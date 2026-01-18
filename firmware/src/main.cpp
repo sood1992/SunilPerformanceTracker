@@ -88,6 +88,7 @@ unsigned long lastActivityTime = 0;
 bool sdCardReady = false;
 bool modemReady = false;
 bool gpsEnabled = false;
+bool accelReady = false;
 
 // ============================================================================
 // Function Prototypes
@@ -123,10 +124,10 @@ void setup() {
     // Initialize debug serial
     DEBUG_SERIAL.begin(DEBUG_BAUDRATE);
     delay(1000);
-    DEBUG_PRINTLN("\n\n╔═══════════════════════════════════════════╗");
-    DEBUG_PRINTLN("║     DOG WALKER GPS TRACKER - Popcorn      ║");
-    DEBUG_PRINTLN("║         LilyGo T-A7670G R2 + ADXL345      ║");
-    DEBUG_PRINTLN("╚═══════════════════════════════════════════╝\n");
+    DEBUG_PRINTLN("\n\n============================================");
+    DEBUG_PRINTLN("    DOG WALKER GPS TRACKER - Popcorn");
+    DEBUG_PRINTLN("    LilyGo T-A7670G R2 + ADXL345");
+    DEBUG_PRINTLN("============================================\n");
 
     DEBUG_PRINTF("Device ID: %s\n", DEVICE_ID);
     DEBUG_PRINTF("Backend:   %s\n", API_BASE_URL);
@@ -135,39 +136,44 @@ void setup() {
     // Step 1: Initialize I2C
     DEBUG_PRINTLN("[STEP 1/5] Initializing I2C bus...");
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
-    DEBUG_PRINTF("  → SDA: GPIO %d, SCL: GPIO %d\n", I2C_SDA_PIN, I2C_SCL_PIN);
-    DEBUG_PRINTLN("  ✓ I2C initialized\n");
+    DEBUG_PRINTF("  SDA: GPIO %d, SCL: GPIO %d\n", I2C_SDA_PIN, I2C_SCL_PIN);
+    DEBUG_PRINTLN("  [OK] I2C initialized\n");
 
     // Step 2: Initialize SD Card
     DEBUG_PRINTLN("[STEP 2/5] Initializing SD Card...");
     initSDCard();
     if (sdCardReady) {
-        DEBUG_PRINTLN("  ✓ SD Card ready\n");
+        DEBUG_PRINTLN("  [OK] SD Card ready\n");
     } else {
-        DEBUG_PRINTLN("  ✗ SD Card FAILED - data will not be saved!\n");
+        DEBUG_PRINTLN("  [FAIL] SD Card - data will not be saved!\n");
     }
 
     // Step 3: Initialize Accelerometer
     DEBUG_PRINTLN("[STEP 3/5] Initializing ADXL345 Accelerometer...");
     initAccelerometer();
+    if (accelReady) {
+        DEBUG_PRINTLN("  [OK] Accelerometer ready\n");
+    } else {
+        DEBUG_PRINTLN("  [FAIL] Accelerometer not detected!\n");
+    }
 
     // Step 4: Initialize Modem
     DEBUG_PRINTLN("[STEP 4/5] Initializing A7670G Modem...");
     DEBUG_PRINTLN("  (Requires battery for sufficient power)");
     initModem();
     if (modemReady) {
-        DEBUG_PRINTLN("  ✓ Modem ready\n");
+        DEBUG_PRINTLN("  [OK] Modem ready\n");
     } else {
-        DEBUG_PRINTLN("  ✗ Modem FAILED - check battery connection!\n");
+        DEBUG_PRINTLN("  [FAIL] Modem - check battery connection!\n");
     }
 
     // Step 5: Initialize GPS
     DEBUG_PRINTLN("[STEP 5/5] Initializing GPS...");
     initGPS();
     if (gpsEnabled) {
-        DEBUG_PRINTLN("  ✓ GPS enabled (waiting for fix...)\n");
+        DEBUG_PRINTLN("  [OK] GPS enabled (waiting for fix...)\n");
     } else {
-        DEBUG_PRINTLN("  ✗ GPS FAILED - modem issue?\n");
+        DEBUG_PRINTLN("  [FAIL] GPS - modem issue?\n");
     }
 
     // Try to connect to WiFi and upload any pending data
@@ -182,16 +188,16 @@ void setup() {
     currentWalk.dataPoints = 0;
 
     // Print status summary
-    DEBUG_PRINTLN("\n╔═══════════════════════════════════════════╗");
-    DEBUG_PRINTLN("║           INITIALIZATION SUMMARY          ║");
-    DEBUG_PRINTLN("╠═══════════════════════════════════════════╣");
-    DEBUG_PRINTF("║  SD Card:      %s                        ║\n", sdCardReady ? "OK " : "ERR");
-    DEBUG_PRINTF("║  Accelerometer: %s                        ║\n", accel.begin() ? "OK " : "ERR");
-    DEBUG_PRINTF("║  Modem:        %s                        ║\n", modemReady ? "OK " : "ERR");
-    DEBUG_PRINTF("║  GPS:          %s                        ║\n", gpsEnabled ? "OK " : "ERR");
-    DEBUG_PRINTF("║  WiFi:         %s                        ║\n", WiFi.status() == WL_CONNECTED ? "OK " : "N/A");
-    DEBUG_PRINTLN("╚═══════════════════════════════════════════╝");
-    DEBUG_PRINTLN("\nWaiting for walk to start...");
+    DEBUG_PRINTLN("\n============================================");
+    DEBUG_PRINTLN("         INITIALIZATION SUMMARY");
+    DEBUG_PRINTLN("============================================");
+    DEBUG_PRINTF("  SD Card:       %s\n", sdCardReady ? "OK" : "FAIL");
+    DEBUG_PRINTF("  Accelerometer: %s\n", accelReady ? "OK" : "FAIL");
+    DEBUG_PRINTF("  Modem:         %s\n", modemReady ? "OK" : "FAIL");
+    DEBUG_PRINTF("  GPS:           %s\n", gpsEnabled ? "OK" : "FAIL");
+    DEBUG_PRINTF("  WiFi:          %s\n", WiFi.status() == WL_CONNECTED ? "OK" : "N/A");
+    DEBUG_PRINTLN("============================================\n");
+    DEBUG_PRINTLN("Waiting for walk to start...");
     DEBUG_PRINTLN("(Move at >0.5 km/h with accelerometer activity)\n");
 }
 
@@ -219,33 +225,33 @@ void loop() {
 
     // Print status every 5 seconds
     if (now - lastStatusPrint >= 5000) {
-        DEBUG_PRINTLN("─────────────────────────────────────────────");
-        DEBUG_PRINTF("⏱ Uptime: %lu sec\n", now / 1000);
+        DEBUG_PRINTLN("---------------------------------------------");
+        DEBUG_PRINTF("[TIME] Uptime: %lu sec\n", now / 1000);
 
         // GPS Status
         if (currentGPS.valid) {
-            DEBUG_PRINTF("📍 GPS: %.6f, %.6f | Speed: %.1f km/h | Sats: %d\n",
-                currentGPS.latitude, currentGPS.longitude, currentGPS.speed, currentGPS.satellites);
+            DEBUG_PRINTF("[GPS]  Lat: %.6f, Lon: %.6f\n", currentGPS.latitude, currentGPS.longitude);
+            DEBUG_PRINTF("       Speed: %.1f km/h | Sats: %d\n", currentGPS.speed, currentGPS.satellites);
         } else {
-            DEBUG_PRINTLN("📍 GPS: Waiting for fix...");
+            DEBUG_PRINTLN("[GPS]  Waiting for fix...");
         }
 
         // Accelerometer Status
-        DEBUG_PRINTF("🏃 Accel: X=%.2f Y=%.2f Z=%.2f | Mag=%.2f | Moving: %s\n",
-            currentAccel.x, currentAccel.y, currentAccel.z,
-            currentAccel.magnitude, currentAccel.isMoving ? "YES" : "NO");
+        DEBUG_PRINTF("[ACCEL] X=%.2f Y=%.2f Z=%.2f | Mag=%.2f\n",
+            currentAccel.x, currentAccel.y, currentAccel.z, currentAccel.magnitude);
+        DEBUG_PRINTF("        Moving: %s\n", currentAccel.isMoving ? "YES" : "NO");
 
         // Walk Status
         if (currentWalk.isActive) {
             unsigned long walkDuration = (now - currentWalk.startTime) / 1000;
-            DEBUG_PRINTF("🚶 WALK ACTIVE: %lu sec | Dist: %.0f m | Pts: %d\n",
+            DEBUG_PRINTF("[WALK] ACTIVE: %lu sec | Dist: %.0f m | Pts: %d\n",
                 walkDuration, currentWalk.totalDistance, currentWalk.dataPoints);
         } else {
-            DEBUG_PRINTLN("💤 Idle - waiting for movement");
+            DEBUG_PRINTLN("[WALK] Idle - waiting for movement");
         }
 
         // WiFi Status
-        DEBUG_PRINTF("📶 WiFi: %s\n", WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected");
+        DEBUG_PRINTF("[WIFI] %s\n", WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected");
 
         lastStatusPrint = now;
     }
@@ -371,11 +377,13 @@ void initGPS() {
 }
 
 void initAccelerometer() {
-    DEBUG_PRINTLN("Initializing ADXL345 accelerometer...");
+    DEBUG_PRINTLN("  Initializing ADXL345 accelerometer...");
+    DEBUG_PRINTF("  Address: 0x%02X\n", ADXL345_ADDRESS);
 
     if (!accel.begin(ADXL345_ADDRESS)) {
-        DEBUG_PRINTLN("ERROR: ADXL345 not found at address 0x53!");
-        DEBUG_PRINTLN("Check wiring: SDA->GPIO21, SCL->GPIO22, CS->3.3V, SDO->GND");
+        DEBUG_PRINTLN("  ERROR: ADXL345 not found!");
+        DEBUG_PRINTLN("  Check wiring: SDA->GPIO21, SCL->GPIO22, CS->3.3V, SDO->GND");
+        accelReady = false;
         return;
     }
 
@@ -383,12 +391,8 @@ void initAccelerometer() {
     accel.setRange(ADXL345_RANGE_4_G);  // +/- 4G range
     accel.setDataRate(ADXL345_DATARATE_50_HZ);  // 50Hz update rate
 
-    DEBUG_PRINTLN("ADXL345 initialized successfully!");
-
-    // Print sensor details
-    sensor_t sensor;
-    accel.getSensor(&sensor);
-    DEBUG_PRINTF("Sensor: %s, Range: +/-%dG\n", sensor.name, 4);
+    accelReady = true;
+    DEBUG_PRINTLN("  ADXL345 initialized successfully!");
 }
 
 void initSDCard() {
