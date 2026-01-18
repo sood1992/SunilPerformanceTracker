@@ -1,0 +1,101 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// ============================================================================
+// WiFi Configuration
+// ============================================================================
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// ============================================================================
+// Backend API Configuration
+// ============================================================================
+#define API_BASE_URL "https://your-backend.railway.app"
+#define API_ENDPOINT "/api/walks/upload"
+#define DEVICE_ID "DOG_WALKER_001"
+
+// ============================================================================
+// LilyGo T-A7670G R2 Pin Definitions
+// ============================================================================
+
+// Modem (A7670G) UART Pins
+#define MODEM_TX_PIN        26
+#define MODEM_RX_PIN        27
+#define MODEM_DTR_PIN       25
+#define MODEM_PWRKEY_PIN    4
+#define MODEM_POWER_ON_PIN  12
+#define MODEM_RESET_PIN     5
+#define MODEM_RING_PIN      33
+
+// Modem Settings
+#define MODEM_BAUDRATE      115200
+#define MODEM_RESET_LEVEL   HIGH
+
+// SD Card SPI Pins
+#define SD_MISO_PIN         2
+#define SD_MOSI_PIN         15
+#define SD_SCK_PIN          14
+#define SD_CS_PIN           13
+
+// Battery ADC
+#define BAT_ADC_PIN         35
+
+// ============================================================================
+// ADXL345 Accelerometer Configuration (I2C)
+// ============================================================================
+#define I2C_SDA_PIN         21
+#define I2C_SCL_PIN         22
+#define ADXL345_ADDRESS     0x53  // SDO connected to GND
+
+// Activity Detection Thresholds
+#define ACTIVITY_THRESHOLD  2.0    // m/s² - threshold for detecting movement
+#define INACTIVITY_TIMEOUT  30000  // ms - time before marking inactive
+
+// ============================================================================
+// GPS Configuration
+// ============================================================================
+// GPS is accessed through the A7670G modem via AT commands
+// No separate pins needed - uses modem UART
+
+#define GPS_UPDATE_INTERVAL 1000   // ms between GPS reads
+#define GPS_MIN_SATELLITES  4      // Minimum satellites for valid fix
+
+// ============================================================================
+// Data Logging Configuration
+// ============================================================================
+#define LOG_FILE_PREFIX     "/walks/walk_"
+#define LOG_INTERVAL        1000   // ms between log entries
+#define MAX_LOG_ENTRIES     86400  // Max entries per walk (24h at 1/sec)
+
+// ============================================================================
+// Walk Detection Settings
+// ============================================================================
+#define WALK_START_SPEED    0.5    // km/h - minimum speed to start walk
+#define WALK_END_TIMEOUT    300000 // ms (5 min) - inactivity before ending walk
+#define MIN_WALK_DURATION   60000  // ms (1 min) - minimum walk duration to save
+
+// ============================================================================
+// Upload Settings
+// ============================================================================
+#define WIFI_CONNECT_TIMEOUT 30000  // ms to wait for WiFi connection
+#define UPLOAD_RETRY_COUNT   3      // Number of upload retries
+#define UPLOAD_RETRY_DELAY   5000   // ms between retries
+
+// ============================================================================
+// Debug Settings
+// ============================================================================
+#define DEBUG_SERIAL        Serial
+#define DEBUG_BAUDRATE      115200
+#define ENABLE_DEBUG        true
+
+#if ENABLE_DEBUG
+  #define DEBUG_PRINT(x)    DEBUG_SERIAL.print(x)
+  #define DEBUG_PRINTLN(x)  DEBUG_SERIAL.println(x)
+  #define DEBUG_PRINTF(...) DEBUG_SERIAL.printf(__VA_ARGS__)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTF(...)
+#endif
+
+#endif // CONFIG_H

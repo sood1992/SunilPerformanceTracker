@@ -1,0 +1,200 @@
+import { useState, useEffect } from 'react'
+import WalkMap from './components/WalkMap'
+import WalkList from './components/WalkList'
+import StatsCards from './components/StatsCards'
+import SpeedChart from './components/SpeedChart'
+
+// API base URL - update for production
+const API_URL = import.meta.env.VITE_API_URL || ''
+
+function App() {
+  const [walks, setWalks] = useState([])
+  const [selectedWalk, setSelectedWalk] = useState(null)
+  const [walkPoints, setWalkPoints] = useState([])
+  const [stats, setStats] = useState(null)
+  const [dailyStats, setDailyStats] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Fetch walks and stats on mount
+  useEffect(() => {
+    fetchWalks()
+    fetchStats()
+    fetchDailyStats()
+  }, [])
+
+  // Fetch walk points when a walk is selected
+  useEffect(() => {
+    if (selectedWalk) {
+      fetchWalkPoints(selectedWalk.id)
+    } else {
+      setWalkPoints([])
+    }
+  }, [selectedWalk])
+
+  const fetchWalks = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/walks?limit=100`)
+      const data = await res.json()
+      setWalks(data.walks || [])
+      setLoading(false)
+    } catch (err) {
+      console.error('Failed to fetch walks:', err)
+      setError('Failed to load walks')
+      setLoading(false)
+    }
+  }
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/stats/summary`)
+      const data = await res.json()
+      setStats(data)
+    } catch (err) {
+      console.error('Failed to fetch stats:', err)
+    }
+  }
+
+  const fetchDailyStats = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/stats/daily?days=14`)
+      const data = await res.json()
+      setDailyStats(data.daily || [])
+    } catch (err) {
+      console.error('Failed to fetch daily stats:', err)
+    }
+  }
+
+  const fetchWalkPoints = async (walkId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/walks/${walkId}/points`)
+      const data = await res.json()
+      setWalkPoints(data.points || [])
+    } catch (err) {
+      console.error('Failed to fetch walk points:', err)
+      setWalkPoints([])
+    }
+  }
+
+  const handleWalkSelect = (walk) => {
+    setSelectedWalk(walk)
+  }
+
+  const handleClearSelection = () => {
+    setSelectedWalk(null)
+    setWalkPoints([])
+  }
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading dashboard...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="app">
+      <header className="header">
+        <div className="header-content">
+          <h1>Dog Walker Tracker</h1>
+          <p className="subtitle">Track walks, routes, and performance</p>
+        </div>
+      </header>
+
+      <main className="main-content">
+        {error && (
+          <div className="error-banner">
+            {error}
+            <button onClick={() => setError(null)}>Dismiss</button>
+          </div>
+        )}
+
+        {/* Stats Overview */}
+        <section className="stats-section">
+          <StatsCards stats={stats} />
+        </section>
+
+        {/* Main Dashboard Grid */}
+        <div className="dashboard-grid">
+          {/* Map Section */}
+          <section className="map-section">
+            <div className="section-header">
+              <h2>Walk Route</h2>
+              {selectedWalk && (
+                <button className="clear-btn" onClick={handleClearSelection}>
+                  Clear Selection
+                </button>
+              )}
+            </div>
+            <WalkMap
+              points={walkPoints}
+              selectedWalk={selectedWalk}
+            />
+            {selectedWalk && (
+              <div className="walk-details">
+                <h3>Walk Details</h3>
+                <div className="details-grid">
+                  <div className="detail-item">
+                    <span className="label">Date</span>
+                    <span className="value">
+                      {new Date(selectedWalk.startTime).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Duration</span>
+                    <span className="value">{selectedWalk.durationFormatted}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Distance</span>
+                    <span className="value">{selectedWalk.totalDistanceKm} km</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Avg Speed</span>
+                    <span className="value">{selectedWalk.avgSpeedKmh} km/h</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Max Speed</span>
+                    <span className="value">{selectedWalk.maxSpeedKmh} km/h</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">GPS Points</span>
+                    <span className="value">{selectedWalk.pointCount}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Walk List Section */}
+          <section className="walks-section">
+            <div className="section-header">
+              <h2>Recent Walks</h2>
+              <span className="walk-count">{walks.length} walks</span>
+            </div>
+            <WalkList
+              walks={walks}
+              selectedWalk={selectedWalk}
+              onSelect={handleWalkSelect}
+            />
+          </section>
+        </div>
+
+        {/* Charts Section */}
+        <section className="charts-section">
+          <div className="section-header">
+            <h2>Activity Overview</h2>
+          </div>
+          <SpeedChart dailyStats={dailyStats} />
+        </section>
+      </main>
+
+      <footer className="footer">
+        <p>Dog Walker GPS Tracker - LilyGo T-A7670G R2 + ADXL345</p>
+      </footer>
+    </div>
+  )
+}
+
+export default App
