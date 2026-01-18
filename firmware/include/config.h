@@ -18,6 +18,9 @@
 // LilyGo T-A7670G R2 Pin Definitions
 // ============================================================================
 
+// Board Power - Keep HIGH to stay powered when USB disconnected
+#define BOARD_POWERON_PIN   12
+
 // Modem (A7670G) UART Pins
 #define MODEM_TX_PIN        26
 #define MODEM_RX_PIN        27
@@ -31,6 +34,13 @@
 #define MODEM_BAUDRATE      115200
 #define MODEM_RESET_LEVEL   HIGH
 
+// GPS (L76K) - Dedicated UART, NOT through modem!
+#define GPS_TX_PIN          21
+#define GPS_RX_PIN          22
+#define GPS_PPS_PIN         23
+#define GPS_WAKEUP_PIN      19
+#define GPS_BAUDRATE        9600
+
 // SD Card SPI Pins
 #define SD_MISO_PIN         2
 #define SD_MOSI_PIN         15
@@ -42,9 +52,10 @@
 
 // ============================================================================
 // ADXL345 Accelerometer Configuration (I2C)
+// NOTE: Moved from GPIO 21/22 to avoid conflict with GPS L76K
 // ============================================================================
-#define I2C_SDA_PIN         21
-#define I2C_SCL_PIN         22
+#define I2C_SDA_PIN         32
+#define I2C_SCL_PIN         33
 #define ADXL345_ADDRESS     0x53  // SDO connected to GND
 
 // Activity Detection Thresholds
@@ -54,9 +65,6 @@
 // ============================================================================
 // GPS Configuration
 // ============================================================================
-// GPS is accessed through the A7670G modem via AT commands
-// No separate pins needed - uses modem UART
-
 #define GPS_UPDATE_INTERVAL 1000   // ms between GPS reads
 #define GPS_MIN_SATELLITES  4      // Minimum satellites for valid fix
 

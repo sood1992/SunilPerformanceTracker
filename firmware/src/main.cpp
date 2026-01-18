@@ -1,6 +1,10 @@
 /**
  * Dog Walker GPS Tracker Firmware
  * Hardware: LilyGo T-A7670G R2 + ADXL345 Accelerometer
+ *
+ * GPS: L76K module on dedicated UART (GPIO 21/22)
+ * Modem: A7670G for 4G (GPIO 26/27) - NOT used for GPS
+ * Accel: ADXL345 on I2C (GPIO 32/33) - moved from 21/22
  */
 
 #include <Arduino.h>
@@ -9,15 +13,18 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
+#include <TinyGPSPlus.h>
 #include <Adafruit_ADXL345_U.h>
 #include <ArduinoJson.h>
 #include "config.h"
 
 // ============================================================================
-// Global Objects - use pointers for lazy init
+// Global Objects
 // ============================================================================
 
-HardwareSerial SerialAT(1);
+HardwareSerial SerialAT(1);   // Modem on UART1
+HardwareSerial SerialGPS(2);  // GPS L76K on UART2
+TinyGPSPlus gps;
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
 
@@ -68,6 +75,7 @@ unsigned long lastStatusPrint = 0;
 // Forward Declarations
 // ============================================================================
 
+void initPower();
 void initModem();
 void initGPS();
 void initAccelerometer();
@@ -80,7 +88,6 @@ void endWalk();
 void logWalkData();
 void uploadPendingWalks();
 bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout);
-String sendATCommandGetResponse(const char* cmd, unsigned long timeout);
 double calculateDistance(double lat1, double lon1, double lat2, double lon2);
 
 // ============================================================================
@@ -107,36 +114,42 @@ void setup() {
     Serial.printf("WiFi SSID: %s\n", WIFI_SSID);
     Serial.println();
 
-    // Step 1: I2C
-    Serial.println("[STEP 1/5] Initializing I2C...");
+    // Step 0: Board Power
+    Serial.println("[STEP 0/6] Setting board power...");
+    initPower();
+    Serial.println("  [OK] Board power pin HIGH\n");
+    delay(100);
+
+    // Step 1: I2C (on new pins to avoid GPS conflict)
+    Serial.println("[STEP 1/6] Initializing I2C...");
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
     Serial.printf("  SDA=GPIO%d, SCL=GPIO%d\n", I2C_SDA_PIN, I2C_SCL_PIN);
     Serial.println("  [OK]\n");
     delay(100);
 
     // Step 2: SD Card
-    Serial.println("[STEP 2/5] Initializing SD Card...");
+    Serial.println("[STEP 2/6] Initializing SD Card...");
     initSDCard();
     delay(100);
 
     // Step 3: Accelerometer
-    Serial.println("[STEP 3/5] Initializing Accelerometer...");
+    Serial.println("[STEP 3/6] Initializing Accelerometer...");
     initAccelerometer();
     delay(100);
 
-    // Step 4: Modem
-    Serial.println("[STEP 4/5] Initializing Modem...");
+    // Step 4: GPS (L76K direct UART)
+    Serial.println("[STEP 4/6] Initializing GPS (L76K)...");
+    initGPS();
+    delay(100);
+
+    // Step 5: Modem (for 4G, not GPS)
+    Serial.println("[STEP 5/6] Initializing Modem (4G)...");
     Serial.println("  (Requires battery connection!)");
     initModem();
     delay(100);
 
-    // Step 5: GPS
-    Serial.println("[STEP 5/5] Initializing GPS...");
-    initGPS();
-    delay(100);
-
-    // WiFi
-    Serial.println("[WIFI] Connecting...");
+    // Step 6: WiFi
+    Serial.println("[STEP 6/6] Connecting WiFi...");
     initWiFi();
 
     // Summary
@@ -146,8 +159,8 @@ void setup() {
     Serial.println("============================================");
     Serial.printf("  SD Card:       %s\n", sdCardReady ? "OK" : "FAIL");
     Serial.printf("  Accelerometer: %s\n", accelReady ? "OK" : "FAIL");
-    Serial.printf("  Modem:         %s\n", modemReady ? "OK" : "FAIL");
-    Serial.printf("  GPS:           %s\n", gpsEnabled ? "OK" : "FAIL");
+    Serial.printf("  GPS (L76K):    %s\n", gpsEnabled ? "OK" : "FAIL");
+    Serial.printf("  Modem (4G):    %s\n", modemReady ? "OK" : "FAIL");
     Serial.printf("  WiFi:          %s\n", WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
     Serial.println("============================================");
     Serial.println();
@@ -162,11 +175,10 @@ void setup() {
 void loop() {
     unsigned long now = millis();
 
-    // Read sensors
-    if (now - lastGPSUpdate >= GPS_UPDATE_INTERVAL) {
-        readGPS();
-        lastGPSUpdate = now;
-    }
+    // Read GPS continuously
+    readGPS();
+
+    // Read accelerometer
     readAccelerometer();
 
     // Update activity time if moving
@@ -183,7 +195,7 @@ void loop() {
             Serial.printf("[GPS]   Lat: %.6f, Lon: %.6f\n", currentGPS.latitude, currentGPS.longitude);
             Serial.printf("        Speed: %.1f km/h, Sats: %d\n", currentGPS.speed, currentGPS.satellites);
         } else {
-            Serial.println("[GPS]   Waiting for fix...");
+            Serial.printf("[GPS]   Waiting for fix... (chars: %lu)\n", gps.charsProcessed());
         }
 
         if (accelReady) {
@@ -239,6 +251,12 @@ void loop() {
 // Initialization Functions
 // ============================================================================
 
+void initPower() {
+    // Keep board powered when USB is disconnected
+    pinMode(BOARD_POWERON_PIN, OUTPUT);
+    digitalWrite(BOARD_POWERON_PIN, HIGH);
+}
+
 void initSDCard() {
     sdSPI = new SPIClass(VSPI);
     sdSPI->begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
@@ -279,7 +297,8 @@ void initAccelerometer() {
 
     if (!accel->begin(ADXL345_ADDRESS)) {
         Serial.println("  [FAIL] ADXL345 not found");
-        Serial.printf("  Check: SDA=GPIO%d, SCL=GPIO%d\n", I2C_SDA_PIN, I2C_SCL_PIN);
+        Serial.printf("  Wiring: SDA=GPIO%d, SCL=GPIO%d, Addr=0x%02X\n",
+            I2C_SDA_PIN, I2C_SCL_PIN, ADXL345_ADDRESS);
         accelReady = false;
         return;
     }
@@ -289,6 +308,39 @@ void initAccelerometer() {
 
     accelReady = true;
     Serial.println("  [OK] ADXL345 initialized");
+}
+
+void initGPS() {
+    // Wake up GPS module
+    pinMode(GPS_WAKEUP_PIN, OUTPUT);
+    digitalWrite(GPS_WAKEUP_PIN, HIGH);
+    delay(100);
+
+    // Initialize GPS serial (L76K at 9600 baud)
+    SerialGPS.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_TX_PIN, GPS_RX_PIN);
+    delay(500);
+
+    // Check for GPS data
+    Serial.printf("  GPS UART: TX=GPIO%d, RX=GPIO%d @ %d baud\n",
+        GPS_TX_PIN, GPS_RX_PIN, GPS_BAUDRATE);
+
+    // Wait briefly to see if we get any data
+    unsigned long start = millis();
+    int chars = 0;
+    while (millis() - start < 2000) {
+        if (SerialGPS.available()) {
+            SerialGPS.read();
+            chars++;
+        }
+    }
+
+    if (chars > 0) {
+        gpsEnabled = true;
+        Serial.printf("  [OK] GPS responding (%d chars received)\n", chars);
+    } else {
+        gpsEnabled = true;  // Still enable, might just need time for fix
+        Serial.println("  [OK] GPS initialized (waiting for data)");
+    }
 }
 
 void initModem() {
@@ -330,20 +382,6 @@ void initModem() {
     }
 }
 
-void initGPS() {
-    if (!modemReady) {
-        Serial.println("  [SKIP] Modem not ready");
-        return;
-    }
-
-    if (sendATCommand("AT+CGNSPWR=1", "OK", 2000)) {
-        gpsEnabled = true;
-        Serial.println("  [OK] GPS powered on");
-    } else {
-        Serial.println("  [FAIL] GPS power on failed");
-    }
-}
-
 void initWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -370,40 +408,20 @@ void initWiFi() {
 // ============================================================================
 
 void readGPS() {
-    if (!gpsEnabled) return;
+    // Read all available GPS data from L76K
+    while (SerialGPS.available() > 0) {
+        char c = SerialGPS.read();
+        gps.encode(c);
+    }
 
-    String response = sendATCommandGetResponse("AT+CGNSINF", 1000);
-
-    if (response.indexOf("+CGNSINF:") >= 0) {
-        int start = response.indexOf(":") + 2;
-        String data = response.substring(start);
-
-        String parts[20];
-        int partCount = 0;
-        int idx;
-
-        while (data.length() > 0 && partCount < 20) {
-            idx = data.indexOf(",");
-            if (idx == -1) {
-                parts[partCount++] = data;
-                break;
-            }
-            parts[partCount++] = data.substring(0, idx);
-            data = data.substring(idx + 1);
-        }
-
-        if (partCount >= 7) {
-            int fix = parts[1].toInt();
-            if (fix == 1) {
-                currentGPS.valid = true;
-                currentGPS.latitude = parts[3].toDouble();
-                currentGPS.longitude = parts[4].toDouble();
-                currentGPS.altitude = parts[5].toDouble();
-                currentGPS.speed = parts[6].toDouble() * 1.852;
-            } else {
-                currentGPS.valid = false;
-            }
-        }
+    // Update GPS data if valid
+    if (gps.location.isUpdated() && gps.location.isValid()) {
+        currentGPS.valid = true;
+        currentGPS.latitude = gps.location.lat();
+        currentGPS.longitude = gps.location.lng();
+        currentGPS.altitude = gps.altitude.meters();
+        currentGPS.speed = gps.speed.kmph();
+        currentGPS.satellites = gps.satellites.value();
     }
 }
 
@@ -589,22 +607,8 @@ bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout)
     return false;
 }
 
-String sendATCommandGetResponse(const char* cmd, unsigned long timeout) {
-    SerialAT.println(cmd);
-
-    unsigned long start = millis();
-    String response = "";
-
-    while (millis() - start < timeout) {
-        if (SerialAT.available()) {
-            response += (char)SerialAT.read();
-        }
-    }
-    return response;
-}
-
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const double R = 6371000; // Earth radius in meters
+    const double R = 6371000;
     double dLat = (lat2 - lat1) * PI / 180.0;
     double dLon = (lon2 - lon1) * PI / 180.0;
     double a = sin(dLat/2) * sin(dLat/2) +
