@@ -4,6 +4,7 @@ import WalkList from './components/WalkList'
 import StatsCards from './components/StatsCards'
 import SpeedChart from './components/SpeedChart'
 import GoalDashboard from './components/GoalDashboard'
+import HistoricalStats from './components/HistoricalStats'
 
 // API base URL - update for production
 // Auto-add https:// if protocol is missing
@@ -242,6 +243,11 @@ function App() {
             <h2>Activity Overview</h2>
           </div>
           <SpeedChart dailyStats={dailyStats} />
+        </section>
+
+        {/* Historical Stats Section */}
+        <section className="historical-section">
+          <HistoricalStats onSelectWalk={handleWalkSelect} />
         </section>
       </main>
 

@@ -909,3 +909,357 @@ body {
     flex-direction: column;
   }
 }
+
+/* ============================================
+   Historical Stats Styles
+   ============================================ */
+
+.historical-section {
+  margin-top: 1.5rem;
+}
+
+.historical-stats {
+  background: var(--card-background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.historical-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.historical-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* View Mode Selector */
+.view-mode-selector {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.view-mode-selector button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.view-mode-selector button:hover {
+  color: var(--text-primary);
+}
+
+.view-mode-selector button.active {
+  background: white;
+  color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Period Selector */
+.period-selector {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.period-selector label {
+  font-weight: 500;
+  margin-right: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.date-picker,
+.month-picker,
+.year-picker,
+.range-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.period-selector input[type="date"],
+.period-selector select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+}
+
+.period-selector input[type="date"]:focus,
+.period-selector select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Historical Content */
+.historical-content {
+  margin-top: 1rem;
+}
+
+/* Summary Cards for Historical */
+.historical-stats .summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.historical-stats .summary-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.historical-stats .summary-card:hover {
+  transform: translateY(-2px);
+}
+
+.historical-stats .summary-card .card-icon {
+  font-size: 1.5rem;
+}
+
+.historical-stats .summary-card .card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.historical-stats .summary-card .card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.historical-stats .summary-card .card-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Chart Section */
+.chart-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.chart-section h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* Walks List Section */
+.walks-list-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.walks-list-section h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.walks-table {
+  overflow-x: auto;
+}
+
+.walks-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.walks-table th,
+.walks-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.walks-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.walks-table tr:hover {
+  background: #f8f9fa;
+}
+
+.view-walk-btn {
+  padding: 0.35rem 0.75rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.view-walk-btn:hover {
+  background: #45a049;
+}
+
+/* No Data Message */
+.no-data-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+/* Month Calendar for Historical */
+.month-calendar {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.month-calendar h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-grid.monthly {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-grid.monthly .calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 60px;
+}
+
+.calendar-grid.monthly .calendar-day:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.calendar-grid.monthly .calendar-day.has-walks {
+  background: #e8f5e9;
+  border: 1px solid #4CAF50;
+}
+
+.calendar-grid.monthly .calendar-day.no-walks {
+  background: #f5f5f5;
+  border: 1px solid transparent;
+}
+
+.calendar-grid.monthly .day-number {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.calendar-grid.monthly .day-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.calendar-grid.monthly .day-stats span:first-child {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Error Message */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Responsive Historical Stats */
+@media (max-width: 768px) {
+  .historical-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .view-mode-selector {
+    width: 100%;
+  }
+
+  .view-mode-selector button {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .walks-table {
+    font-size: 0.8rem;
+  }
+
+  .walks-table th,
+  .walks-table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .calendar-grid.monthly {
+    gap: 3px;
+  }
+
+  .calendar-grid.monthly .calendar-day {
+    min-height: 50px;
+    padding: 0.25rem;
+  }
+
+  .calendar-grid.monthly .day-number {
+    font-size: 0.85rem;
+  }
+
+  .calendar-grid.monthly .day-stats {
+    font-size: 0.55rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .historical-stats .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .range-picker {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -244,6 +244,407 @@ statsRoutes.get('/heatmap', async (req, res, next) => {
 });
 
 /**
+ * GET /api/stats/date/:date
+ * Get detailed stats for a specific date
+ */
+statsRoutes.get('/date/:date', async (req, res, next) => {
+  try {
+    const { date } = req.params;
+    const { device_id } = req.query;
+
+    let deviceFilter = '';
+    const params = [date];
+
+    if (device_id) {
+      deviceFilter = 'AND device_id = $2';
+      params.push(device_id);
+    }
+
+    // Get summary for the date
+    const summaryResult = await query(`
+      SELECT
+        COUNT(*) as total_walks,
+        COALESCE(SUM(total_distance_meters), 0) as total_distance,
+        COALESCE(SUM(duration_seconds), 0) as total_duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COALESCE(MIN(start_time), NULL) as first_walk,
+        COALESCE(MAX(start_time), NULL) as last_walk
+      FROM walks
+      WHERE DATE(start_time) = $1
+      ${deviceFilter}
+    `, params);
+
+    // Get individual walks for the date
+    const walksResult = await query(`
+      SELECT
+        id,
+        device_id,
+        start_time,
+        end_time,
+        duration_seconds,
+        total_distance_meters,
+        avg_speed_kmh,
+        max_speed_kmh,
+        point_count
+      FROM walks
+      WHERE DATE(start_time) = $1
+      ${deviceFilter}
+      ORDER BY start_time ASC
+    `, params);
+
+    const summary = summaryResult.rows[0];
+
+    res.json({
+      date,
+      summary: {
+        totalWalks: parseInt(summary.total_walks),
+        totalDistanceKm: (parseFloat(summary.total_distance) / 1000).toFixed(2),
+        totalDurationMinutes: Math.round(parseFloat(summary.total_duration) / 60),
+        avgSpeedKmh: parseFloat(summary.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(summary.max_speed).toFixed(2),
+        firstWalk: summary.first_walk,
+        lastWalk: summary.last_walk
+      },
+      walks: walksResult.rows.map(w => ({
+        id: w.id,
+        deviceId: w.device_id,
+        startTime: w.start_time,
+        endTime: w.end_time,
+        durationMinutes: Math.round(parseFloat(w.duration_seconds) / 60),
+        distanceKm: (parseFloat(w.total_distance_meters) / 1000).toFixed(2),
+        avgSpeedKmh: parseFloat(w.avg_speed_kmh).toFixed(2),
+        maxSpeedKmh: parseFloat(w.max_speed_kmh).toFixed(2),
+        pointCount: w.point_count
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/stats/monthly
+ * Get monthly statistics for the last N months
+ */
+statsRoutes.get('/monthly', async (req, res, next) => {
+  try {
+    const { device_id, months = 12 } = req.query;
+
+    let deviceFilter = '';
+    const params = [parseInt(months)];
+
+    if (device_id) {
+      deviceFilter = 'AND device_id = $2';
+      params.push(device_id);
+    }
+
+    const result = await query(`
+      SELECT
+        date_trunc('month', start_time)::date as month_start,
+        COUNT(*) as walks,
+        COALESCE(SUM(total_distance_meters), 0) as distance,
+        COALESCE(SUM(duration_seconds), 0) as duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COUNT(DISTINCT DATE(start_time)) as active_days
+      FROM walks
+      WHERE start_time >= date_trunc('month', CURRENT_DATE) - INTERVAL '1 month' * $1
+      ${deviceFilter}
+      GROUP BY date_trunc('month', start_time)
+      ORDER BY month_start DESC
+    `, params);
+
+    res.json({
+      monthly: result.rows.map(row => ({
+        monthStart: row.month_start.toISOString().split('T')[0],
+        month: new Date(row.month_start).toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+        walks: parseInt(row.walks),
+        distanceKm: (parseFloat(row.distance) / 1000).toFixed(2),
+        durationHours: (parseFloat(row.duration) / 3600).toFixed(2),
+        avgSpeedKmh: parseFloat(row.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(row.max_speed).toFixed(2),
+        activeDays: parseInt(row.active_days),
+        avgWalksPerDay: (parseInt(row.walks) / parseInt(row.active_days)).toFixed(1)
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/stats/yearly
+ * Get yearly statistics
+ */
+statsRoutes.get('/yearly', async (req, res, next) => {
+  try {
+    const { device_id } = req.query;
+
+    let deviceFilter = '';
+    const params = [];
+
+    if (device_id) {
+      deviceFilter = 'WHERE device_id = $1';
+      params.push(device_id);
+    }
+
+    const result = await query(`
+      SELECT
+        EXTRACT(YEAR FROM start_time)::integer as year,
+        COUNT(*) as walks,
+        COALESCE(SUM(total_distance_meters), 0) as distance,
+        COALESCE(SUM(duration_seconds), 0) as duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COUNT(DISTINCT DATE(start_time)) as active_days,
+        COUNT(DISTINCT date_trunc('month', start_time)) as active_months
+      FROM walks
+      ${deviceFilter}
+      GROUP BY EXTRACT(YEAR FROM start_time)
+      ORDER BY year DESC
+    `, params);
+
+    res.json({
+      yearly: result.rows.map(row => ({
+        year: row.year,
+        walks: parseInt(row.walks),
+        distanceKm: (parseFloat(row.distance) / 1000).toFixed(2),
+        durationHours: (parseFloat(row.duration) / 3600).toFixed(2),
+        avgSpeedKmh: parseFloat(row.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(row.max_speed).toFixed(2),
+        activeDays: parseInt(row.active_days),
+        activeMonths: parseInt(row.active_months),
+        avgDistancePerWalkKm: (parseFloat(row.distance) / 1000 / parseInt(row.walks)).toFixed(2)
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/stats/range
+ * Get stats for a specific date range
+ */
+statsRoutes.get('/range', async (req, res, next) => {
+  try {
+    const { start_date, end_date, device_id } = req.query;
+
+    if (!start_date || !end_date) {
+      return res.status(400).json({ error: 'start_date and end_date are required' });
+    }
+
+    let deviceFilter = '';
+    const params = [start_date, end_date];
+
+    if (device_id) {
+      deviceFilter = 'AND device_id = $3';
+      params.push(device_id);
+    }
+
+    // Get summary for the range
+    const summaryResult = await query(`
+      SELECT
+        COUNT(*) as total_walks,
+        COALESCE(SUM(total_distance_meters), 0) as total_distance,
+        COALESCE(SUM(duration_seconds), 0) as total_duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COUNT(DISTINCT DATE(start_time)) as active_days
+      FROM walks
+      WHERE DATE(start_time) >= $1 AND DATE(start_time) <= $2
+      ${deviceFilter}
+    `, params);
+
+    // Get daily breakdown for the range
+    const dailyResult = await query(`
+      SELECT
+        DATE(start_time) as date,
+        COUNT(*) as walks,
+        COALESCE(SUM(total_distance_meters), 0) as distance,
+        COALESCE(SUM(duration_seconds), 0) as duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed
+      FROM walks
+      WHERE DATE(start_time) >= $1 AND DATE(start_time) <= $2
+      ${deviceFilter}
+      GROUP BY DATE(start_time)
+      ORDER BY date ASC
+    `, params);
+
+    const summary = summaryResult.rows[0];
+
+    res.json({
+      startDate: start_date,
+      endDate: end_date,
+      summary: {
+        totalWalks: parseInt(summary.total_walks),
+        totalDistanceKm: (parseFloat(summary.total_distance) / 1000).toFixed(2),
+        totalDurationHours: (parseFloat(summary.total_duration) / 3600).toFixed(2),
+        avgSpeedKmh: parseFloat(summary.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(summary.max_speed).toFixed(2),
+        activeDays: parseInt(summary.active_days)
+      },
+      daily: dailyResult.rows.map(row => ({
+        date: row.date.toISOString().split('T')[0],
+        walks: parseInt(row.walks),
+        distanceKm: (parseFloat(row.distance) / 1000).toFixed(2),
+        durationMinutes: Math.round(parseFloat(row.duration) / 60),
+        avgSpeedKmh: parseFloat(row.avg_speed).toFixed(2)
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/stats/month/:year/:month
+ * Get detailed stats for a specific month
+ */
+statsRoutes.get('/month/:year/:month', async (req, res, next) => {
+  try {
+    const { year, month } = req.params;
+    const { device_id } = req.query;
+
+    let deviceFilter = '';
+    const params = [parseInt(year), parseInt(month)];
+
+    if (device_id) {
+      deviceFilter = 'AND device_id = $3';
+      params.push(device_id);
+    }
+
+    // Get summary for the month
+    const summaryResult = await query(`
+      SELECT
+        COUNT(*) as total_walks,
+        COALESCE(SUM(total_distance_meters), 0) as total_distance,
+        COALESCE(SUM(duration_seconds), 0) as total_duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COUNT(DISTINCT DATE(start_time)) as active_days
+      FROM walks
+      WHERE EXTRACT(YEAR FROM start_time) = $1 AND EXTRACT(MONTH FROM start_time) = $2
+      ${deviceFilter}
+    `, params);
+
+    // Get daily breakdown for the month
+    const dailyResult = await query(`
+      SELECT
+        DATE(start_time) as date,
+        COUNT(*) as walks,
+        COALESCE(SUM(total_distance_meters), 0) as distance,
+        COALESCE(SUM(duration_seconds), 0) as duration
+      FROM walks
+      WHERE EXTRACT(YEAR FROM start_time) = $1 AND EXTRACT(MONTH FROM start_time) = $2
+      ${deviceFilter}
+      GROUP BY DATE(start_time)
+      ORDER BY date ASC
+    `, params);
+
+    const summary = summaryResult.rows[0];
+    const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+    res.json({
+      year: parseInt(year),
+      month: parseInt(month),
+      monthName,
+      summary: {
+        totalWalks: parseInt(summary.total_walks),
+        totalDistanceKm: (parseFloat(summary.total_distance) / 1000).toFixed(2),
+        totalDurationHours: (parseFloat(summary.total_duration) / 3600).toFixed(2),
+        avgSpeedKmh: parseFloat(summary.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(summary.max_speed).toFixed(2),
+        activeDays: parseInt(summary.active_days)
+      },
+      daily: dailyResult.rows.map(row => ({
+        date: row.date.toISOString().split('T')[0],
+        day: new Date(row.date).getDate(),
+        walks: parseInt(row.walks),
+        distanceKm: (parseFloat(row.distance) / 1000).toFixed(2),
+        durationMinutes: Math.round(parseFloat(row.duration) / 60)
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/stats/year/:year
+ * Get detailed stats for a specific year
+ */
+statsRoutes.get('/year/:year', async (req, res, next) => {
+  try {
+    const { year } = req.params;
+    const { device_id } = req.query;
+
+    let deviceFilter = '';
+    const params = [parseInt(year)];
+
+    if (device_id) {
+      deviceFilter = 'AND device_id = $2';
+      params.push(device_id);
+    }
+
+    // Get summary for the year
+    const summaryResult = await query(`
+      SELECT
+        COUNT(*) as total_walks,
+        COALESCE(SUM(total_distance_meters), 0) as total_distance,
+        COALESCE(SUM(duration_seconds), 0) as total_duration,
+        COALESCE(AVG(avg_speed_kmh), 0) as avg_speed,
+        COALESCE(MAX(max_speed_kmh), 0) as max_speed,
+        COUNT(DISTINCT DATE(start_time)) as active_days
+      FROM walks
+      WHERE EXTRACT(YEAR FROM start_time) = $1
+      ${deviceFilter}
+    `, params);
+
+    // Get monthly breakdown for the year
+    const monthlyResult = await query(`
+      SELECT
+        EXTRACT(MONTH FROM start_time)::integer as month,
+        COUNT(*) as walks,
+        COALESCE(SUM(total_distance_meters), 0) as distance,
+        COALESCE(SUM(duration_seconds), 0) as duration,
+        COUNT(DISTINCT DATE(start_time)) as active_days
+      FROM walks
+      WHERE EXTRACT(YEAR FROM start_time) = $1
+      ${deviceFilter}
+      GROUP BY EXTRACT(MONTH FROM start_time)
+      ORDER BY month ASC
+    `, params);
+
+    const summary = summaryResult.rows[0];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    res.json({
+      year: parseInt(year),
+      summary: {
+        totalWalks: parseInt(summary.total_walks),
+        totalDistanceKm: (parseFloat(summary.total_distance) / 1000).toFixed(2),
+        totalDurationHours: (parseFloat(summary.total_duration) / 3600).toFixed(2),
+        avgSpeedKmh: parseFloat(summary.avg_speed).toFixed(2),
+        maxSpeedKmh: parseFloat(summary.max_speed).toFixed(2),
+        activeDays: parseInt(summary.active_days)
+      },
+      monthly: monthlyResult.rows.map(row => ({
+        month: row.month,
+        monthName: monthNames[row.month - 1],
+        walks: parseInt(row.walks),
+        distanceKm: (parseFloat(row.distance) / 1000).toFixed(2),
+        durationHours: (parseFloat(row.duration) / 3600).toFixed(2),
+        activeDays: parseInt(row.active_days)
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/stats/speed-distribution
  * Get speed distribution data
  */

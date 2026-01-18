@@ -72,8 +72,14 @@ app.get('/', (req, res) => {
       },
       stats: {
         summary: 'GET /api/stats/summary',
-        daily: 'GET /api/stats/daily',
-        weekly: 'GET /api/stats/weekly'
+        daily: 'GET /api/stats/daily?days=30',
+        weekly: 'GET /api/stats/weekly?weeks=12',
+        monthly: 'GET /api/stats/monthly?months=12',
+        yearly: 'GET /api/stats/yearly',
+        byDate: 'GET /api/stats/date/:date',
+        byMonth: 'GET /api/stats/month/:year/:month',
+        byYear: 'GET /api/stats/year/:year',
+        range: 'GET /api/stats/range?start_date=&end_date='
       },
       accountability: {
         score: 'GET /api/accountability/score/:walkId',
