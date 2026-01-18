@@ -106,7 +106,9 @@ void processATResponse(String response);
 void startWalk();
 void endWalk();
 void logWalkData();
+void finalizeWalkFile();
 void uploadPendingWalks();
+bool uploadWalkData(String filename, String content);
 
 double calculateDistance(double lat1, double lon1, double lat2, double lon2);
 String getTimestamp();
