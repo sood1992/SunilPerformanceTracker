@@ -12,6 +12,7 @@ import { walkRoutes } from './routes/walks.js';
 import { deviceRoutes } from './routes/devices.js';
 import { statsRoutes } from './routes/stats.js';
 import { accountabilityRoutes } from './routes/accountability.js';
+import { goalsRoutes } from './routes/goals.js';
 import { initDatabase } from './db/init.js';
 
 config();
@@ -50,6 +51,7 @@ app.use('/api/walks', walkRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/accountability', accountabilityRoutes);
+app.use('/api/goals', goalsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -77,6 +79,12 @@ app.get('/', (req, res) => {
         score: 'GET /api/accountability/score/:walkId',
         report: 'GET /api/accountability/report',
         alerts: 'GET /api/accountability/alerts'
+      },
+      goals: {
+        profile: 'GET /api/goals/profile',
+        today: 'GET /api/goals/today',
+        history: 'GET /api/goals/history?days=30',
+        alerts: 'GET /api/goals/alerts'
       }
     }
   });

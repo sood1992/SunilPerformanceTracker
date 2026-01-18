@@ -3,6 +3,7 @@ import WalkMap from './components/WalkMap'
 import WalkList from './components/WalkList'
 import StatsCards from './components/StatsCards'
 import SpeedChart from './components/SpeedChart'
+import GoalDashboard from './components/GoalDashboard'
 
 // API base URL - update for production
 const API_URL = import.meta.env.VITE_API_URL || ''
@@ -158,6 +159,11 @@ function App() {
         {/* Stats Overview */}
         <section className="stats-section">
           <StatsCards stats={stats} />
+        </section>
+
+        {/* Goals Dashboard - Popcorn's Daily Goals */}
+        <section className="goals-section">
+          <GoalDashboard />
         </section>
 
         {/* Main Dashboard Grid */}
