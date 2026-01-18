@@ -6,7 +6,11 @@ import SpeedChart from './components/SpeedChart'
 import GoalDashboard from './components/GoalDashboard'
 
 // API base URL - update for production
-const API_URL = import.meta.env.VITE_API_URL || ''
+// Auto-add https:// if protocol is missing
+const rawApiUrl = import.meta.env.VITE_API_URL || ''
+const API_URL = rawApiUrl && !rawApiUrl.startsWith('http')
+  ? `https://${rawApiUrl}`
+  : rawApiUrl
 
 function App() {
   const [walks, setWalks] = useState([])

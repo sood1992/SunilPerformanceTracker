@@ -4,7 +4,11 @@ import {
   ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts'
 
-const API_URL = import.meta.env.VITE_API_URL || ''
+// Auto-add https:// if protocol is missing
+const rawApiUrl = import.meta.env.VITE_API_URL || ''
+const API_URL = rawApiUrl && !rawApiUrl.startsWith('http')
+  ? `https://${rawApiUrl}`
+  : rawApiUrl
 
 function GoalDashboard() {
   const [todayGoals, setTodayGoals] = useState(null)
