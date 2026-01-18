@@ -4,13 +4,13 @@
 // ============================================================================
 // WiFi Configuration
 // ============================================================================
-#define WIFI_SSID "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define WIFI_SSID "CTNF-Universal"
+#define WIFI_PASSWORD "9868164136"
 
 // ============================================================================
 // Backend API Configuration
 // ============================================================================
-#define API_BASE_URL "https://your-backend.railway.app"
+#define API_BASE_URL "https://sunilperformancetracker-production.up.railway.app"
 #define API_ENDPOINT "/api/walks/upload"
 #define DEVICE_ID "DOG_WALKER_001"
 
