@@ -50,7 +50,7 @@ walkRoutes.get('/', async (req, res, next) => {
 
     const result = await query(sql, params);
 
-    // Get total count
+    // Get total count (apply same filters as main query, excluding LIMIT/OFFSET)
     let countSql = 'SELECT COUNT(*) as total FROM walks WHERE 1=1';
     const countParams = [];
     let countParamIndex = 1;
@@ -58,6 +58,16 @@ walkRoutes.get('/', async (req, res, next) => {
     if (device_id) {
       countSql += ` AND device_id = $${countParamIndex++}`;
       countParams.push(device_id);
+    }
+
+    if (from) {
+      countSql += ` AND start_time >= $${countParamIndex++}`;
+      countParams.push(from);
+    }
+
+    if (to) {
+      countSql += ` AND start_time <= $${countParamIndex++}`;
+      countParams.push(to);
     }
 
     const countResult = await query(countSql, countParams);
@@ -154,12 +164,43 @@ walkRoutes.post('/upload', async (req, res, next) => {
   try {
     const { deviceId, filename, startTime, startLat, startLon, points = [] } = req.body;
 
+    // Validate required fields
     if (!deviceId || !startTime) {
       return res.status(400).json({
         error: 'Missing required fields',
         required: ['deviceId', 'startTime']
       });
     }
+
+    // Validate deviceId format
+    if (typeof deviceId !== 'string' || deviceId.length > 50) {
+      return res.status(400).json({ error: 'Invalid deviceId format' });
+    }
+
+    // Validate startTime is a number
+    if (typeof startTime !== 'number' || isNaN(startTime)) {
+      return res.status(400).json({ error: 'startTime must be a valid timestamp' });
+    }
+
+    // Validate points array
+    if (!Array.isArray(points)) {
+      return res.status(400).json({ error: 'points must be an array' });
+    }
+
+    // Limit points to prevent DOS (max 100k points per walk)
+    if (points.length > 100000) {
+      return res.status(400).json({ error: 'Too many points (max 100000)' });
+    }
+
+    // Validate and filter points - only include valid ones
+    const validPoints = points.filter(p => {
+      if (!p || typeof p !== 'object') return false;
+      if (typeof p.lat !== 'number' || isNaN(p.lat)) return false;
+      if (typeof p.lon !== 'number' || isNaN(p.lon)) return false;
+      if (p.lat < -90 || p.lat > 90) return false;
+      if (p.lon < -180 || p.lon > 180) return false;
+      return true;
+    });
 
     // Update device last_seen
     await query(`
@@ -169,7 +210,7 @@ walkRoutes.post('/upload', async (req, res, next) => {
       DO UPDATE SET last_seen = CURRENT_TIMESTAMP
     `, [deviceId]);
 
-    // Calculate walk statistics from points
+    // Calculate walk statistics from validated points
     let totalDistance = 0;
     let maxSpeed = 0;
     let avgSpeed = 0;
@@ -177,10 +218,10 @@ walkRoutes.post('/upload', async (req, res, next) => {
     let endLon = startLon;
     let durationSeconds = 0;
 
-    if (points.length > 0) {
+    if (validPoints.length > 0) {
       // Calculate distance and speeds
-      for (let i = 0; i < points.length; i++) {
-        const point = points[i];
+      for (let i = 0; i < validPoints.length; i++) {
+        const point = validPoints[i];
 
         if (point.spd > maxSpeed) {
           maxSpeed = point.spd;
@@ -188,7 +229,7 @@ walkRoutes.post('/upload', async (req, res, next) => {
         avgSpeed += point.spd || 0;
 
         if (i > 0) {
-          const prevPoint = points[i - 1];
+          const prevPoint = validPoints[i - 1];
           const dist = haversineDistance(
             prevPoint.lat, prevPoint.lon,
             point.lat, point.lon
@@ -197,8 +238,8 @@ walkRoutes.post('/upload', async (req, res, next) => {
         }
       }
 
-      avgSpeed = avgSpeed / points.length;
-      const lastPoint = points[points.length - 1];
+      avgSpeed = avgSpeed / validPoints.length;
+      const lastPoint = validPoints[validPoints.length - 1];
       endLat = lastPoint.lat;
       endLon = lastPoint.lon;
       durationSeconds = lastPoint.t || 0;
@@ -227,35 +268,16 @@ walkRoutes.post('/upload', async (req, res, next) => {
       startLon || null,
       endLat || null,
       endLon || null,
-      points.length
+      validPoints.length
     ]);
 
     const walkId = walkResult.rows[0].id;
 
-    // Insert all points
-    if (points.length > 0) {
-      const pointValues = points.map((p, idx) => {
-        return `($1, $${idx * 8 + 2}, $${idx * 8 + 3}, $${idx * 8 + 4}, $${idx * 8 + 5}, $${idx * 8 + 6}, $${idx * 8 + 7}, $${idx * 8 + 8}, $${idx * 8 + 9})`;
-      }).join(', ');
-
-      const pointParams = [walkId];
-      points.forEach(p => {
-        pointParams.push(
-          p.t || 0,
-          p.lat,
-          p.lon,
-          p.alt || null,
-          p.spd || null,
-          p.ax || null,
-          p.ay || null,
-          p.az || null
-        );
-      });
-
-      // Batch insert points (for large datasets, consider chunking)
+    // Insert all validated points in batches
+    if (validPoints.length > 0) {
       const batchSize = 100;
-      for (let i = 0; i < points.length; i += batchSize) {
-        const batch = points.slice(i, i + batchSize);
+      for (let i = 0; i < validPoints.length; i += batchSize) {
+        const batch = validPoints.slice(i, i + batchSize);
         const batchValues = batch.map((_, idx) => {
           const base = idx * 8;
           return `($1, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
@@ -284,14 +306,14 @@ walkRoutes.post('/upload', async (req, res, next) => {
       }
     }
 
-    console.log(`Walk uploaded: ID=${walkId}, Device=${deviceId}, Points=${points.length}`);
+    console.log(`Walk uploaded: ID=${walkId}, Device=${deviceId}, Points=${validPoints.length}`);
 
     res.status(201).json({
       success: true,
       walkId: walkId,
       message: 'Walk data uploaded successfully',
       stats: {
-        pointCount: points.length,
+        pointCount: validPoints.length,
         durationSeconds: Math.round(durationSeconds),
         distanceMeters: Math.round(totalDistance),
         avgSpeedKmh: avgSpeed.toFixed(2),

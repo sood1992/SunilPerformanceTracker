@@ -11,6 +11,7 @@ import { config } from 'dotenv';
 import { walkRoutes } from './routes/walks.js';
 import { deviceRoutes } from './routes/devices.js';
 import { statsRoutes } from './routes/stats.js';
+import { accountabilityRoutes } from './routes/accountability.js';
 import { initDatabase } from './db/init.js';
 
 config();
@@ -48,6 +49,7 @@ app.get('/health', (req, res) => {
 app.use('/api/walks', walkRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/accountability', accountabilityRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -70,6 +72,11 @@ app.get('/', (req, res) => {
         summary: 'GET /api/stats/summary',
         daily: 'GET /api/stats/daily',
         weekly: 'GET /api/stats/weekly'
+      },
+      accountability: {
+        score: 'GET /api/accountability/score/:walkId',
+        report: 'GET /api/accountability/report',
+        alerts: 'GET /api/accountability/alerts'
       }
     }
   });

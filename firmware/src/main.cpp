@@ -439,23 +439,58 @@ void readGPS() {
         if (response.indexOf("+CGPSINFO:") >= 0 && response.indexOf(",,,,") == -1) {
             // Parse CGPSINFO format
             // +CGPSINFO: [lat],[N/S],[lon],[E/W],[date],[UTC],[alt],[speed],[course]
-            int start = response.indexOf(":") + 2;
+            int colonIdx = response.indexOf(":");
+            if (colonIdx < 0) return;
+
+            int start = colonIdx + 2;
             String data = response.substring(start);
 
-            // Basic parsing - extract lat/lon
-            int commaIdx = data.indexOf(",");
-            if (commaIdx > 0) {
-                String latStr = data.substring(0, commaIdx);
-                if (latStr.length() > 0) {
-                    // Convert NMEA format to decimal degrees
-                    double latDeg = latStr.substring(0, 2).toDouble();
-                    double latMin = latStr.substring(2).toDouble();
-                    currentGPS.latitude = latDeg + (latMin / 60.0);
-
-                    // Continue parsing...
-                    currentGPS.valid = true;
-                    currentGPS.timestamp = millis();
+            // Split by commas into parts
+            String cgpsParts[10];
+            int cgpsPartCount = 0;
+            while (data.length() > 0 && cgpsPartCount < 10) {
+                int commaIdx = data.indexOf(",");
+                if (commaIdx == -1) {
+                    cgpsParts[cgpsPartCount++] = data;
+                    break;
                 }
+                cgpsParts[cgpsPartCount++] = data.substring(0, commaIdx);
+                data = data.substring(commaIdx + 1);
+            }
+
+            // Need at least lat, N/S, lon, E/W
+            if (cgpsPartCount >= 4 && cgpsParts[0].length() > 0 && cgpsParts[2].length() > 0) {
+                // Parse latitude (NMEA format: DDMM.MMMM)
+                String latStr = cgpsParts[0];
+                double latDeg = latStr.substring(0, 2).toDouble();
+                double latMin = latStr.substring(2).toDouble();
+                currentGPS.latitude = latDeg + (latMin / 60.0);
+                if (cgpsParts[1] == "S") currentGPS.latitude = -currentGPS.latitude;
+
+                // Parse longitude (NMEA format: DDDMM.MMMM)
+                String lonStr = cgpsParts[2];
+                double lonDeg = lonStr.substring(0, 3).toDouble();
+                double lonMin = lonStr.substring(3).toDouble();
+                currentGPS.longitude = lonDeg + (lonMin / 60.0);
+                if (cgpsParts[3] == "W") currentGPS.longitude = -currentGPS.longitude;
+
+                // Parse altitude (index 6) and speed (index 7) if available
+                if (cgpsPartCount > 6 && cgpsParts[6].length() > 0) {
+                    currentGPS.altitude = cgpsParts[6].toDouble();
+                }
+                if (cgpsPartCount > 7 && cgpsParts[7].length() > 0) {
+                    currentGPS.speed = cgpsParts[7].toDouble() * 1.852; // knots to km/h
+                }
+                if (cgpsPartCount > 8 && cgpsParts[8].length() > 0) {
+                    currentGPS.course = cgpsParts[8].toDouble();
+                }
+
+                currentGPS.valid = true;
+                currentGPS.timestamp = millis();
+                lastValidGPS = currentGPS;
+
+                DEBUG_PRINTF("GPS (CGPSINFO): %.6f, %.6f | Speed: %.1f km/h\n",
+                    currentGPS.latitude, currentGPS.longitude, currentGPS.speed);
             }
         }
     }
@@ -601,9 +636,15 @@ void logWalkData() {
         point["ay"] = currentAccel.y;
         point["az"] = currentAccel.z;
 
-        file.print("\n");
-        serializeJson(point, file);
+        size_t written = file.print("\n");
+        written += serializeJson(point, file);
         file.close();
+
+        if (written == 0) {
+            DEBUG_PRINTLN("WARNING: Failed to write GPS point to SD card!");
+        }
+    } else {
+        DEBUG_PRINTLN("ERROR: Could not open file for writing!");
     }
 
     DEBUG_PRINTF("Logged point #%d: %.6f, %.6f @ %.1f km/h\n",
@@ -663,8 +704,6 @@ void uploadPendingWalks() {
 }
 
 bool uploadWalkData(String filename, String content) {
-    HTTPClient http;
-
     // Build upload URL
     String url = String(API_BASE_URL) + String(API_ENDPOINT);
 
@@ -678,7 +717,11 @@ bool uploadWalkData(String filename, String content) {
     if (firstNewline > 0) {
         String metaJson = content.substring(0, firstNewline);
         JsonDocument metaDoc;
-        deserializeJson(metaDoc, metaJson);
+        DeserializationError err = deserializeJson(metaDoc, metaJson);
+        if (err) {
+            DEBUG_PRINTF("Failed to parse metadata: %s\n", err.c_str());
+            return false;
+        }
 
         uploadDoc["startTime"] = metaDoc["startTime"];
         uploadDoc["startLat"] = metaDoc["startLat"];
@@ -702,8 +745,10 @@ bool uploadWalkData(String filename, String content) {
 
         if (line.length() > 0) {
             JsonDocument pointDoc;
-            deserializeJson(pointDoc, line);
-            points.add(pointDoc);
+            DeserializationError err = deserializeJson(pointDoc, line);
+            if (!err && pointDoc.containsKey("lat") && pointDoc.containsKey("lon")) {
+                points.add(pointDoc);
+            }
         }
     }
 
@@ -711,22 +756,34 @@ bool uploadWalkData(String filename, String content) {
     String uploadJson;
     serializeJson(uploadDoc, uploadJson);
 
-    // Send HTTP POST
-    http.begin(url);
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("X-Device-ID", DEVICE_ID);
+    // Retry loop with exponential backoff
+    for (int attempt = 0; attempt < UPLOAD_RETRY_COUNT; attempt++) {
+        if (attempt > 0) {
+            unsigned long backoffMs = UPLOAD_RETRY_DELAY * (1 << (attempt - 1)); // 5s, 10s, 20s
+            DEBUG_PRINTF("Retry attempt %d after %lu ms...\n", attempt + 1, backoffMs);
+            delay(backoffMs);
+        }
 
-    int httpCode = http.POST(uploadJson);
+        HTTPClient http;
+        http.begin(url);
+        http.setTimeout(30000); // 30 second timeout
+        http.addHeader("Content-Type", "application/json");
+        http.addHeader("X-Device-ID", DEVICE_ID);
 
-    if (httpCode == 200 || httpCode == 201) {
-        DEBUG_PRINTF("Upload successful: HTTP %d\n", httpCode);
+        int httpCode = http.POST(uploadJson);
+
+        if (httpCode == 200 || httpCode == 201) {
+            DEBUG_PRINTF("Upload successful: HTTP %d\n", httpCode);
+            http.end();
+            return true;
+        }
+
+        DEBUG_PRINTF("Upload attempt %d failed: HTTP %d\n", attempt + 1, httpCode);
         http.end();
-        return true;
-    } else {
-        DEBUG_PRINTF("Upload failed: HTTP %d\n", httpCode);
-        http.end();
-        return false;
     }
+
+    DEBUG_PRINTLN("All upload attempts failed");
+    return false;
 }
 
 // ============================================================================

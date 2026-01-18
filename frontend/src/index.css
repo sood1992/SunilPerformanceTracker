@@ -234,6 +234,32 @@ body {
   border-radius: 2px;
 }
 
+/* Map Loading Overlay */
+.map-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  gap: 0.5rem;
+}
+
+.map-loading-overlay .loading-spinner {
+  width: 30px;
+  height: 30px;
+}
+
+.map-loading-overlay span {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
 /* Walk Details */
 .walk-details {
   padding: 1.25rem;

@@ -44,16 +44,20 @@ function FitBounds({ points }) {
   return null
 }
 
-function WalkMap({ points, selectedWalk }) {
+function WalkMap({ points, selectedWalk, loading }) {
   const defaultCenter = [40.7128, -74.0060] // Default to NYC
   const defaultZoom = 13
 
-  // Convert points to path coordinates
-  const pathCoordinates = points.map(p => [p.lat, p.lon])
+  // Validate points and filter invalid ones
+  const validPoints = (points || []).filter(p =>
+    p && typeof p.lat === 'number' && typeof p.lon === 'number' &&
+    !isNaN(p.lat) && !isNaN(p.lon) &&
+    p.lat >= -90 && p.lat <= 90 && p.lon >= -180 && p.lon <= 180
+  )
 
   // Get start and end points
-  const startPoint = points.length > 0 ? points[0] : null
-  const endPoint = points.length > 1 ? points[points.length - 1] : null
+  const startPoint = validPoints.length > 0 ? validPoints[0] : null
+  const endPoint = validPoints.length > 1 ? validPoints[validPoints.length - 1] : null
 
   // Color gradient based on speed
   const getSpeedColor = (speed) => {
@@ -63,8 +67,33 @@ function WalkMap({ points, selectedWalk }) {
     return '#ff3333'  // Running - red
   }
 
+  // Create colored segments based on speed
+  const createColoredSegments = () => {
+    if (validPoints.length < 2) return []
+
+    const segments = []
+    for (let i = 0; i < validPoints.length - 1; i++) {
+      const p1 = validPoints[i]
+      const p2 = validPoints[i + 1]
+      const avgSpeed = ((p1.speed || 0) + (p2.speed || 0)) / 2
+      segments.push({
+        positions: [[p1.lat, p1.lon], [p2.lat, p2.lon]],
+        color: getSpeedColor(avgSpeed)
+      })
+    }
+    return segments
+  }
+
+  const coloredSegments = createColoredSegments()
+
   return (
     <div className="map-container">
+      {loading && (
+        <div className="map-loading-overlay">
+          <div className="loading-spinner"></div>
+          <span>Loading route...</span>
+        </div>
+      )}
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
@@ -76,15 +105,18 @@ function WalkMap({ points, selectedWalk }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {points.length > 0 && (
+        {validPoints.length > 0 && (
           <>
-            {/* Route polyline */}
-            <Polyline
-              positions={pathCoordinates}
-              color="#3388ff"
-              weight={4}
-              opacity={0.8}
-            />
+            {/* Colored route segments based on speed */}
+            {coloredSegments.map((segment, idx) => (
+              <Polyline
+                key={idx}
+                positions={segment.positions}
+                color={segment.color}
+                weight={4}
+                opacity={0.8}
+              />
+            ))}
 
             {/* Start marker */}
             {startPoint && (
@@ -107,12 +139,12 @@ function WalkMap({ points, selectedWalk }) {
             )}
 
             {/* Fit bounds to route */}
-            <FitBounds points={points} />
+            <FitBounds points={validPoints} />
           </>
         )}
 
         {/* Show placeholder if no route */}
-        {points.length === 0 && (
+        {validPoints.length === 0 && !loading && (
           <div className="map-placeholder">
             Select a walk to view the route
           </div>
@@ -120,7 +152,7 @@ function WalkMap({ points, selectedWalk }) {
       </MapContainer>
 
       {/* Speed legend */}
-      {points.length > 0 && (
+      {validPoints.length > 0 && (
         <div className="map-legend">
           <div className="legend-item">
             <span className="legend-color" style={{ background: '#3388ff' }}></span>

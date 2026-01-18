@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import WalkMap from './components/WalkMap'
 import WalkList from './components/WalkList'
 import StatsCards from './components/StatsCards'
@@ -14,7 +14,11 @@ function App() {
   const [stats, setStats] = useState(null)
   const [dailyStats, setDailyStats] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingPoints, setLoadingPoints] = useState(false)
   const [error, setError] = useState(null)
+
+  // Abort controller for cancelling fetch requests
+  const abortControllerRef = useRef(null)
 
   // Fetch walks and stats on mount
   useEffect(() => {
@@ -23,20 +27,36 @@ function App() {
     fetchDailyStats()
   }, [])
 
-  // Fetch walk points when a walk is selected
+  // Fetch walk points when a walk is selected (with race condition fix)
   useEffect(() => {
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
     if (selectedWalk) {
       fetchWalkPoints(selectedWalk.id)
     } else {
       setWalkPoints([])
+    }
+
+    // Cleanup on unmount or when selectedWalk changes
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
     }
   }, [selectedWalk])
 
   const fetchWalks = async () => {
     try {
       const res = await fetch(`${API_URL}/api/walks?limit=100`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      setWalks(data.walks || [])
+      if (!data || !Array.isArray(data.walks)) {
+        throw new Error('Invalid response format')
+      }
+      setWalks(data.walks)
       setLoading(false)
     } catch (err) {
       console.error('Failed to fetch walks:', err)
@@ -48,31 +68,55 @@ function App() {
   const fetchStats = async () => {
     try {
       const res = await fetch(`${API_URL}/api/stats/summary`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
+      if (!data || !data.allTime) {
+        throw new Error('Invalid stats format')
+      }
       setStats(data)
     } catch (err) {
       console.error('Failed to fetch stats:', err)
+      // Don't set main error - stats are secondary
     }
   }
 
   const fetchDailyStats = async () => {
     try {
       const res = await fetch(`${API_URL}/api/stats/daily?days=14`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      setDailyStats(data.daily || [])
+      if (!data || !Array.isArray(data.daily)) {
+        throw new Error('Invalid daily stats format')
+      }
+      setDailyStats(data.daily)
     } catch (err) {
       console.error('Failed to fetch daily stats:', err)
     }
   }
 
   const fetchWalkPoints = async (walkId) => {
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController()
+
+    setLoadingPoints(true)
     try {
-      const res = await fetch(`${API_URL}/api/walks/${walkId}/points`)
+      const res = await fetch(`${API_URL}/api/walks/${walkId}/points`, {
+        signal: abortControllerRef.current.signal
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      setWalkPoints(data.points || [])
+      if (!data || !Array.isArray(data.points)) {
+        throw new Error('Invalid points format')
+      }
+      setWalkPoints(data.points)
     } catch (err) {
-      console.error('Failed to fetch walk points:', err)
-      setWalkPoints([])
+      // Ignore abort errors (expected when user selects different walk)
+      if (err.name !== 'AbortError') {
+        console.error('Failed to fetch walk points:', err)
+        setWalkPoints([])
+      }
+    } finally {
+      setLoadingPoints(false)
     }
   }
 
@@ -131,6 +175,7 @@ function App() {
             <WalkMap
               points={walkPoints}
               selectedWalk={selectedWalk}
+              loading={loadingPoints}
             />
             {selectedWalk && (
               <div className="walk-details">
