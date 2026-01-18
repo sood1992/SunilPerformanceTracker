@@ -123,20 +123,55 @@ void setup() {
     // Initialize debug serial
     DEBUG_SERIAL.begin(DEBUG_BAUDRATE);
     delay(1000);
-    DEBUG_PRINTLN("\n\n=================================");
-    DEBUG_PRINTLN("Dog Walker GPS Tracker");
-    DEBUG_PRINTLN("=================================\n");
+    DEBUG_PRINTLN("\n\n╔═══════════════════════════════════════════╗");
+    DEBUG_PRINTLN("║     DOG WALKER GPS TRACKER - Popcorn      ║");
+    DEBUG_PRINTLN("║         LilyGo T-A7670G R2 + ADXL345      ║");
+    DEBUG_PRINTLN("╚═══════════════════════════════════════════╝\n");
 
-    // Initialize I2C for ADXL345
+    DEBUG_PRINTF("Device ID: %s\n", DEVICE_ID);
+    DEBUG_PRINTF("Backend:   %s\n", API_BASE_URL);
+    DEBUG_PRINTF("WiFi:      %s\n\n", WIFI_SSID);
+
+    // Step 1: Initialize I2C
+    DEBUG_PRINTLN("[STEP 1/5] Initializing I2C bus...");
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+    DEBUG_PRINTF("  → SDA: GPIO %d, SCL: GPIO %d\n", I2C_SDA_PIN, I2C_SCL_PIN);
+    DEBUG_PRINTLN("  ✓ I2C initialized\n");
 
-    // Initialize components
+    // Step 2: Initialize SD Card
+    DEBUG_PRINTLN("[STEP 2/5] Initializing SD Card...");
     initSDCard();
+    if (sdCardReady) {
+        DEBUG_PRINTLN("  ✓ SD Card ready\n");
+    } else {
+        DEBUG_PRINTLN("  ✗ SD Card FAILED - data will not be saved!\n");
+    }
+
+    // Step 3: Initialize Accelerometer
+    DEBUG_PRINTLN("[STEP 3/5] Initializing ADXL345 Accelerometer...");
     initAccelerometer();
+
+    // Step 4: Initialize Modem
+    DEBUG_PRINTLN("[STEP 4/5] Initializing A7670G Modem...");
+    DEBUG_PRINTLN("  (Requires battery for sufficient power)");
     initModem();
+    if (modemReady) {
+        DEBUG_PRINTLN("  ✓ Modem ready\n");
+    } else {
+        DEBUG_PRINTLN("  ✗ Modem FAILED - check battery connection!\n");
+    }
+
+    // Step 5: Initialize GPS
+    DEBUG_PRINTLN("[STEP 5/5] Initializing GPS...");
     initGPS();
+    if (gpsEnabled) {
+        DEBUG_PRINTLN("  ✓ GPS enabled (waiting for fix...)\n");
+    } else {
+        DEBUG_PRINTLN("  ✗ GPS FAILED - modem issue?\n");
+    }
 
     // Try to connect to WiFi and upload any pending data
+    DEBUG_PRINTLN("[WIFI] Attempting WiFi connection...");
     initWiFi();
 
     // Initialize walk session
@@ -146,9 +181,18 @@ void setup() {
     currentWalk.avgSpeed = 0;
     currentWalk.dataPoints = 0;
 
-    DEBUG_PRINTLN("\n=================================");
-    DEBUG_PRINTLN("Initialization Complete!");
-    DEBUG_PRINTLN("=================================\n");
+    // Print status summary
+    DEBUG_PRINTLN("\n╔═══════════════════════════════════════════╗");
+    DEBUG_PRINTLN("║           INITIALIZATION SUMMARY          ║");
+    DEBUG_PRINTLN("╠═══════════════════════════════════════════╣");
+    DEBUG_PRINTF("║  SD Card:      %s                        ║\n", sdCardReady ? "OK " : "ERR");
+    DEBUG_PRINTF("║  Accelerometer: %s                        ║\n", accel.begin() ? "OK " : "ERR");
+    DEBUG_PRINTF("║  Modem:        %s                        ║\n", modemReady ? "OK " : "ERR");
+    DEBUG_PRINTF("║  GPS:          %s                        ║\n", gpsEnabled ? "OK " : "ERR");
+    DEBUG_PRINTF("║  WiFi:         %s                        ║\n", WiFi.status() == WL_CONNECTED ? "OK " : "N/A");
+    DEBUG_PRINTLN("╚═══════════════════════════════════════════╝");
+    DEBUG_PRINTLN("\nWaiting for walk to start...");
+    DEBUG_PRINTLN("(Move at >0.5 km/h with accelerometer activity)\n");
 }
 
 // ============================================================================
@@ -157,6 +201,7 @@ void setup() {
 
 void loop() {
     unsigned long now = millis();
+    static unsigned long lastStatusPrint = 0;
 
     // Read GPS data
     if (now - lastGPSUpdate >= GPS_UPDATE_INTERVAL) {
@@ -170,6 +215,39 @@ void loop() {
     // Update activity time if moving
     if (currentAccel.isMoving || (currentGPS.valid && currentGPS.speed > WALK_START_SPEED)) {
         lastActivityTime = now;
+    }
+
+    // Print status every 5 seconds
+    if (now - lastStatusPrint >= 5000) {
+        DEBUG_PRINTLN("─────────────────────────────────────────────");
+        DEBUG_PRINTF("⏱ Uptime: %lu sec\n", now / 1000);
+
+        // GPS Status
+        if (currentGPS.valid) {
+            DEBUG_PRINTF("📍 GPS: %.6f, %.6f | Speed: %.1f km/h | Sats: %d\n",
+                currentGPS.latitude, currentGPS.longitude, currentGPS.speed, currentGPS.satellites);
+        } else {
+            DEBUG_PRINTLN("📍 GPS: Waiting for fix...");
+        }
+
+        // Accelerometer Status
+        DEBUG_PRINTF("🏃 Accel: X=%.2f Y=%.2f Z=%.2f | Mag=%.2f | Moving: %s\n",
+            currentAccel.x, currentAccel.y, currentAccel.z,
+            currentAccel.magnitude, currentAccel.isMoving ? "YES" : "NO");
+
+        // Walk Status
+        if (currentWalk.isActive) {
+            unsigned long walkDuration = (now - currentWalk.startTime) / 1000;
+            DEBUG_PRINTF("🚶 WALK ACTIVE: %lu sec | Dist: %.0f m | Pts: %d\n",
+                walkDuration, currentWalk.totalDistance, currentWalk.dataPoints);
+        } else {
+            DEBUG_PRINTLN("💤 Idle - waiting for movement");
+        }
+
+        // WiFi Status
+        DEBUG_PRINTF("📶 WiFi: %s\n", WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected");
+
+        lastStatusPrint = now;
     }
 
     // Walk state machine
@@ -194,10 +272,13 @@ void loop() {
     // Periodically check WiFi and upload pending data
     static unsigned long lastWiFiCheck = 0;
     if (now - lastWiFiCheck > 60000) { // Check every minute
+        DEBUG_PRINTLN("\n[WIFI] Checking connection...");
         if (WiFi.status() != WL_CONNECTED) {
+            DEBUG_PRINTLN("[WIFI] Reconnecting...");
             initWiFi();
         }
         if (WiFi.status() == WL_CONNECTED) {
+            DEBUG_PRINTLN("[UPLOAD] Checking for pending walks...");
             uploadPendingWalks();
         }
         lastWiFiCheck = now;
