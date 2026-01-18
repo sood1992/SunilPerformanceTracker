@@ -553,23 +553,86 @@ void uploadPendingWalks() {
             String filename = String(file.name());
             Serial.printf("  Uploading: %s\n", filename.c_str());
 
+            // Read file content
             String content = "";
             while (file.available()) {
                 content += (char)file.read();
             }
+            file.close();
 
+            // Parse the file: first line is metadata, rest are points
+            int firstNewline = content.indexOf('\n');
+            if (firstNewline < 0) {
+                Serial.println("    [SKIP] Invalid file format");
+                file = dir.openNextFile();
+                continue;
+            }
+
+            String metaLine = content.substring(0, firstNewline);
+            String pointsData = content.substring(firstNewline + 1);
+
+            // Parse metadata
+            JsonDocument metaDoc;
+            DeserializationError metaErr = deserializeJson(metaDoc, metaLine);
+            if (metaErr) {
+                Serial.printf("    [SKIP] Invalid metadata: %s\n", metaErr.c_str());
+                file = dir.openNextFile();
+                continue;
+            }
+
+            // Build upload payload
+            JsonDocument uploadDoc;
+            uploadDoc["deviceId"] = metaDoc["deviceId"] | DEVICE_ID;
+            uploadDoc["filename"] = filename;
+            uploadDoc["startTime"] = metaDoc["startTime"];
+            uploadDoc["startLat"] = metaDoc["startLat"];
+            uploadDoc["startLon"] = metaDoc["startLon"];
+
+            // Parse points (NDJSON format - one JSON per line)
+            JsonArray pointsArray = uploadDoc["points"].to<JsonArray>();
+            int pointCount = 0;
+
+            int lineStart = 0;
+            while (lineStart < pointsData.length()) {
+                int lineEnd = pointsData.indexOf('\n', lineStart);
+                if (lineEnd < 0) lineEnd = pointsData.length();
+
+                String line = pointsData.substring(lineStart, lineEnd);
+                line.trim();
+
+                if (line.length() > 0) {
+                    JsonDocument pointDoc;
+                    DeserializationError pointErr = deserializeJson(pointDoc, line);
+                    if (!pointErr) {
+                        JsonObject point = pointsArray.add<JsonObject>();
+                        point["t"] = pointDoc["t"];
+                        point["lat"] = pointDoc["lat"];
+                        point["lon"] = pointDoc["lon"];
+                        point["spd"] = pointDoc["spd"];
+                        point["ax"] = pointDoc["ax"];
+                        point["ay"] = pointDoc["ay"];
+                        point["az"] = pointDoc["az"];
+                        pointCount++;
+                    }
+                }
+
+                lineStart = lineEnd + 1;
+            }
+
+            Serial.printf("    Parsed %d points\n", pointCount);
+
+            // Send to server
             HTTPClient http;
             String url = String(API_BASE_URL) + String(API_ENDPOINT);
             http.begin(url);
             http.addHeader("Content-Type", "application/json");
             http.addHeader("X-Device-ID", DEVICE_ID);
-
-            JsonDocument uploadDoc;
-            uploadDoc["deviceId"] = DEVICE_ID;
-            uploadDoc["rawData"] = content;
+            http.setTimeout(30000);  // 30 second timeout
 
             String payload;
             serializeJson(uploadDoc, payload);
+
+            Serial.printf("    Payload size: %d bytes\n", payload.length());
 
             int httpCode = http.POST(payload);
             if (httpCode == 200 || httpCode == 201) {
@@ -578,6 +641,8 @@ void uploadPendingWalks() {
                 Serial.println("    [OK] Uploaded and deleted");
             } else {
                 Serial.printf("    [FAIL] HTTP %d\n", httpCode);
+                String response = http.getString();
+                Serial.printf("    Response: %s\n", response.substring(0, 200).c_str());
             }
             http.end();
         }
