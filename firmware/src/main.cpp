@@ -1336,34 +1336,31 @@ void updateDisplay() {
     }
     display->drawStr(0, 26, buf);
 
-    // Row 3: GPS and connectivity status
-    // GPS status with satellite count or query count
+    // Row 3: GPS status with details
+    unsigned long gpsChars = gps.charsProcessed();
+    unsigned long gpsErrors = gps.failedChecksum();
+    unsigned long gpsSentences = gps.sentencesWithFix();
+
     if (currentGPS.valid) {
-        snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
+        // Valid fix: show satellites and fix count
+        snprintf(buf, sizeof(buf), "GPS:%dsat Fx:%lu", currentGPS.satellites, gpsSentences);
     } else {
-        // Show satellite count or chars received to indicate GPS is working
-        if (currentGPS.satellites > 0) {
-            snprintf(buf, sizeof(buf), "GPS:%d*", currentGPS.satellites);  // Has sats but no fix
-        } else if (gps.charsProcessed() > 0) {
-            snprintf(buf, sizeof(buf), "GPS:...");  // Receiving data
+        // No fix: show satellites, chars received, errors
+        if (gpsChars > 0) {
+            if (currentGPS.satellites > 0) {
+                // Has satellites but no fix yet
+                snprintf(buf, sizeof(buf), "GPS:%d* C:%luk", currentGPS.satellites, gpsChars/1000);
+            } else {
+                // Receiving data but no satellites
+                snprintf(buf, sizeof(buf), "GPS:-- C:%luk E:%lu", gpsChars/1000, gpsErrors);
+            }
         } else {
-            snprintf(buf, sizeof(buf), "GPS:--");  // No data yet
+            snprintf(buf, sizeof(buf), "GPS: No data!");
         }
     }
     display->drawStr(0, 38, buf);
 
-    // WiFi status
-    if (WiFi.status() == WL_CONNECTED) {
-        display->drawStr(45, 38, "WiFi:OK");
-    } else {
-        display->drawStr(45, 38, "WiFi:NO");
-    }
-
-    // Battery
-    snprintf(buf, sizeof(buf), "%d%%", (int)displayStatus.batteryPercent);
-    display->drawStr(100, 38, buf);
-
-    // Row 4: Pending uploads and upload stats
+    // Row 4: WiFi, Battery, Pending uploads
     static unsigned long lastPendingCheck = 0;
     static int pendingCount = 0;
     if (millis() - lastPendingCheck > 5000) {  // Check every 5 sec
@@ -1371,10 +1368,11 @@ void updateDisplay() {
         lastPendingCheck = millis();
     }
 
+    const char* wifiStatus = (WiFi.status() == WL_CONNECTED) ? "W:OK" : "W:NO";
     if (pendingCount > 0) {
-        snprintf(buf, sizeof(buf), "Pending:%d Up:%d", pendingCount, displayStatus.uploadsToday);
+        snprintf(buf, sizeof(buf), "%s %d%% P:%d", wifiStatus, (int)displayStatus.batteryPercent, pendingCount);
     } else {
-        snprintf(buf, sizeof(buf), "Up:%d Fail:%d", displayStatus.uploadsToday, displayStatus.uploadsFailed);
+        snprintf(buf, sizeof(buf), "%s %d%% Up:%d", wifiStatus, (int)displayStatus.batteryPercent, displayStatus.uploadsToday);
     }
     display->drawStr(0, 50, buf);
 
