@@ -147,6 +147,14 @@ struct DisplayStatus {
 String currentLogFile = "";
 unsigned long lastLogFlush = 0;
 
+// Geofence & Standby Mode
+bool isAtHome = true;              // Assume at home on boot
+bool wasAtHome = true;             // Previous state for edge detection
+bool standbyMode = true;           // Low power mode when at home
+unsigned long lastHomeCheck = 0;   // Last geofence check time
+unsigned long displayOffTime = 0;  // When to turn off display in standby
+bool displayIsOff = false;         // Display power state
+
 // Button State
 bool buttonPressed = false;
 unsigned long buttonPressStart = 0;
@@ -178,6 +186,9 @@ void initDisplay();
 void initLogging();
 void initButton();
 void handleButton();
+void checkHomeStatus();
+double getDistanceFromHome();
+bool isConnectedToHomeWiFi();
 void writeLog(LogLevel level, const char* category, const char* message);
 void writeLogf(LogLevel level, const char* category, const char* format, ...);
 String sendATCommandGetResponse(const char* cmd, unsigned long timeout);
@@ -300,6 +311,14 @@ void setup() {
         writeLogf(LOG_INFO, "WIFI", "Connected to %s, IP: %s", WIFI_SSID, WiFi.localIP().toString().c_str());
     }
 
+    // Log geofence configuration
+    writeLogf(LOG_INFO, "GEOFENCE", "Home: %.6f, %.6f | Start: %dm | End: %dm",
+        HOME_LATITUDE, HOME_LONGITUDE, HOME_RADIUS_START, HOME_RADIUS_END);
+    writeLogf(LOG_INFO, "GEOFENCE", "Home WiFi: %s | Standby display off: %ds",
+        HOME_WIFI_SSID, STANDBY_DISPLAY_OFF_MS / 1000);
+    Serial.printf("[GEOFENCE] Home: %.6f, %.6f\n", HOME_LATITUDE, HOME_LONGITUDE);
+    Serial.printf("[GEOFENCE] Leave radius: %dm | Return radius: %dm\n", HOME_RADIUS_START, HOME_RADIUS_END);
+
     // Initial display update
     if (displayReady) {
         displayStatus.lastEvent = "System Ready";
@@ -315,14 +334,22 @@ void loop() {
     unsigned long now = millis();
 
     // Handle button input (for manual start/stop)
+    // Button press also wakes display from standby
     handleButton();
 
-    // Read GPS continuously
-    readGPS();
+    // Read GPS (reduced frequency in standby mode)
+    static unsigned long lastStandbyGPS = 0;
+    if (!standbyMode || (now - lastStandbyGPS >= STANDBY_GPS_INTERVAL)) {
+        readGPS();
+        if (standbyMode) lastStandbyGPS = now;
+    }
 
     // Read accelerometer and detect steps
     readAccelerometer();
     detectSteps();
+
+    // Check geofence / home status (for auto start/stop)
+    checkHomeStatus();
 
     // Read battery level periodically
     static unsigned long lastBatteryRead = 0;
@@ -336,8 +363,8 @@ void loop() {
         lastActivityTime = now;
     }
 
-    // Update display every 500ms
-    if (displayReady && now - lastDisplayUpdate >= 500) {
+    // Update display every 500ms (skip if display is off in standby)
+    if (displayReady && !displayIsOff && now - lastDisplayUpdate >= 500) {
         updateDisplay();
         lastDisplayUpdate = now;
     }
@@ -470,6 +497,13 @@ void handleButton() {
         buttonPressed = true;
         buttonPressStart = now;
         buttonHandled = false;
+
+        // Wake display from standby on any button press
+        if (displayIsOff) {
+            displayIsOff = false;
+            displayOffTime = now + STANDBY_DISPLAY_OFF_MS;
+            Serial.println("[BUTTON] Woke display from standby");
+        }
     } else if (!isPressed && buttonPressed) {
         // Button just released
         unsigned long pressDuration = now - buttonPressStart;
@@ -1338,6 +1372,99 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 }
 
 // ============================================================================
+// Geofence & Home Detection
+// ============================================================================
+
+double getDistanceFromHome() {
+    if (!currentGPS.valid) return -1;  // Unknown
+    return calculateDistance(currentGPS.latitude, currentGPS.longitude,
+                            HOME_LATITUDE, HOME_LONGITUDE);
+}
+
+bool isConnectedToHomeWiFi() {
+    if (WiFi.status() != WL_CONNECTED) return false;
+    return (strcmp(WiFi.SSID().c_str(), HOME_WIFI_SSID) == 0);
+}
+
+void checkHomeStatus() {
+    // Only check every 5 seconds to save CPU
+    if (millis() - lastHomeCheck < 5000) return;
+    lastHomeCheck = millis();
+
+    wasAtHome = isAtHome;
+
+    // Determine if at home using GPS + WiFi
+    double distFromHome = getDistanceFromHome();
+    bool wifiAtHome = isConnectedToHomeWiFi();
+
+    // At home if: connected to home WiFi OR within home radius
+    if (wifiAtHome) {
+        isAtHome = true;
+    } else if (distFromHome >= 0) {
+        // Use different radius for entering vs leaving (hysteresis)
+        if (isAtHome) {
+            // Currently at home - need to go beyond START radius to leave
+            isAtHome = (distFromHome < HOME_RADIUS_START);
+        } else {
+            // Currently away - need to enter END radius to be home
+            isAtHome = (distFromHome < HOME_RADIUS_END);
+        }
+    }
+    // If no GPS and no WiFi, maintain previous state
+
+    // Handle state transitions
+    if (wasAtHome && !isAtHome) {
+        // Just left home!
+        Serial.println("\n[GEOFENCE] Left home area!");
+        writeLog(LOG_INFO, "GEOFENCE", "Left home - auto-starting walk");
+
+        standbyMode = false;
+        displayIsOff = false;
+
+        // Auto-start walk if not already active
+        if (!currentWalk.isActive) {
+            startWalkManual();  // Use manual mode (no auto-timeout)
+            displayStatus.lastEvent = "Auto: Left home";
+        }
+    } else if (!wasAtHome && isAtHome) {
+        // Just arrived home!
+        Serial.println("\n[GEOFENCE] Arrived home!");
+        writeLog(LOG_INFO, "GEOFENCE", "Arrived home - auto-ending walk");
+
+        // Auto-end walk if active
+        if (currentWalk.isActive) {
+            endWalkManual();
+            displayStatus.lastEvent = "Auto: Home";
+        }
+
+        standbyMode = true;
+        displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
+    }
+
+    // Update standby mode
+    if (isAtHome && !currentWalk.isActive) {
+        standbyMode = true;
+
+        // Turn off display after timeout in standby
+        if (STANDBY_DISPLAY_DIM && millis() > displayOffTime && !displayIsOff) {
+            displayIsOff = true;
+            if (display != nullptr) {
+                display->clearBuffer();
+                display->sendBuffer();
+                Serial.println("[STANDBY] Display off to save power");
+            }
+        }
+    } else {
+        standbyMode = false;
+        if (displayIsOff) {
+            displayIsOff = false;
+            displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
+            Serial.println("[STANDBY] Display on");
+        }
+    }
+}
+
+// ============================================================================
 // OLED Display Functions
 // ============================================================================
 
@@ -1434,19 +1561,22 @@ void updateDisplay() {
     }
     display->drawStr(0, 38, buf);
 
-    // Row 4: WiFi, Battery, Pending uploads
-    static unsigned long lastPendingCheck = 0;
-    static int pendingCount = 0;
-    if (millis() - lastPendingCheck > 5000) {  // Check every 5 sec
-        pendingCount = countPendingFiles();
-        lastPendingCheck = millis();
-    }
+    // Row 4: Home status, WiFi, Battery
+    const char* homeStatus = isAtHome ? "HOME" : "AWAY";
+    const char* wifiStatus = (WiFi.status() == WL_CONNECTED) ? "W" : "-";
+    double distHome = getDistanceFromHome();
 
-    const char* wifiStatus = (WiFi.status() == WL_CONNECTED) ? "W:OK" : "W:NO";
-    if (pendingCount > 0) {
-        snprintf(buf, sizeof(buf), "%s %d%% P:%d", wifiStatus, (int)displayStatus.batteryPercent, pendingCount);
+    if (isAtHome) {
+        snprintf(buf, sizeof(buf), "%s %s %d%%", homeStatus, wifiStatus, (int)displayStatus.batteryPercent);
+    } else if (distHome >= 0) {
+        // Show distance from home when away
+        if (distHome >= 1000) {
+            snprintf(buf, sizeof(buf), "%.1fkm %s %d%%", distHome/1000, wifiStatus, (int)displayStatus.batteryPercent);
+        } else {
+            snprintf(buf, sizeof(buf), "%.0fm %s %d%%", distHome, wifiStatus, (int)displayStatus.batteryPercent);
+        }
     } else {
-        snprintf(buf, sizeof(buf), "%s %d%% Up:%d", wifiStatus, (int)displayStatus.batteryPercent, displayStatus.uploadsToday);
+        snprintf(buf, sizeof(buf), "%s %s %d%%", homeStatus, wifiStatus, (int)displayStatus.batteryPercent);
     }
     display->drawStr(0, 50, buf);
 

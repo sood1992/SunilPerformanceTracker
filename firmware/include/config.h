@@ -99,8 +99,26 @@
 // Walk Detection Settings
 // ============================================================================
 #define WALK_START_SPEED    0.5    // km/h - minimum speed to start walk
-#define WALK_END_TIMEOUT    300000 // ms (5 min) - inactivity before ending walk
+#define WALK_END_TIMEOUT    900000 // ms (15 min) - inactivity before ending walk (safety net)
 #define MIN_WALK_DURATION   60000  // ms (1 min) - minimum walk duration to save
+
+// ============================================================================
+// Home Geofence Configuration (for auto start/stop)
+// ============================================================================
+// UPDATE THESE with your actual home coordinates from Google Maps!
+// Right-click location → "What's here?" → Copy coordinates
+#define HOME_LATITUDE       28.4744    // Neofox Media HQ latitude (UPDATE THIS!)
+#define HOME_LONGITUDE      77.0760    // Neofox Media HQ longitude (UPDATE THIS!)
+#define HOME_RADIUS_START   100        // meters - leave this radius to auto-start walk
+#define HOME_RADIUS_END     50         // meters - enter this radius to auto-end walk
+#define HOME_WIFI_SSID      "CTNF-Universal"  // Home WiFi SSID for detection
+
+// ============================================================================
+// Standby Mode Configuration (battery saving when at home)
+// ============================================================================
+#define STANDBY_GPS_INTERVAL    30000  // ms - GPS poll interval in standby (30 sec)
+#define STANDBY_DISPLAY_DIM     true   // Dim display in standby mode
+#define STANDBY_DISPLAY_OFF_MS  60000  // ms - Turn off display after 1 min at home
 
 // ============================================================================
 // Upload Settings
