@@ -61,8 +61,9 @@ struct AccelData {
 } currentAccel;
 
 struct WalkSession {
-    unsigned long startTime = 0;
-    unsigned long endTime = 0;
+    unsigned long startTime = 0;      // millis() for duration calculation
+    unsigned long endTime = 0;        // millis() for duration calculation
+    time_t startTimeUnix = 0;         // Unix timestamp for actual date/time
     double totalDistance = 0;
     double maxSpeed = 0;
     double avgSpeed = 0;
@@ -827,6 +828,7 @@ void startWalk() {
 
     currentWalk.isActive = true;
     currentWalk.startTime = millis();
+    currentWalk.startTimeUnix = time(nullptr);  // Get actual Unix timestamp
     currentWalk.totalDistance = 0;
     currentWalk.maxSpeed = 0;
     currentWalk.avgSpeed = 0;
@@ -837,15 +839,16 @@ void startWalk() {
     writeLog(LOG_INFO, "WALK", "========== WALK STARTED ==========");
     writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
     writeLogf(LOG_INFO, "WALK", "GPS satellites: %d, Speed: %.1f km/h", currentGPS.satellites, currentGPS.speed);
+    writeLogf(LOG_INFO, "WALK", "Unix timestamp: %ld", (long)currentWalk.startTimeUnix);
 
     if (sdCardReady) {
-        currentWalk.filename = "/walks/walk_" + String(millis()) + ".json";
+        currentWalk.filename = "/walks/walk_" + String(currentWalk.startTimeUnix) + ".json";
 
         File file = SD.open(currentWalk.filename, FILE_WRITE);
         if (file) {
             JsonDocument doc;
             doc["deviceId"] = DEVICE_ID;
-            doc["startTime"] = currentWalk.startTime;
+            doc["startTime"] = (long)currentWalk.startTimeUnix;  // Unix timestamp in seconds
             doc["startLat"] = currentGPS.latitude;
             doc["startLon"] = currentGPS.longitude;
             serializeJson(doc, file);
@@ -888,7 +891,7 @@ void endWalk() {
         }
         displayStatus.lastEvent = "Walk too short";
     } else if (sdCardReady && currentWalk.filename.length() > 0) {
-        String pendingPath = "/pending/walk_" + String(currentWalk.startTime) + ".json";
+        String pendingPath = "/pending/walk_" + String(currentWalk.startTimeUnix) + ".json";
         SD.rename(currentWalk.filename.c_str(), pendingPath.c_str());
         Serial.printf("  Moved to: %s\n", pendingPath.c_str());
         writeLogf(LOG_INFO, "WALK", "Queued for upload: %s", pendingPath.c_str());
@@ -907,6 +910,7 @@ void startWalkManual() {
 
     currentWalk.isActive = true;
     currentWalk.startTime = millis();
+    currentWalk.startTimeUnix = time(nullptr);  // Get actual Unix timestamp
     currentWalk.totalDistance = 0;
     currentWalk.maxSpeed = 0;
     currentWalk.avgSpeed = 0;
@@ -922,15 +926,16 @@ void startWalkManual() {
     } else {
         writeLog(LOG_INFO, "WALK", "Start location: GPS not available");
     }
+    writeLogf(LOG_INFO, "WALK", "Unix timestamp: %ld", (long)currentWalk.startTimeUnix);
 
     if (sdCardReady) {
-        currentWalk.filename = "/walks/walk_" + String(millis()) + ".json";
+        currentWalk.filename = "/walks/walk_" + String(currentWalk.startTimeUnix) + ".json";
 
         File file = SD.open(currentWalk.filename, FILE_WRITE);
         if (file) {
             JsonDocument doc;
             doc["deviceId"] = DEVICE_ID;
-            doc["startTime"] = currentWalk.startTime;
+            doc["startTime"] = (long)currentWalk.startTimeUnix;  // Unix timestamp in seconds
             doc["manual"] = true;  // Mark as manually started
             if (currentGPS.valid) {
                 doc["startLat"] = currentGPS.latitude;
@@ -972,7 +977,7 @@ void endWalkManual() {
 
     // For manual walks, always save (no minimum duration check)
     if (sdCardReady && currentWalk.filename.length() > 0) {
-        String pendingPath = "/pending/walk_" + String(currentWalk.startTime) + ".json";
+        String pendingPath = "/pending/walk_" + String(currentWalk.startTimeUnix) + ".json";
         SD.rename(currentWalk.filename.c_str(), pendingPath.c_str());
         Serial.printf("  Moved to: %s\n", pendingPath.c_str());
         writeLogf(LOG_INFO, "WALK", "Queued for upload: %s", pendingPath.c_str());
