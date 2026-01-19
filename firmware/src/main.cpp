@@ -17,6 +17,7 @@
 #include <Adafruit_ADXL345_U.h>
 #include <ArduinoJson.h>
 #include <time.h>
+#include <stdarg.h>
 #include <U8g2lib.h>
 #include "config.h"
 
@@ -93,6 +94,21 @@ struct DisplayStatus {
     String lastEvent = "Ready";
 } displayStatus;
 
+// Logging System
+String currentLogFile = "";
+unsigned long lastLogFlush = 0;
+
+// Log levels for filtering
+enum LogLevel {
+    LOG_DEBUG = 0,
+    LOG_INFO = 1,
+    LOG_WARN = 2,
+    LOG_ERROR = 3,
+    LOG_UPLOAD = 4  // Special level for upload events
+};
+
+const char* LOG_LEVEL_NAMES[] = {"DEBUG", "INFO", "WARN", "ERROR", "UPLOAD"};
+
 // ============================================================================
 // Forward Declarations
 // ============================================================================
@@ -104,6 +120,9 @@ void initAccelerometer();
 void initSDCard();
 void initWiFi();
 void initDisplay();
+void initLogging();
+void writeLog(LogLevel level, const char* category, const char* message);
+void writeLogf(LogLevel level, const char* category, const char* format, ...);
 void readGPS();
 void readAccelerometer();
 void detectSteps();
@@ -183,6 +202,10 @@ void setup() {
     Serial.println("[STEP 7/7] Connecting WiFi...");
     initWiFi();
 
+    // Initialize logging (after WiFi for NTP time)
+    Serial.println("\n[LOGGING] Initializing log file...");
+    initLogging();
+
     // Summary
     Serial.println();
     Serial.println("============================================");
@@ -198,6 +221,18 @@ void setup() {
     Serial.println();
     Serial.println("System ready. Monitoring for walks...");
     Serial.println();
+
+    // Log system startup
+    writeLog(LOG_INFO, "SYSTEM", "=== SYSTEM STARTUP COMPLETE ===");
+    writeLogf(LOG_INFO, "SYSTEM", "Device: %s", DEVICE_ID);
+    writeLogf(LOG_INFO, "SYSTEM", "Display: %s | SD: %s | Accel: %s",
+        displayReady ? "OK" : "FAIL", sdCardReady ? "OK" : "FAIL", accelReady ? "OK" : "FAIL");
+    writeLogf(LOG_INFO, "SYSTEM", "GPS: %s | Modem: %s | WiFi: %s",
+        gpsEnabled ? "OK" : "FAIL", modemReady ? "OK" : "FAIL",
+        WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
+    if (WiFi.status() == WL_CONNECTED) {
+        writeLogf(LOG_INFO, "WIFI", "Connected to %s, IP: %s", WIFI_SSID, WiFi.localIP().toString().c_str());
+    }
 
     // Initial display update
     if (displayReady) {
@@ -236,6 +271,21 @@ void loop() {
     if (displayReady && now - lastDisplayUpdate >= 500) {
         updateDisplay();
         lastDisplayUpdate = now;
+    }
+
+    // Log periodic status to file every 5 minutes
+    static unsigned long lastStatusLog = 0;
+    if (now - lastStatusLog >= 300000) {  // 5 minutes
+        writeLogf(LOG_INFO, "STATUS", "Uptime: %lu min | Steps: %lu | GPS: %s (%d sats) | WiFi: %s | Batt: %.0f%%",
+            now / 60000, todayStepCount,
+            currentGPS.valid ? "OK" : "NO",
+            currentGPS.satellites,
+            WiFi.status() == WL_CONNECTED ? "OK" : "NO",
+            displayStatus.batteryPercent);
+        if (currentWalk.isActive) {
+            writeLogf(LOG_INFO, "STATUS", "Walk active: %.0fm, %d pts", currentWalk.totalDistance, currentWalk.dataPoints);
+        }
+        lastStatusLog = now;
     }
 
     // Print status every 5 seconds
@@ -287,10 +337,28 @@ void loop() {
 
     // WiFi check every minute
     static unsigned long lastWiFiCheck = 0;
+    static bool wasConnected = false;
     if (now - lastWiFiCheck > 60000) {
-        if (WiFi.status() != WL_CONNECTED) {
+        bool isConnected = (WiFi.status() == WL_CONNECTED);
+
+        // Log WiFi state changes
+        if (isConnected && !wasConnected) {
+            writeLogf(LOG_INFO, "WIFI", "Connected! IP: %s", WiFi.localIP().toString().c_str());
+        } else if (!isConnected && wasConnected) {
+            writeLog(LOG_WARN, "WIFI", "Connection lost!");
+        }
+        wasConnected = isConnected;
+
+        if (!isConnected) {
             Serial.println("[WIFI] Reconnecting...");
+            writeLog(LOG_INFO, "WIFI", "Attempting reconnection...");
             initWiFi();
+            if (WiFi.status() == WL_CONNECTED) {
+                writeLogf(LOG_INFO, "WIFI", "Reconnected! IP: %s", WiFi.localIP().toString().c_str());
+                wasConnected = true;
+            } else {
+                writeLog(LOG_WARN, "WIFI", "Reconnection failed");
+            }
         }
         if (WiFi.status() == WL_CONNECTED && sdCardReady) {
             uploadPendingWalks();
@@ -341,6 +409,7 @@ void initSDCard() {
 
     if (!SD.exists("/walks")) SD.mkdir("/walks");
     if (!SD.exists("/pending")) SD.mkdir("/pending");
+    if (!SD.exists("/logs")) SD.mkdir("/logs");
 
     sdCardReady = true;
     Serial.println("  [OK]");
@@ -479,10 +548,87 @@ void initWiFi() {
 }
 
 // ============================================================================
+// Logging Functions
+// ============================================================================
+
+void initLogging() {
+    if (!sdCardReady) return;
+
+    // Create log filename based on current date: /logs/YYYY-MM-DD.log
+    time_t now = time(nullptr);
+    struct tm* timeinfo = localtime(&now);
+
+    char filename[32];
+    if (now > 1600000000) {  // Valid time from NTP
+        strftime(filename, sizeof(filename), "/logs/%Y-%m-%d.log", timeinfo);
+    } else {
+        // Fallback if no NTP sync
+        snprintf(filename, sizeof(filename), "/logs/boot_%lu.log", millis());
+    }
+
+    currentLogFile = String(filename);
+
+    // Write startup header
+    File logFile = SD.open(currentLogFile, FILE_APPEND);
+    if (logFile) {
+        logFile.println();
+        logFile.println("================================================================================");
+        char timeStr[32];
+        if (now > 1600000000) {
+            strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", timeinfo);
+        } else {
+            snprintf(timeStr, sizeof(timeStr), "Boot+%lums", millis());
+        }
+        logFile.printf("=== DOG WALKER GPS TRACKER - Session Started: %s ===\n", timeStr);
+        logFile.println("================================================================================");
+        logFile.close();
+    }
+
+    Serial.printf("  [OK] Logging to: %s\n", currentLogFile.c_str());
+}
+
+void writeLog(LogLevel level, const char* category, const char* message) {
+    // Always print to Serial
+    Serial.printf("[%s][%s] %s\n", LOG_LEVEL_NAMES[level], category, message);
+
+    // Write to SD card log file
+    if (!sdCardReady || currentLogFile.length() == 0) return;
+
+    File logFile = SD.open(currentLogFile, FILE_APPEND);
+    if (logFile) {
+        // Get timestamp
+        time_t now = time(nullptr);
+        struct tm* timeinfo = localtime(&now);
+        char timeStr[20];
+
+        if (now > 1600000000) {
+            strftime(timeStr, sizeof(timeStr), "%H:%M:%S", timeinfo);
+        } else {
+            snprintf(timeStr, sizeof(timeStr), "%lu", millis() / 1000);
+        }
+
+        logFile.printf("[%s][%s][%s] %s\n", timeStr, LOG_LEVEL_NAMES[level], category, message);
+        logFile.close();
+    }
+}
+
+void writeLogf(LogLevel level, const char* category, const char* format, ...) {
+    char buffer[256];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    writeLog(level, category, buffer);
+}
+
+// ============================================================================
 // Sensor Reading Functions
 // ============================================================================
 
 void readGPS() {
+    static bool hadFirstFix = false;
+
     // Read all available GPS data from L76K
     while (SerialGPS.available() > 0) {
         char c = SerialGPS.read();
@@ -491,12 +637,20 @@ void readGPS() {
 
     // Update GPS data if valid
     if (gps.location.isUpdated() && gps.location.isValid()) {
+        bool wasValid = currentGPS.valid;
         currentGPS.valid = true;
         currentGPS.latitude = gps.location.lat();
         currentGPS.longitude = gps.location.lng();
         currentGPS.altitude = gps.altitude.meters();
         currentGPS.speed = gps.speed.kmph();
         currentGPS.satellites = gps.satellites.value();
+
+        // Log first GPS fix
+        if (!hadFirstFix) {
+            hadFirstFix = true;
+            writeLogf(LOG_INFO, "GPS", "First fix! Lat: %.6f, Lon: %.6f, Sats: %d",
+                currentGPS.latitude, currentGPS.longitude, currentGPS.satellites);
+        }
     }
 }
 
@@ -534,6 +688,11 @@ void startWalk() {
     currentWalk.dataPoints = 0;
     stepCount = 0;  // Reset walk step count
 
+    // Log walk start
+    writeLog(LOG_INFO, "WALK", "========== WALK STARTED ==========");
+    writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
+    writeLogf(LOG_INFO, "WALK", "GPS satellites: %d, Speed: %.1f km/h", currentGPS.satellites, currentGPS.speed);
+
     if (sdCardReady) {
         currentWalk.filename = "/walks/walk_" + String(millis()) + ".json";
 
@@ -547,6 +706,9 @@ void startWalk() {
             serializeJson(doc, file);
             file.close();
             Serial.printf("  File: %s\n", currentWalk.filename.c_str());
+            writeLogf(LOG_INFO, "WALK", "Data file: %s", currentWalk.filename.c_str());
+        } else {
+            writeLog(LOG_ERROR, "WALK", "Failed to create walk data file!");
         }
     }
 
@@ -565,8 +727,17 @@ void endWalk() {
     Serial.printf("  Points: %d\n", currentWalk.dataPoints);
     Serial.printf("  Steps: %lu\n", stepCount);
 
+    // Log walk end with full stats
+    writeLog(LOG_INFO, "WALK", "========== WALK ENDED ==========");
+    writeLogf(LOG_INFO, "WALK", "Duration: %lu sec (%.1f min)", duration / 1000, duration / 60000.0);
+    writeLogf(LOG_INFO, "WALK", "Distance: %.0f m (%.2f km)", currentWalk.totalDistance, currentWalk.totalDistance / 1000.0);
+    writeLogf(LOG_INFO, "WALK", "Data points: %d", currentWalk.dataPoints);
+    writeLogf(LOG_INFO, "WALK", "Steps: %lu", stepCount);
+    writeLogf(LOG_INFO, "WALK", "Max speed: %.1f km/h, Avg speed: %.1f km/h", currentWalk.maxSpeed, currentWalk.avgSpeed);
+
     if (duration < MIN_WALK_DURATION) {
         Serial.println("  Walk too short - discarding");
+        writeLogf(LOG_WARN, "WALK", "Walk too short (<%lu ms) - discarding", MIN_WALK_DURATION);
         if (sdCardReady && currentWalk.filename.length() > 0) {
             SD.remove(currentWalk.filename.c_str());
         }
@@ -575,6 +746,7 @@ void endWalk() {
         String pendingPath = "/pending/walk_" + String(currentWalk.startTime) + ".json";
         SD.rename(currentWalk.filename.c_str(), pendingPath.c_str());
         Serial.printf("  Moved to: %s\n", pendingPath.c_str());
+        writeLogf(LOG_INFO, "WALK", "Queued for upload: %s", pendingPath.c_str());
         char buf[32];
         snprintf(buf, sizeof(buf), "Walk: %.0fm %lus", currentWalk.totalDistance, duration/1000);
         displayStatus.lastEvent = String(buf);
@@ -625,15 +797,20 @@ void uploadPendingWalks() {
     if (!sdCardReady || WiFi.status() != WL_CONNECTED) return;
 
     Serial.println("[UPLOAD] Checking pending walks...");
+    writeLog(LOG_UPLOAD, "UPLOAD", "--- Starting upload check ---");
 
     File dir = SD.open("/pending");
-    if (!dir || !dir.isDirectory()) return;
+    if (!dir || !dir.isDirectory()) {
+        writeLog(LOG_WARN, "UPLOAD", "No pending directory or empty");
+        return;
+    }
 
     File file = dir.openNextFile();
     while (file) {
         if (!file.isDirectory()) {
             String filename = String(file.name());
             Serial.printf("  Uploading: %s\n", filename.c_str());
+            writeLogf(LOG_UPLOAD, "UPLOAD", "=== Processing: %s ===", filename.c_str());
 
             // Read file content
             String content = "";
@@ -646,6 +823,7 @@ void uploadPendingWalks() {
             int firstNewline = content.indexOf('\n');
             if (firstNewline < 0) {
                 Serial.println("    [SKIP] Invalid file format");
+                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid file format (no newline)", filename.c_str());
                 file = dir.openNextFile();
                 continue;
             }
@@ -658,6 +836,7 @@ void uploadPendingWalks() {
             DeserializationError metaErr = deserializeJson(metaDoc, metaLine);
             if (metaErr) {
                 Serial.printf("    [SKIP] Invalid metadata: %s\n", metaErr.c_str());
+                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid metadata JSON: %s", filename.c_str(), metaErr.c_str());
                 file = dir.openNextFile();
                 continue;
             }
@@ -702,10 +881,13 @@ void uploadPendingWalks() {
             }
 
             Serial.printf("    Parsed %d points\n", pointCount);
+            writeLogf(LOG_UPLOAD, "UPLOAD", "Parsed %d GPS points from file", pointCount);
 
             // Send to server
             HTTPClient http;
             String url = String(API_BASE_URL) + String(API_ENDPOINT);
+            writeLogf(LOG_UPLOAD, "UPLOAD", "URL: %s", url.c_str());
+
             http.begin(url);
             http.addHeader("Content-Type", "application/json");
             http.addHeader("X-Device-ID", DEVICE_ID);
@@ -715,9 +897,14 @@ void uploadPendingWalks() {
             serializeJson(uploadDoc, payload);
 
             Serial.printf("    Payload size: %d bytes\n", payload.length());
+            writeLogf(LOG_UPLOAD, "UPLOAD", "Payload size: %d bytes, sending POST...", payload.length());
 
+            unsigned long uploadStart = millis();
             int httpCode = http.POST(payload);
+            unsigned long uploadDuration = millis() - uploadStart;
             if (httpCode == 200 || httpCode == 201) {
+                writeLogf(LOG_UPLOAD, "UPLOAD", "SUCCESS! HTTP %d in %lums", httpCode, uploadDuration);
+
                 String fullPath = "/pending/" + filename;
 
                 // Archive instead of delete - organize by year/month
@@ -751,6 +938,7 @@ void uploadPendingWalks() {
                 // Move file to archive
                 if (SD.rename(fullPath.c_str(), archivePath.c_str())) {
                     Serial.printf("    [OK] Uploaded and archived to %s\n", archivePath.c_str());
+                    writeLogf(LOG_UPLOAD, "UPLOAD", "Archived to: %s", archivePath.c_str());
                     displayStatus.uploadsToday++;
                     displayStatus.archivesToday++;
                     displayStatus.lastEvent = "Uploaded " + filename;
@@ -766,11 +954,13 @@ void uploadPendingWalks() {
                         dstFile.close();
                         SD.remove(fullPath.c_str());
                         Serial.printf("    [OK] Uploaded and archived (copy) to %s\n", archivePath.c_str());
+                        writeLogf(LOG_UPLOAD, "UPLOAD", "Archived (via copy) to: %s", archivePath.c_str());
                         displayStatus.uploadsToday++;
                         displayStatus.archivesToday++;
                         displayStatus.lastEvent = "Uploaded " + filename;
                     } else {
                         Serial.println("    [WARN] Uploaded but archive failed - keeping in pending");
+                        writeLogf(LOG_WARN, "UPLOAD", "Archive failed for %s - keeping in pending", filename.c_str());
                         if (srcFile) srcFile.close();
                         if (dstFile) dstFile.close();
                         displayStatus.uploadsToday++;
@@ -781,6 +971,13 @@ void uploadPendingWalks() {
                 Serial.printf("    [FAIL] HTTP %d\n", httpCode);
                 String response = http.getString();
                 Serial.printf("    Response: %s\n", response.substring(0, 200).c_str());
+
+                // Detailed failure logging
+                writeLogf(LOG_ERROR, "UPLOAD", "FAILED! HTTP %d after %lums", httpCode, uploadDuration);
+                writeLogf(LOG_ERROR, "UPLOAD", "Server response: %s", response.substring(0, 200).c_str());
+                writeLogf(LOG_ERROR, "UPLOAD", "File: %s, Points: %d, Size: %d bytes",
+                    filename.c_str(), pointCount, payload.length());
+
                 displayStatus.uploadsFailed++;
                 displayStatus.lastEvent = "Upload FAIL: " + String(httpCode);
             }
