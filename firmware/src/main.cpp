@@ -137,8 +137,8 @@ void readBattery();
 bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout);
 double calculateDistance(double lat1, double lon1, double lat2, double lon2);
 
-// External GPS query counter (defined in readGPS)
-extern unsigned long gpsQueryCount;
+// GPS query counter (used in readGPS and updateDisplay)
+unsigned long gpsQueryCount = 0;
 
 // ============================================================================
 // Setup
@@ -686,7 +686,7 @@ String sendATCommandGetResponse(const char* cmd, unsigned long timeout) {
 // Track GPS polling and fix status
 static unsigned long lastGPSPoll = 0;
 static bool hadFirstFix = false;
-static unsigned long gpsQueryCount = 0;
+// Note: gpsQueryCount is defined as global near forward declarations
 
 void readGPS() {
     if (!gpsEnabled || !modemReady) return;
