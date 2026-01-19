@@ -71,8 +71,9 @@
 // ============================================================================
 // Button Configuration
 // ============================================================================
-// Button connected to GPIO 25, other end to GND (active LOW - pressed = LOW)
-#define BUTTON_PIN          25
+// Button connected to GPIO 18, other end to GND (active LOW - pressed = LOW)
+// Note: GPIO 25 is used by MODEM_DTR_PIN, so using GPIO 18 instead
+#define BUTTON_PIN          18
 #define BUTTON_ACTIVE_LOW   true   // Button is LOW when pressed
 #define BUTTON_DEBOUNCE_MS  50     // Debounce time in ms
 #define BUTTON_LONG_PRESS_MS 2000  // Long press threshold (2 seconds)
