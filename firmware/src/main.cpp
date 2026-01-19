@@ -354,7 +354,9 @@ void loop() {
             logWalkData();
             lastLogTime = now;
         }
-        if (now - lastActivityTime > WALK_END_TIMEOUT) {
+        // Only auto-timeout for auto-detected walks, not manual walks
+        // Manual walks are stopped by long button press only
+        if (!manualWalkMode && now - lastActivityTime > WALK_END_TIMEOUT) {
             endWalk();
         }
     }
