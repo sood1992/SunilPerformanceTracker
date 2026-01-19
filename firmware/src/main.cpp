@@ -777,9 +777,21 @@ void readGPS() {
     // Response format: +CGNSINF: <run>,<fix>,<datetime>,<lat>,<lon>,<alt>,<speed>,<course>,...,<sats_view>,<sats_used>,...
     String response = sendATCommandGetResponse("AT+CGNSINF", 1000);
 
+    // Debug: log raw response every 30 queries (30 seconds)
+    if (gpsQueryCount % 30 == 1) {
+        Serial.printf("[GPS DEBUG] Raw response: %s\n", response.c_str());
+        writeLogf(LOG_DEBUG, "GPS", "Raw AT+CGNSINF response: %s", response.c_str());
+    }
+
     // Parse the response
     int idx = response.indexOf("+CGNSINF:");
-    if (idx < 0) return;
+    if (idx < 0) {
+        // Log if we're not getting expected response
+        if (gpsQueryCount % 30 == 1) {
+            Serial.println("[GPS DEBUG] No +CGNSINF in response!");
+        }
+        return;
+    }
 
     String data = response.substring(idx + 10);  // Skip "+CGNSINF: "
     data.trim();
@@ -1105,8 +1117,13 @@ void uploadPendingWalks() {
             // Parse the file: first line is metadata, rest are points
             int firstNewline = content.indexOf('\n');
             if (firstNewline < 0) {
-                Serial.println("    [SKIP] Invalid file format");
+                Serial.println("    [SKIP] Invalid file format - moving to /failed/");
                 writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid file format (no newline)", filename.c_str());
+                // Move to failed directory so it doesn't block queue
+                String failedPath = "/failed/" + filename;
+                SD.mkdir("/failed");
+                SD.rename(("/pending/" + filename).c_str(), failedPath.c_str());
+                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
                 file = dir.openNextFile();
                 continue;
             }
@@ -1118,8 +1135,13 @@ void uploadPendingWalks() {
             JsonDocument metaDoc;
             DeserializationError metaErr = deserializeJson(metaDoc, metaLine);
             if (metaErr) {
-                Serial.printf("    [SKIP] Invalid metadata: %s\n", metaErr.c_str());
+                Serial.printf("    [SKIP] Invalid metadata: %s - moving to /failed/\n", metaErr.c_str());
                 writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid metadata JSON: %s", filename.c_str(), metaErr.c_str());
+                // Move to failed directory so it doesn't block queue
+                String failedPath = "/failed/" + filename;
+                SD.mkdir("/failed");
+                SD.rename(("/pending/" + filename).c_str(), failedPath.c_str());
+                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
                 file = dir.openNextFile();
                 continue;
             }
