@@ -815,10 +815,22 @@ void readGPS() {
         double rawLon = gps.location.lng();
         double rawSpeed = gps.speed.isValid() ? gps.speed.kmph() : 0;
 
+        // Cap raw speed before filtering (reject obvious GPS glitches)
+        // No dog walk exceeds 20 km/h, so anything higher is noise
+        if (rawSpeed > 20.0) {
+            rawSpeed = currentGPS.speed;  // Use previous filtered value
+        }
+
         // Apply Kalman filter to smooth GPS data
         currentGPS.latitude = kalmanLat.update(rawLat);
         currentGPS.longitude = kalmanLon.update(rawLon);
         currentGPS.speed = kalmanSpeed.update(rawSpeed);
+
+        // Hard cap on filtered speed (walking max ~7 km/h, running ~15 km/h)
+        if (currentGPS.speed > 15.0) {
+            currentGPS.speed = 15.0;
+        }
+
         currentGPS.valid = true;
 
         if (gps.altitude.isValid()) {

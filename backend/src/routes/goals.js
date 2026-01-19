@@ -23,7 +23,7 @@ const DOG_PROFILE = {
     totalMinutes: 60,           // 60 minutes total exercise per day
     walkingMinutes: 40,         // 30-40 minutes of actual walking
     distanceKm: 2.5,            // 1.6-3.2 km (target middle)
-    minWalks: 2,                // At least 2 walks per day
+    minWalks: 3,                // At least 3 walks per day (Popcorn typically does 3-4)
     maxRestPercent: 30,         // Max 30% of walk time resting/sitting
   },
 
