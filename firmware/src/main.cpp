@@ -17,8 +17,7 @@
 #include <Adafruit_ADXL345_U.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <U8g2lib.h>
 #include "config.h"
 
 // ============================================================================
@@ -30,7 +29,8 @@ HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
-Adafruit_SSD1306* display = nullptr;
+// U8g2 display for SH1106 1.3" OLED (128x64) on hardware I2C
+U8G2_SH1106_128X64_NONAME_F_HW_I2C* display = nullptr;
 
 // ============================================================================
 // State Variables
@@ -828,85 +828,79 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 // ============================================================================
 
 void initDisplay() {
-    display = new Adafruit_SSD1306(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
+    // U8g2 constructor for SH1106 128x64 on hardware I2C
+    // Using custom I2C pins (SDA=32, SCL=33) - Wire already initialized in setup()
+    display = new U8G2_SH1106_128X64_NONAME_F_HW_I2C(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
-    if (display->begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS)) {
-        displayReady = true;
-        Serial.println("  [OK] OLED SSD1306 initialized");
+    display->begin();
+    displayReady = true;
+    Serial.println("  [OK] OLED SH1106 initialized (U8g2)");
 
-        // Show splash screen
-        display->clearDisplay();
-        display->setTextSize(2);
-        display->setTextColor(SSD1306_WHITE);
-        display->setCursor(10, 10);
-        display->println("POPCORN");
-        display->setTextSize(1);
-        display->setCursor(10, 35);
-        display->println("Dog Walker Tracker");
-        display->setCursor(10, 50);
-        display->println("Initializing...");
-        display->display();
-    } else {
-        Serial.println("  [FAIL] OLED not found at 0x3C");
-        displayReady = false;
-    }
+    // Show splash screen
+    display->clearBuffer();
+    display->setFont(u8g2_font_helvB14_tr);  // Large font for title
+    display->drawStr(20, 25, "POPCORN");
+    display->setFont(u8g2_font_6x10_tf);     // Small font for subtitle
+    display->drawStr(10, 42, "Dog Walker Tracker");
+    display->drawStr(10, 56, "Initializing...");
+    display->sendBuffer();
 }
 
 void updateDisplay() {
     if (!displayReady || display == nullptr) return;
 
-    display->clearDisplay();
-    display->setTextColor(SSD1306_WHITE);
+    display->clearBuffer();
+    char buf[32];
 
-    // Row 1: Steps count (large)
-    display->setTextSize(2);
-    display->setCursor(0, 0);
-    display->printf("%lu", todayStepCount);
-    display->setTextSize(1);
-    display->setCursor(75, 8);
-    display->println("steps");
+    // Row 1: Steps count (large font)
+    display->setFont(u8g2_font_helvB14_tr);  // Large bold font
+    snprintf(buf, sizeof(buf), "%lu", todayStepCount);
+    display->drawStr(0, 14, buf);
+    display->setFont(u8g2_font_6x10_tf);     // Small font
+    display->drawStr(75, 14, "steps");
 
     // Row 2: Walk status
-    display->setCursor(0, 20);
     if (currentWalk.isActive) {
         unsigned long walkMin = (millis() - currentWalk.startTime) / 60000;
-        display->printf("WALK %lum %.0fm", walkMin, currentWalk.totalDistance);
+        snprintf(buf, sizeof(buf), "WALK %lum %.0fm", walkMin, currentWalk.totalDistance);
     } else {
-        display->printf("Dist: %.2fkm", currentWalk.totalDistance / 1000.0);
+        snprintf(buf, sizeof(buf), "Dist: %.2fkm", currentWalk.totalDistance / 1000.0);
     }
+    display->drawStr(0, 26, buf);
 
-    // Row 3: GPS and connectivity icons
-    display->setCursor(0, 32);
+    // Row 3: GPS and connectivity status
     // GPS status
     if (currentGPS.valid) {
-        display->printf("GPS:%d", currentGPS.satellites);
+        snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
     } else {
-        display->print("GPS:--");
+        snprintf(buf, sizeof(buf), "GPS:--");
     }
+    display->drawStr(0, 38, buf);
+
     // WiFi status
-    display->setCursor(50, 32);
     if (WiFi.status() == WL_CONNECTED) {
-        display->print("WiFi:OK");
+        display->drawStr(50, 38, "WiFi:OK");
     } else {
-        display->print("WiFi:--");
+        display->drawStr(50, 38, "WiFi:--");
     }
+
     // Battery
-    display->setCursor(100, 32);
-    display->printf("%d%%", (int)displayStatus.batteryPercent);
+    snprintf(buf, sizeof(buf), "%d%%", (int)displayStatus.batteryPercent);
+    display->drawStr(100, 38, buf);
 
-    // Row 4: Speed or status
-    display->setCursor(0, 44);
+    // Row 4: Speed or upload stats
     if (currentGPS.valid && currentGPS.speed > 0.5) {
-        display->printf("Speed: %.1f km/h", currentGPS.speed);
+        snprintf(buf, sizeof(buf), "Speed: %.1f km/h", currentGPS.speed);
     } else {
-        display->printf("Up:%lu Ar:%lu", displayStatus.uploadsToday, displayStatus.archivesToday);
+        snprintf(buf, sizeof(buf), "Up:%d Ar:%d", displayStatus.uploadsToday, displayStatus.archivesToday);
     }
+    display->drawStr(0, 50, buf);
 
-    // Row 5: Last event
-    display->setCursor(0, 56);
-    display->print(displayStatus.lastEvent.substring(0, 21));
+    // Row 5: Last event (truncate to fit)
+    String eventStr = displayStatus.lastEvent.substring(0, 21);
+    display->drawStr(0, 62, eventStr.c_str());
 
-    display->display();
+    display->sendBuffer();
 }
 
 // ============================================================================

@@ -60,10 +60,12 @@
 // ADXL345 Accelerometer
 #define ADXL345_ADDRESS     0x53  // SDO connected to GND
 
-// OLED SSD1306 Display
+// OLED SH1106 Display (1.3" 128x64)
+// Note: 1.3" OLEDs use SH1106 controller, NOT SSD1306
+// Using U8g2 library for proper SH1106 support
 #define OLED_WIDTH          128
 #define OLED_HEIGHT         64
-#define OLED_ADDRESS        0x3C  // Common I2C address for SSD1306
+#define OLED_ADDRESS        0x3C  // Common I2C address for SH1106
 #define OLED_RESET          -1    // No reset pin (share with ESP32 reset)
 
 // Activity Detection Thresholds
