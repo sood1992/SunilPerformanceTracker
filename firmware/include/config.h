@@ -51,12 +51,20 @@
 #define BAT_ADC_PIN         35
 
 // ============================================================================
-// ADXL345 Accelerometer Configuration (I2C)
+// I2C Configuration (Shared by ADXL345 and OLED)
 // NOTE: Moved from GPIO 21/22 to avoid conflict with GPS L76K
 // ============================================================================
 #define I2C_SDA_PIN         32
 #define I2C_SCL_PIN         33
+
+// ADXL345 Accelerometer
 #define ADXL345_ADDRESS     0x53  // SDO connected to GND
+
+// OLED SSD1306 Display
+#define OLED_WIDTH          128
+#define OLED_HEIGHT         64
+#define OLED_ADDRESS        0x3C  // Common I2C address for SSD1306
+#define OLED_RESET          -1    // No reset pin (share with ESP32 reset)
 
 // Activity Detection Thresholds
 #define ACTIVITY_THRESHOLD  2.0    // m/s² - threshold for detecting movement

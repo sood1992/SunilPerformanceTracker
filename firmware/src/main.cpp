@@ -17,6 +17,8 @@
 #include <Adafruit_ADXL345_U.h>
 #include <ArduinoJson.h>
 #include <time.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "config.h"
 
 // ============================================================================
@@ -28,6 +30,7 @@ HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
+Adafruit_SSD1306* display = nullptr;
 
 // ============================================================================
 // State Variables
@@ -37,6 +40,7 @@ bool sdCardReady = false;
 bool modemReady = false;
 bool gpsEnabled = false;
 bool accelReady = false;
+bool displayReady = false;
 
 struct GPSData {
     double latitude = 0;
@@ -71,6 +75,23 @@ unsigned long lastGPSUpdate = 0;
 unsigned long lastLogTime = 0;
 unsigned long lastActivityTime = 0;
 unsigned long lastStatusPrint = 0;
+unsigned long lastDisplayUpdate = 0;
+
+// Step Counter Variables
+unsigned long stepCount = 0;
+unsigned long todayStepCount = 0;
+float lastAccelMagnitude = 0;
+bool stepDetected = false;
+unsigned long lastStepTime = 0;
+
+// Display Status
+struct DisplayStatus {
+    int uploadsToday = 0;
+    int archivesToday = 0;
+    int uploadsFailed = 0;
+    float batteryPercent = 100.0;
+    String lastEvent = "Ready";
+} displayStatus;
 
 // ============================================================================
 // Forward Declarations
@@ -82,12 +103,16 @@ void initGPS();
 void initAccelerometer();
 void initSDCard();
 void initWiFi();
+void initDisplay();
 void readGPS();
 void readAccelerometer();
+void detectSteps();
 void startWalk();
 void endWalk();
 void logWalkData();
 void uploadPendingWalks();
+void updateDisplay();
+void readBattery();
 bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout);
 double calculateDistance(double lat1, double lon1, double lat2, double lon2);
 
@@ -116,41 +141,46 @@ void setup() {
     Serial.println();
 
     // Step 0: Board Power
-    Serial.println("[STEP 0/6] Setting board power...");
+    Serial.println("[STEP 0/7] Setting board power...");
     initPower();
     Serial.println("  [OK] Board power pin HIGH\n");
     delay(100);
 
     // Step 1: I2C (on new pins to avoid GPS conflict)
-    Serial.println("[STEP 1/6] Initializing I2C...");
+    Serial.println("[STEP 1/7] Initializing I2C...");
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
     Serial.printf("  SDA=GPIO%d, SCL=GPIO%d\n", I2C_SDA_PIN, I2C_SCL_PIN);
     Serial.println("  [OK]\n");
     delay(100);
 
-    // Step 2: SD Card
-    Serial.println("[STEP 2/6] Initializing SD Card...");
+    // Step 2: OLED Display
+    Serial.println("[STEP 2/7] Initializing OLED Display...");
+    initDisplay();
+    delay(100);
+
+    // Step 3: SD Card
+    Serial.println("[STEP 3/7] Initializing SD Card...");
     initSDCard();
     delay(100);
 
-    // Step 3: Accelerometer
-    Serial.println("[STEP 3/6] Initializing Accelerometer...");
+    // Step 4: Accelerometer
+    Serial.println("[STEP 4/7] Initializing Accelerometer...");
     initAccelerometer();
     delay(100);
 
-    // Step 4: GPS (L76K direct UART)
-    Serial.println("[STEP 4/6] Initializing GPS (L76K)...");
+    // Step 5: GPS (L76K direct UART)
+    Serial.println("[STEP 5/7] Initializing GPS (L76K)...");
     initGPS();
     delay(100);
 
-    // Step 5: Modem (for 4G, not GPS)
-    Serial.println("[STEP 5/6] Initializing Modem (4G)...");
+    // Step 6: Modem (for 4G, not GPS)
+    Serial.println("[STEP 6/7] Initializing Modem (4G)...");
     Serial.println("  (Requires battery connection!)");
     initModem();
     delay(100);
 
-    // Step 6: WiFi
-    Serial.println("[STEP 6/6] Connecting WiFi...");
+    // Step 7: WiFi
+    Serial.println("[STEP 7/7] Connecting WiFi...");
     initWiFi();
 
     // Summary
@@ -158,6 +188,7 @@ void setup() {
     Serial.println("============================================");
     Serial.println("           INITIALIZATION SUMMARY");
     Serial.println("============================================");
+    Serial.printf("  OLED Display:  %s\n", displayReady ? "OK" : "FAIL");
     Serial.printf("  SD Card:       %s\n", sdCardReady ? "OK" : "FAIL");
     Serial.printf("  Accelerometer: %s\n", accelReady ? "OK" : "FAIL");
     Serial.printf("  GPS (L76K):    %s\n", gpsEnabled ? "OK" : "FAIL");
@@ -167,6 +198,12 @@ void setup() {
     Serial.println();
     Serial.println("System ready. Monitoring for walks...");
     Serial.println();
+
+    // Initial display update
+    if (displayReady) {
+        displayStatus.lastEvent = "System Ready";
+        updateDisplay();
+    }
 }
 
 // ============================================================================
@@ -179,18 +216,33 @@ void loop() {
     // Read GPS continuously
     readGPS();
 
-    // Read accelerometer
+    // Read accelerometer and detect steps
     readAccelerometer();
+    detectSteps();
+
+    // Read battery level periodically
+    static unsigned long lastBatteryRead = 0;
+    if (now - lastBatteryRead >= 10000) {  // Every 10 seconds
+        readBattery();
+        lastBatteryRead = now;
+    }
 
     // Update activity time if moving
     if (currentAccel.isMoving || (currentGPS.valid && currentGPS.speed > WALK_START_SPEED)) {
         lastActivityTime = now;
     }
 
+    // Update display every 500ms
+    if (displayReady && now - lastDisplayUpdate >= 500) {
+        updateDisplay();
+        lastDisplayUpdate = now;
+    }
+
     // Print status every 5 seconds
     if (now - lastStatusPrint >= 5000) {
         Serial.println("---------------------------------------------");
         Serial.printf("[TIME]  Uptime: %lu sec\n", now / 1000);
+        Serial.printf("[STEPS] Today: %lu | Walk: %lu\n", todayStepCount, stepCount);
 
         if (currentGPS.valid) {
             Serial.printf("[GPS]   Lat: %.6f, Lon: %.6f\n", currentGPS.latitude, currentGPS.longitude);
@@ -213,6 +265,7 @@ void loop() {
             Serial.println("[WALK]  Idle - waiting for movement");
         }
 
+        Serial.printf("[BATT]  %.0f%%\n", displayStatus.batteryPercent);
         Serial.printf("[WIFI]  %s\n", WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected");
         lastStatusPrint = now;
     }
@@ -479,6 +532,7 @@ void startWalk() {
     currentWalk.maxSpeed = 0;
     currentWalk.avgSpeed = 0;
     currentWalk.dataPoints = 0;
+    stepCount = 0;  // Reset walk step count
 
     if (sdCardReady) {
         currentWalk.filename = "/walks/walk_" + String(millis()) + ".json";
@@ -498,6 +552,7 @@ void startWalk() {
 
     lastValidGPS = currentGPS;
     lastActivityTime = millis();
+    displayStatus.lastEvent = "Walk Started!";
 }
 
 void endWalk() {
@@ -508,16 +563,21 @@ void endWalk() {
     Serial.printf("  Duration: %lu sec\n", duration / 1000);
     Serial.printf("  Distance: %.0f m\n", currentWalk.totalDistance);
     Serial.printf("  Points: %d\n", currentWalk.dataPoints);
+    Serial.printf("  Steps: %lu\n", stepCount);
 
     if (duration < MIN_WALK_DURATION) {
         Serial.println("  Walk too short - discarding");
         if (sdCardReady && currentWalk.filename.length() > 0) {
             SD.remove(currentWalk.filename.c_str());
         }
+        displayStatus.lastEvent = "Walk too short";
     } else if (sdCardReady && currentWalk.filename.length() > 0) {
         String pendingPath = "/pending/walk_" + String(currentWalk.startTime) + ".json";
         SD.rename(currentWalk.filename.c_str(), pendingPath.c_str());
         Serial.printf("  Moved to: %s\n", pendingPath.c_str());
+        char buf[32];
+        snprintf(buf, sizeof(buf), "Walk: %.0fm %lus", currentWalk.totalDistance, duration/1000);
+        displayStatus.lastEvent = String(buf);
     }
 
     currentWalk.isActive = false;
@@ -691,6 +751,9 @@ void uploadPendingWalks() {
                 // Move file to archive
                 if (SD.rename(fullPath.c_str(), archivePath.c_str())) {
                     Serial.printf("    [OK] Uploaded and archived to %s\n", archivePath.c_str());
+                    displayStatus.uploadsToday++;
+                    displayStatus.archivesToday++;
+                    displayStatus.lastEvent = "Uploaded " + filename;
                 } else {
                     // If rename fails (maybe cross-directory issue), try copy+delete
                     File srcFile = SD.open(fullPath, FILE_READ);
@@ -703,16 +766,23 @@ void uploadPendingWalks() {
                         dstFile.close();
                         SD.remove(fullPath.c_str());
                         Serial.printf("    [OK] Uploaded and archived (copy) to %s\n", archivePath.c_str());
+                        displayStatus.uploadsToday++;
+                        displayStatus.archivesToday++;
+                        displayStatus.lastEvent = "Uploaded " + filename;
                     } else {
                         Serial.println("    [WARN] Uploaded but archive failed - keeping in pending");
                         if (srcFile) srcFile.close();
                         if (dstFile) dstFile.close();
+                        displayStatus.uploadsToday++;
+                        displayStatus.lastEvent = "Upload OK (no archive)";
                     }
                 }
             } else {
                 Serial.printf("    [FAIL] HTTP %d\n", httpCode);
                 String response = http.getString();
                 Serial.printf("    Response: %s\n", response.substring(0, 200).c_str());
+                displayStatus.uploadsFailed++;
+                displayStatus.lastEvent = "Upload FAIL: " + String(httpCode);
             }
             http.end();
         }
@@ -751,4 +821,145 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
                sin(dLon/2) * sin(dLon/2);
     double c = 2 * atan2(sqrt(a), sqrt(1-a));
     return R * c;
+}
+
+// ============================================================================
+// OLED Display Functions
+// ============================================================================
+
+void initDisplay() {
+    display = new Adafruit_SSD1306(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
+
+    if (display->begin(SSD1306_SWITCHCAPVCC, OLED_ADDRESS)) {
+        displayReady = true;
+        Serial.println("  [OK] OLED SSD1306 initialized");
+
+        // Show splash screen
+        display->clearDisplay();
+        display->setTextSize(2);
+        display->setTextColor(SSD1306_WHITE);
+        display->setCursor(10, 10);
+        display->println("POPCORN");
+        display->setTextSize(1);
+        display->setCursor(10, 35);
+        display->println("Dog Walker Tracker");
+        display->setCursor(10, 50);
+        display->println("Initializing...");
+        display->display();
+    } else {
+        Serial.println("  [FAIL] OLED not found at 0x3C");
+        displayReady = false;
+    }
+}
+
+void updateDisplay() {
+    if (!displayReady || display == nullptr) return;
+
+    display->clearDisplay();
+    display->setTextColor(SSD1306_WHITE);
+
+    // Row 1: Steps count (large)
+    display->setTextSize(2);
+    display->setCursor(0, 0);
+    display->printf("%lu", todayStepCount);
+    display->setTextSize(1);
+    display->setCursor(75, 8);
+    display->println("steps");
+
+    // Row 2: Walk status
+    display->setCursor(0, 20);
+    if (currentWalk.isActive) {
+        unsigned long walkMin = (millis() - currentWalk.startTime) / 60000;
+        display->printf("WALK %lum %.0fm", walkMin, currentWalk.totalDistance);
+    } else {
+        display->printf("Dist: %.2fkm", currentWalk.totalDistance / 1000.0);
+    }
+
+    // Row 3: GPS and connectivity icons
+    display->setCursor(0, 32);
+    // GPS status
+    if (currentGPS.valid) {
+        display->printf("GPS:%d", currentGPS.satellites);
+    } else {
+        display->print("GPS:--");
+    }
+    // WiFi status
+    display->setCursor(50, 32);
+    if (WiFi.status() == WL_CONNECTED) {
+        display->print("WiFi:OK");
+    } else {
+        display->print("WiFi:--");
+    }
+    // Battery
+    display->setCursor(100, 32);
+    display->printf("%d%%", (int)displayStatus.batteryPercent);
+
+    // Row 4: Speed or status
+    display->setCursor(0, 44);
+    if (currentGPS.valid && currentGPS.speed > 0.5) {
+        display->printf("Speed: %.1f km/h", currentGPS.speed);
+    } else {
+        display->printf("Up:%lu Ar:%lu", displayStatus.uploadsToday, displayStatus.archivesToday);
+    }
+
+    // Row 5: Last event
+    display->setCursor(0, 56);
+    display->print(displayStatus.lastEvent.substring(0, 21));
+
+    display->display();
+}
+
+// ============================================================================
+// Step Detection
+// ============================================================================
+
+void detectSteps() {
+    if (!accelReady) return;
+
+    // Simple step detection using accelerometer magnitude threshold crossing
+    // A step typically creates a spike in acceleration magnitude
+    const float STEP_THRESHOLD = 12.0;  // m/s² - adjust based on testing
+    const float STEP_MIN_THRESHOLD = 9.0;
+    const unsigned long STEP_DEBOUNCE = 250;  // ms between steps (max ~4 steps/sec)
+
+    float mag = currentAccel.magnitude;
+
+    // Detect rising edge crossing threshold
+    if (!stepDetected && mag > STEP_THRESHOLD && lastAccelMagnitude < STEP_THRESHOLD) {
+        unsigned long now = millis();
+        if (now - lastStepTime > STEP_DEBOUNCE) {
+            stepCount++;
+            todayStepCount++;
+            lastStepTime = now;
+            stepDetected = true;
+        }
+    }
+
+    // Reset detection when magnitude falls below lower threshold
+    if (stepDetected && mag < STEP_MIN_THRESHOLD) {
+        stepDetected = false;
+    }
+
+    lastAccelMagnitude = mag;
+}
+
+// ============================================================================
+// Battery Reading
+// ============================================================================
+
+void readBattery() {
+    // Read battery voltage from ADC
+    // LilyGo T-A7670G has voltage divider on GPIO35
+    int adcValue = analogRead(BAT_ADC_PIN);
+
+    // Convert to voltage (ESP32 ADC is 12-bit, 0-4095)
+    // With voltage divider ratio (typically 2:1), max voltage is ~4.2V * 2 = 8.4V reference
+    // Actual divider may vary - adjust multiplier based on testing
+    float voltage = (adcValue / 4095.0) * 3.3 * 2.0;  // Assuming 2:1 divider
+
+    // Convert voltage to percentage (3.2V = 0%, 4.2V = 100%)
+    float percent = ((voltage - 3.2) / (4.2 - 3.2)) * 100.0;
+    percent = constrain(percent, 0, 100);
+
+    displayStatus.batteryPercent = percent;
 }
