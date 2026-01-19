@@ -16,6 +16,7 @@
 #include <TinyGPSPlus.h>
 #include <Adafruit_ADXL345_U.h>
 #include <ArduinoJson.h>
+#include <time.h>
 #include "config.h"
 
 // ============================================================================
@@ -398,6 +399,27 @@ void initWiFi() {
 
     if (WiFi.status() == WL_CONNECTED) {
         Serial.printf("  [OK] IP: %s\n", WiFi.localIP().toString().c_str());
+
+        // Sync time via NTP for proper archive folder naming
+        configTime(19800, 0, "pool.ntp.org", "time.nist.gov");  // IST = UTC+5:30 = 19800 sec
+        Serial.print("  Syncing time...");
+        int ntpRetries = 10;
+        while (time(nullptr) < 1600000000 && ntpRetries > 0) {  // Wait until time > year 2020
+            delay(500);
+            Serial.print(".");
+            ntpRetries--;
+        }
+        Serial.println();
+
+        time_t now = time(nullptr);
+        if (now > 1600000000) {
+            struct tm* timeinfo = localtime(&now);
+            char timeStr[25];
+            strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", timeinfo);
+            Serial.printf("  [OK] Time: %s\n", timeStr);
+        } else {
+            Serial.println("  [WARN] NTP sync failed - using default time");
+        }
     } else {
         Serial.println("  [FAIL] Could not connect");
     }
@@ -637,8 +659,56 @@ void uploadPendingWalks() {
             int httpCode = http.POST(payload);
             if (httpCode == 200 || httpCode == 201) {
                 String fullPath = "/pending/" + filename;
-                SD.remove(fullPath.c_str());
-                Serial.println("    [OK] Uploaded and deleted");
+
+                // Archive instead of delete - organize by year/month
+                // Extract timestamp from filename (walk_XXXXXXXX.json)
+                unsigned long walkTime = 0;
+                int underscorePos = filename.indexOf('_');
+                int dotPos = filename.indexOf('.');
+                if (underscorePos >= 0 && dotPos > underscorePos) {
+                    walkTime = filename.substring(underscorePos + 1, dotPos).toInt();
+                }
+
+                // Create archived folder structure: /archived/YYYY/MM/
+                // Use current time if walk time not parseable
+                time_t now = time(nullptr);
+                struct tm* timeinfo = localtime(&now);
+                char yearStr[5], monthStr[3];
+                strftime(yearStr, sizeof(yearStr), "%Y", timeinfo);
+                strftime(monthStr, sizeof(monthStr), "%m", timeinfo);
+
+                String archiveDir = "/archived";
+                if (!SD.exists(archiveDir)) SD.mkdir(archiveDir);
+
+                String yearDir = archiveDir + "/" + String(yearStr);
+                if (!SD.exists(yearDir)) SD.mkdir(yearDir);
+
+                String monthDir = yearDir + "/" + String(monthStr);
+                if (!SD.exists(monthDir)) SD.mkdir(monthDir);
+
+                String archivePath = monthDir + "/" + filename;
+
+                // Move file to archive
+                if (SD.rename(fullPath.c_str(), archivePath.c_str())) {
+                    Serial.printf("    [OK] Uploaded and archived to %s\n", archivePath.c_str());
+                } else {
+                    // If rename fails (maybe cross-directory issue), try copy+delete
+                    File srcFile = SD.open(fullPath, FILE_READ);
+                    File dstFile = SD.open(archivePath, FILE_WRITE);
+                    if (srcFile && dstFile) {
+                        while (srcFile.available()) {
+                            dstFile.write(srcFile.read());
+                        }
+                        srcFile.close();
+                        dstFile.close();
+                        SD.remove(fullPath.c_str());
+                        Serial.printf("    [OK] Uploaded and archived (copy) to %s\n", archivePath.c_str());
+                    } else {
+                        Serial.println("    [WARN] Uploaded but archive failed - keeping in pending");
+                        if (srcFile) srcFile.close();
+                        if (dstFile) dstFile.close();
+                    }
+                }
             } else {
                 Serial.printf("    [FAIL] HTTP %d\n", httpCode);
                 String response = http.getString();
