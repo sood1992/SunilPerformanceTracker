@@ -369,22 +369,67 @@ void loop() {
         lastDisplayUpdate = now;
     }
 
-    // Log periodic status to file every 5 minutes
+    // Log detailed status to file every 2 minutes for debugging
     static unsigned long lastStatusLog = 0;
-    if (now - lastStatusLog >= 300000) {  // 5 minutes
-        writeLogf(LOG_INFO, "STATUS", "Uptime: %lu min | Steps: %lu | GPS: %s (%d sats) | WiFi: %s | Batt: %.0f%%",
-            now / 60000, todayStepCount,
-            currentGPS.valid ? "OK" : "NO",
+    if (now - lastStatusLog >= 120000) {  // 2 minutes
+        // System status
+        writeLogf(LOG_INFO, "STATUS", "=== Periodic Status Report ===");
+        writeLogf(LOG_INFO, "STATUS", "Uptime: %lu min | Free heap: %lu bytes",
+            now / 60000, ESP.getFreeHeap());
+
+        // Battery & Power
+        writeLogf(LOG_INFO, "POWER", "Battery: %.0f%% | Standby: %s | Display: %s",
+            displayStatus.batteryPercent,
+            standbyMode ? "YES" : "NO",
+            displayIsOff ? "OFF" : "ON");
+
+        // GPS details
+        writeLogf(LOG_INFO, "GPS", "Valid: %s | Sats: %d | Lat: %.6f | Lon: %.6f | Speed: %.1f km/h",
+            currentGPS.valid ? "YES" : "NO",
             currentGPS.satellites,
-            WiFi.status() == WL_CONNECTED ? "OK" : "NO",
-            displayStatus.batteryPercent);
-        // Log GPS diagnostic info
-        writeLogf(LOG_INFO, "GPS", "Fixes: %lu | Valid: %s | Lat: %.6f, Lon: %.6f | Sats: %d",
-            gpsQueryCount, currentGPS.valid ? "YES" : "NO",
-            currentGPS.latitude, currentGPS.longitude, currentGPS.satellites);
+            currentGPS.latitude, currentGPS.longitude,
+            currentGPS.speed);
+        writeLogf(LOG_INFO, "GPS", "Chars: %lu | Fixes: %lu | Errors: %lu | Alt: %.1fm",
+            gps.charsProcessed(), gps.sentencesWithFix(), gps.failedChecksum(),
+            currentGPS.altitude);
+
+        // Geofence status
+        double distHome = getDistanceFromHome();
+        writeLogf(LOG_INFO, "GEOFENCE", "AtHome: %s | Distance: %.0fm | WiFi: %s",
+            isAtHome ? "YES" : "NO",
+            distHome >= 0 ? distHome : -1,
+            isConnectedToHomeWiFi() ? HOME_WIFI_SSID : "disconnected");
+
+        // Walk status
         if (currentWalk.isActive) {
-            writeLogf(LOG_INFO, "STATUS", "Walk active: %.0fm, %d pts", currentWalk.totalDistance, currentWalk.dataPoints);
+            unsigned long walkDur = (now - currentWalk.startTime) / 1000;
+            writeLogf(LOG_INFO, "WALK", "Active: YES | Duration: %lu sec | Distance: %.0fm | Points: %d",
+                walkDur, currentWalk.totalDistance, currentWalk.dataPoints);
+            writeLogf(LOG_INFO, "WALK", "Steps: %lu | MaxSpeed: %.1f | AvgSpeed: %.1f | Manual: %s",
+                stepCount, currentWalk.maxSpeed, currentWalk.avgSpeed,
+                manualWalkMode ? "YES" : "NO");
+        } else {
+            writeLogf(LOG_INFO, "WALK", "Active: NO | Today steps: %lu", todayStepCount);
         }
+
+        // Upload status
+        int pending = countPendingFiles();
+        writeLogf(LOG_INFO, "UPLOAD", "Pending: %d | Today uploads: %d | Failed: %d",
+            pending, displayStatus.uploadsToday, displayStatus.uploadsFailed);
+
+        // Network status
+        if (WiFi.status() == WL_CONNECTED) {
+            writeLogf(LOG_INFO, "WIFI", "Connected: %s | IP: %s | RSSI: %d dBm",
+                WiFi.SSID().c_str(), WiFi.localIP().toString().c_str(), WiFi.RSSI());
+        } else {
+            writeLog(LOG_INFO, "WIFI", "Disconnected");
+        }
+
+        // Accelerometer
+        writeLogf(LOG_INFO, "ACCEL", "X: %.2f | Y: %.2f | Z: %.2f | Mag: %.2f | Moving: %s",
+            currentAccel.x, currentAccel.y, currentAccel.z, currentAccel.magnitude,
+            currentAccel.isMoving ? "YES" : "NO");
+
         lastStatusLog = now;
     }
 
@@ -1527,80 +1572,111 @@ void updateDisplay() {
 
     display->clearBuffer();
     char buf[32];
+    bool lowBattery = (displayStatus.batteryPercent < 20);
+    bool blinkOn = ((millis() / 500) % 2 == 0);  // For flashing elements
 
-    // Row 1: Steps count (large font)
-    display->setFont(u8g2_font_helvB14_tr);  // Large bold font
+    // Get pending upload count (cached, updates every 5 sec in background)
+    static int pendingUploads = 0;
+    static unsigned long lastPendingCheck = 0;
+    if (millis() - lastPendingCheck > 5000) {
+        pendingUploads = countPendingFiles();
+        lastPendingCheck = millis();
+    }
+
+    // Get current time
+    time_t now = time(nullptr);
+    struct tm* timeinfo = localtime(&now);
+
+    // ===== ROW 1: Time + Battery (with low battery flash) =====
+    display->setFont(u8g2_font_6x10_tf);
+    if (now > 1600000000) {  // Valid NTP time
+        snprintf(buf, sizeof(buf), "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+    } else {
+        snprintf(buf, sizeof(buf), "--:--");
+    }
+    display->drawStr(0, 10, buf);
+
+    // Battery with flash warning
+    if (lowBattery && blinkOn) {
+        snprintf(buf, sizeof(buf), "!%d%% CHARGE!", (int)displayStatus.batteryPercent);
+    } else {
+        snprintf(buf, sizeof(buf), "%d%%", (int)displayStatus.batteryPercent);
+    }
+    display->drawStr(90, 10, buf);
+
+    // ===== ROW 2: Steps + Distance (large) =====
+    display->setFont(u8g2_font_helvB12_tr);
     snprintf(buf, sizeof(buf), "%lu", todayStepCount);
-    display->drawStr(0, 14, buf);
-    display->setFont(u8g2_font_6x10_tf);     // Small font
-    display->drawStr(75, 14, "steps");
+    display->drawStr(0, 26, buf);
+    display->setFont(u8g2_font_6x10_tf);
+    display->drawStr(50, 26, "stp");
 
-    // Row 2: Walk status with recording indicator
+    // Distance today or in current walk
+    if (currentWalk.isActive) {
+        if (currentWalk.totalDistance >= 1000) {
+            snprintf(buf, sizeof(buf), "%.1fkm", currentWalk.totalDistance / 1000);
+        } else {
+            snprintf(buf, sizeof(buf), "%.0fm", currentWalk.totalDistance);
+        }
+    } else {
+        snprintf(buf, sizeof(buf), "---");
+    }
+    display->drawStr(80, 26, buf);
+
+    // ===== ROW 3: Recording Status + Walk Time =====
     if (currentWalk.isActive) {
         unsigned long walkSec = (millis() - currentWalk.startTime) / 1000;
         unsigned long walkMin = walkSec / 60;
         unsigned long walkSecRem = walkSec % 60;
-        // Blinking REC indicator (toggle every 500ms)
-        const char* recIndicator = ((millis() / 500) % 2 == 0) ? "[REC]" : "     ";
-        if (manualWalkMode) {
-            snprintf(buf, sizeof(buf), "%s %lu:%02lu", recIndicator, walkMin, walkSecRem);
+        // Blinking REC
+        if (blinkOn) {
+            snprintf(buf, sizeof(buf), "*REC* %lu:%02lu", walkMin, walkSecRem);
         } else {
-            snprintf(buf, sizeof(buf), "%s %lum %.0fm", recIndicator, walkMin, currentWalk.totalDistance);
+            snprintf(buf, sizeof(buf), " REC  %lu:%02lu", walkMin, walkSecRem);
         }
-    } else if (!currentGPS.valid) {
-        // Show hint to use button
-        snprintf(buf, sizeof(buf), "Press BTN to start");
     } else {
-        snprintf(buf, sizeof(buf), "Ready - Press BTN");
-    }
-    display->drawStr(0, 26, buf);
-
-    // Row 3: GPS status with details
-    unsigned long gpsChars = gps.charsProcessed();
-    unsigned long gpsErrors = gps.failedChecksum();
-    unsigned long gpsSentences = gps.sentencesWithFix();
-
-    if (currentGPS.valid) {
-        // Valid fix: show satellites and fix count
-        snprintf(buf, sizeof(buf), "GPS:%dsat Fx:%lu", currentGPS.satellites, gpsSentences);
-    } else {
-        // No fix: show satellites, chars received, errors
-        if (gpsChars > 0) {
-            if (currentGPS.satellites > 0) {
-                // Has satellites but no fix yet
-                snprintf(buf, sizeof(buf), "GPS:%d* C:%luk", currentGPS.satellites, gpsChars/1000);
-            } else {
-                // Receiving data but no satellites
-                snprintf(buf, sizeof(buf), "GPS:-- C:%luk E:%lu", gpsChars/1000, gpsErrors);
-            }
-        } else {
-            snprintf(buf, sizeof(buf), "GPS: No data!");
-        }
+        snprintf(buf, sizeof(buf), "IDLE  Ready");
     }
     display->drawStr(0, 38, buf);
 
-    // Row 4: Home status, WiFi, Battery
-    const char* homeStatus = isAtHome ? "HOME" : "AWAY";
-    const char* wifiStatus = (WiFi.status() == WL_CONNECTED) ? "W" : "-";
-    double distHome = getDistanceFromHome();
-
-    if (isAtHome) {
-        snprintf(buf, sizeof(buf), "%s %s %d%%", homeStatus, wifiStatus, (int)displayStatus.batteryPercent);
-    } else if (distHome >= 0) {
-        // Show distance from home when away
-        if (distHome >= 1000) {
-            snprintf(buf, sizeof(buf), "%.1fkm %s %d%%", distHome/1000, wifiStatus, (int)displayStatus.batteryPercent);
-        } else {
-            snprintf(buf, sizeof(buf), "%.0fm %s %d%%", distHome, wifiStatus, (int)displayStatus.batteryPercent);
-        }
+    // ===== ROW 4: GPS + WiFi + Upload Status =====
+    // GPS status
+    if (currentGPS.valid) {
+        snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
+    } else if (currentGPS.satellites > 0) {
+        snprintf(buf, sizeof(buf), "GPS:%d*", currentGPS.satellites);
     } else {
-        snprintf(buf, sizeof(buf), "%s %s %d%%", homeStatus, wifiStatus, (int)displayStatus.batteryPercent);
+        snprintf(buf, sizeof(buf), "GPS:--");
     }
     display->drawStr(0, 50, buf);
 
-    // Row 5: Last event (truncate to fit)
-    String eventStr = displayStatus.lastEvent.substring(0, 21);
-    display->drawStr(0, 62, eventStr.c_str());
+    // WiFi status
+    display->drawStr(48, 50, (WiFi.status() == WL_CONNECTED) ? "WiFi" : "----");
+
+    // Upload status
+    if (pendingUploads > 0) {
+        snprintf(buf, sizeof(buf), "P:%d", pendingUploads);
+    } else {
+        snprintf(buf, sizeof(buf), "OK");
+    }
+    display->drawStr(90, 50, buf);
+
+    // ===== ROW 5: Location Status =====
+    if (isAtHome) {
+        snprintf(buf, sizeof(buf), "HOME - Standby");
+    } else if (currentWalk.isActive) {
+        double dist = getDistanceFromHome();
+        if (dist >= 1000) {
+            snprintf(buf, sizeof(buf), "WALK %.1fkm from home", dist/1000);
+        } else if (dist >= 0) {
+            snprintf(buf, sizeof(buf), "WALK %.0fm from home", dist);
+        } else {
+            snprintf(buf, sizeof(buf), "WALK - GPS searching");
+        }
+    } else {
+        snprintf(buf, sizeof(buf), "AWAY - Press BTN");
+    }
+    display->drawStr(0, 62, buf);
 
     display->sendBuffer();
 }
