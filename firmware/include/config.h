@@ -68,6 +68,15 @@
 #define OLED_ADDRESS        0x3C  // Common I2C address for SH1106
 #define OLED_RESET          -1    // No reset pin (share with ESP32 reset)
 
+// ============================================================================
+// Button Configuration
+// ============================================================================
+// Using the BOOT button on GPIO 0 (active LOW - pressed = LOW)
+#define BUTTON_PIN          0
+#define BUTTON_ACTIVE_LOW   true   // Button is LOW when pressed
+#define BUTTON_DEBOUNCE_MS  50     // Debounce time in ms
+#define BUTTON_LONG_PRESS_MS 2000  // Long press threshold (2 seconds)
+
 // Activity Detection Thresholds
 #define ACTIVITY_THRESHOLD  2.0    // m/s² - threshold for detecting movement
 #define INACTIVITY_TIMEOUT  30000  // ms - time before marking inactive

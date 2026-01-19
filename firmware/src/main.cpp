@@ -98,6 +98,12 @@ struct DisplayStatus {
 String currentLogFile = "";
 unsigned long lastLogFlush = 0;
 
+// Button State
+bool buttonPressed = false;
+unsigned long buttonPressStart = 0;
+bool buttonHandled = false;
+bool manualWalkMode = false;  // True when walk started manually via button
+
 // Log levels for filtering
 enum LogLevel {
     LOG_DEBUG = 0,
@@ -121,6 +127,8 @@ void initSDCard();
 void initWiFi();
 void initDisplay();
 void initLogging();
+void initButton();
+void handleButton();
 void writeLog(LogLevel level, const char* category, const char* message);
 void writeLogf(LogLevel level, const char* category, const char* format, ...);
 String sendATCommandGetResponse(const char* cmd, unsigned long timeout);
@@ -128,7 +136,9 @@ void readGPS();
 void readAccelerometer();
 void detectSteps();
 void startWalk();
+void startWalkManual();
 void endWalk();
+void endWalkManual();
 void logWalkData();
 void uploadPendingWalks();
 int countPendingFiles();
@@ -164,10 +174,12 @@ void setup() {
     Serial.printf("WiFi SSID: %s\n", WIFI_SSID);
     Serial.println();
 
-    // Step 0: Board Power
-    Serial.println("[STEP 0/7] Setting board power...");
+    // Step 0: Board Power and Button
+    Serial.println("[STEP 0/8] Setting board power...");
     initPower();
-    Serial.println("  [OK] Board power pin HIGH\n");
+    initButton();
+    Serial.println("  [OK] Board power pin HIGH");
+    Serial.printf("  [OK] Button on GPIO%d (press=start, long=stop)\n", BUTTON_PIN);
     delay(100);
 
     // Step 1: I2C (on new pins to avoid GPS conflict)
@@ -252,6 +264,9 @@ void setup() {
 
 void loop() {
     unsigned long now = millis();
+
+    // Handle button input (for manual start/stop)
+    handleButton();
 
     // Read GPS continuously
     readGPS();
@@ -386,6 +401,66 @@ void initPower() {
     // Keep board powered when USB is disconnected
     pinMode(BOARD_POWERON_PIN, OUTPUT);
     digitalWrite(BOARD_POWERON_PIN, HIGH);
+}
+
+void initButton() {
+    // Initialize button pin with internal pull-up
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+}
+
+void handleButton() {
+    // Read button state (active LOW)
+    bool isPressed = (digitalRead(BUTTON_PIN) == LOW);
+    unsigned long now = millis();
+
+    if (isPressed && !buttonPressed) {
+        // Button just pressed
+        buttonPressed = true;
+        buttonPressStart = now;
+        buttonHandled = false;
+    } else if (!isPressed && buttonPressed) {
+        // Button just released
+        unsigned long pressDuration = now - buttonPressStart;
+
+        if (!buttonHandled) {
+            if (pressDuration >= BUTTON_LONG_PRESS_MS) {
+                // Long press - stop activity
+                if (currentWalk.isActive) {
+                    Serial.println("\n[BUTTON] Long press detected - stopping activity");
+                    endWalkManual();
+                } else {
+                    Serial.println("[BUTTON] Long press - no active walk to stop");
+                    displayStatus.lastEvent = "No walk active";
+                }
+            } else if (pressDuration >= BUTTON_DEBOUNCE_MS) {
+                // Short press - start activity
+                if (!currentWalk.isActive) {
+                    Serial.println("\n[BUTTON] Short press detected - starting activity");
+                    startWalkManual();
+                } else {
+                    Serial.println("[BUTTON] Short press - walk already active");
+                    displayStatus.lastEvent = "Walk in progress";
+                }
+            }
+        }
+
+        buttonPressed = false;
+        buttonHandled = false;
+    } else if (isPressed && buttonPressed && !buttonHandled) {
+        // Button still held - check for long press feedback
+        unsigned long pressDuration = now - buttonPressStart;
+        if (pressDuration >= BUTTON_LONG_PRESS_MS) {
+            // Give feedback that long press is detected
+            if (currentWalk.isActive) {
+                displayStatus.lastEvent = "Release to STOP";
+            }
+            buttonHandled = true;  // Will handle on release
+            buttonHandled = false; // Actually handle on release
+        } else if (pressDuration >= 500 && currentWalk.isActive) {
+            // Show "hold to stop" hint
+            displayStatus.lastEvent = "Hold 2s to stop...";
+        }
+    }
 }
 
 void initSDCard() {
@@ -871,6 +946,94 @@ void endWalk() {
     }
 
     currentWalk.isActive = false;
+    manualWalkMode = false;
+}
+
+// Manual walk start (triggered by button press)
+void startWalkManual() {
+    Serial.println("\n*** MANUAL WALK STARTED ***");
+
+    currentWalk.isActive = true;
+    currentWalk.startTime = millis();
+    currentWalk.totalDistance = 0;
+    currentWalk.maxSpeed = 0;
+    currentWalk.avgSpeed = 0;
+    currentWalk.dataPoints = 0;
+    stepCount = 0;
+    manualWalkMode = true;  // Mark as manual start
+
+    // Log walk start
+    writeLog(LOG_INFO, "WALK", "========== MANUAL WALK STARTED ==========");
+    if (currentGPS.valid) {
+        writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
+        writeLogf(LOG_INFO, "WALK", "GPS satellites: %d", currentGPS.satellites);
+    } else {
+        writeLog(LOG_INFO, "WALK", "Start location: GPS not available");
+    }
+
+    if (sdCardReady) {
+        currentWalk.filename = "/walks/walk_" + String(millis()) + ".json";
+
+        File file = SD.open(currentWalk.filename, FILE_WRITE);
+        if (file) {
+            JsonDocument doc;
+            doc["deviceId"] = DEVICE_ID;
+            doc["startTime"] = currentWalk.startTime;
+            doc["manual"] = true;  // Mark as manually started
+            if (currentGPS.valid) {
+                doc["startLat"] = currentGPS.latitude;
+                doc["startLon"] = currentGPS.longitude;
+            }
+            serializeJson(doc, file);
+            file.close();
+            Serial.printf("  File: %s\n", currentWalk.filename.c_str());
+            writeLogf(LOG_INFO, "WALK", "Data file: %s", currentWalk.filename.c_str());
+        } else {
+            writeLog(LOG_ERROR, "WALK", "Failed to create walk data file!");
+        }
+    }
+
+    if (currentGPS.valid) {
+        lastValidGPS = currentGPS;
+    }
+    lastActivityTime = millis();
+    displayStatus.lastEvent = "RECORDING...";
+}
+
+// Manual walk end (triggered by long button press)
+void endWalkManual() {
+    currentWalk.endTime = millis();
+    unsigned long duration = currentWalk.endTime - currentWalk.startTime;
+
+    Serial.println("\n*** MANUAL WALK ENDED ***");
+    Serial.printf("  Duration: %lu sec\n", duration / 1000);
+    Serial.printf("  Distance: %.0f m\n", currentWalk.totalDistance);
+    Serial.printf("  Points: %d\n", currentWalk.dataPoints);
+    Serial.printf("  Steps: %lu\n", stepCount);
+
+    // Log walk end
+    writeLog(LOG_INFO, "WALK", "========== MANUAL WALK ENDED ==========");
+    writeLogf(LOG_INFO, "WALK", "Duration: %lu sec (%.1f min)", duration / 1000, duration / 60000.0);
+    writeLogf(LOG_INFO, "WALK", "Distance: %.0f m (%.2f km)", currentWalk.totalDistance, currentWalk.totalDistance / 1000.0);
+    writeLogf(LOG_INFO, "WALK", "Data points: %d", currentWalk.dataPoints);
+    writeLogf(LOG_INFO, "WALK", "Steps: %lu", stepCount);
+
+    // For manual walks, always save (no minimum duration check)
+    if (sdCardReady && currentWalk.filename.length() > 0) {
+        String pendingPath = "/pending/walk_" + String(currentWalk.startTime) + ".json";
+        SD.rename(currentWalk.filename.c_str(), pendingPath.c_str());
+        Serial.printf("  Moved to: %s\n", pendingPath.c_str());
+        writeLogf(LOG_INFO, "WALK", "Queued for upload: %s", pendingPath.c_str());
+
+        char buf[32];
+        snprintf(buf, sizeof(buf), "Saved: %lus %lu steps", duration/1000, stepCount);
+        displayStatus.lastEvent = String(buf);
+    } else {
+        displayStatus.lastEvent = "Walk stopped";
+    }
+
+    currentWalk.isActive = false;
+    manualWalkMode = false;
 }
 
 void logWalkData() {
@@ -1191,15 +1354,23 @@ void updateDisplay() {
     display->setFont(u8g2_font_6x10_tf);     // Small font
     display->drawStr(75, 14, "steps");
 
-    // Row 2: Walk status or waiting for GPS
+    // Row 2: Walk status with recording indicator
     if (currentWalk.isActive) {
-        unsigned long walkMin = (millis() - currentWalk.startTime) / 60000;
-        snprintf(buf, sizeof(buf), "WALK %lum %.0fm", walkMin, currentWalk.totalDistance);
+        unsigned long walkSec = (millis() - currentWalk.startTime) / 1000;
+        unsigned long walkMin = walkSec / 60;
+        unsigned long walkSecRem = walkSec % 60;
+        // Blinking REC indicator (toggle every 500ms)
+        const char* recIndicator = ((millis() / 500) % 2 == 0) ? "[REC]" : "     ";
+        if (manualWalkMode) {
+            snprintf(buf, sizeof(buf), "%s %lu:%02lu", recIndicator, walkMin, walkSecRem);
+        } else {
+            snprintf(buf, sizeof(buf), "%s %lum %.0fm", recIndicator, walkMin, currentWalk.totalDistance);
+        }
     } else if (!currentGPS.valid) {
-        // Show GPS waiting status more prominently
-        snprintf(buf, sizeof(buf), "Waiting for GPS...");
+        // Show hint to use button
+        snprintf(buf, sizeof(buf), "Press BTN to start");
     } else {
-        snprintf(buf, sizeof(buf), "Ready (GPS OK)");
+        snprintf(buf, sizeof(buf), "Ready - Press BTN");
     }
     display->drawStr(0, 26, buf);
 
