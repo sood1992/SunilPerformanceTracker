@@ -130,6 +130,7 @@ void startWalk();
 void endWalk();
 void logWalkData();
 void uploadPendingWalks();
+int countPendingFiles();
 void updateDisplay();
 void readBattery();
 bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout);
@@ -411,6 +412,16 @@ void initSDCard() {
     if (!SD.exists("/pending")) SD.mkdir("/pending");
     if (!SD.exists("/logs")) SD.mkdir("/logs");
 
+    // Write immediate boot marker (before WiFi/NTP)
+    File bootLog = SD.open("/logs/boot.log", FILE_APPEND);
+    if (bootLog) {
+        bootLog.printf("\n[BOOT] Device started at millis=%lu\n", millis());
+        bootLog.close();
+        Serial.println("  Boot marker written to /logs/boot.log");
+    } else {
+        Serial.println("  [WARN] Could not write boot marker");
+    }
+
     sdCardReady = true;
     Serial.println("  [OK]");
 }
@@ -552,7 +563,10 @@ void initWiFi() {
 // ============================================================================
 
 void initLogging() {
-    if (!sdCardReady) return;
+    if (!sdCardReady) {
+        Serial.println("  [SKIP] SD card not ready - logging disabled");
+        return;
+    }
 
     // Create log filename based on current date: /logs/YYYY-MM-DD.log
     time_t now = time(nullptr);
@@ -561,12 +575,15 @@ void initLogging() {
     char filename[32];
     if (now > 1600000000) {  // Valid time from NTP
         strftime(filename, sizeof(filename), "/logs/%Y-%m-%d.log", timeinfo);
+        Serial.printf("  NTP time valid, using date-based log\n");
     } else {
         // Fallback if no NTP sync
         snprintf(filename, sizeof(filename), "/logs/boot_%lu.log", millis());
+        Serial.printf("  NTP failed, using boot-time log\n");
     }
 
     currentLogFile = String(filename);
+    Serial.printf("  Log file: %s\n", currentLogFile.c_str());
 
     // Write startup header
     File logFile = SD.open(currentLogFile, FILE_APPEND);
@@ -582,9 +599,11 @@ void initLogging() {
         logFile.printf("=== DOG WALKER GPS TRACKER - Session Started: %s ===\n", timeStr);
         logFile.println("================================================================================");
         logFile.close();
+        Serial.println("  [OK] Log file created successfully");
+    } else {
+        Serial.println("  [FAIL] Could not create log file!");
+        currentLogFile = "";  // Disable logging
     }
-
-    Serial.printf("  [OK] Logging to: %s\n", currentLogFile.c_str());
 }
 
 void writeLog(LogLevel level, const char* category, const char* message) {
@@ -1043,6 +1062,23 @@ void initDisplay() {
     display->sendBuffer();
 }
 
+// Count files in pending directory
+int countPendingFiles() {
+    if (!sdCardReady) return 0;
+    int count = 0;
+    File dir = SD.open("/pending");
+    if (dir && dir.isDirectory()) {
+        File file = dir.openNextFile();
+        while (file) {
+            if (!file.isDirectory()) count++;
+            file.close();
+            file = dir.openNextFile();
+        }
+        dir.close();
+    }
+    return count;
+}
+
 void updateDisplay() {
     if (!displayReady || display == nullptr) return;
 
@@ -1056,40 +1092,51 @@ void updateDisplay() {
     display->setFont(u8g2_font_6x10_tf);     // Small font
     display->drawStr(75, 14, "steps");
 
-    // Row 2: Walk status
+    // Row 2: Walk status or waiting for GPS
     if (currentWalk.isActive) {
         unsigned long walkMin = (millis() - currentWalk.startTime) / 60000;
         snprintf(buf, sizeof(buf), "WALK %lum %.0fm", walkMin, currentWalk.totalDistance);
+    } else if (!currentGPS.valid) {
+        // Show GPS waiting status more prominently
+        snprintf(buf, sizeof(buf), "Waiting for GPS...");
     } else {
-        snprintf(buf, sizeof(buf), "Dist: %.2fkm", currentWalk.totalDistance / 1000.0);
+        snprintf(buf, sizeof(buf), "Ready (GPS OK)");
     }
     display->drawStr(0, 26, buf);
 
     // Row 3: GPS and connectivity status
-    // GPS status
+    // GPS status with satellite count
     if (currentGPS.valid) {
         snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
     } else {
+        // Show chars processed to indicate GPS module is responding
         snprintf(buf, sizeof(buf), "GPS:--");
     }
     display->drawStr(0, 38, buf);
 
     // WiFi status
     if (WiFi.status() == WL_CONNECTED) {
-        display->drawStr(50, 38, "WiFi:OK");
+        display->drawStr(45, 38, "WiFi:OK");
     } else {
-        display->drawStr(50, 38, "WiFi:--");
+        display->drawStr(45, 38, "WiFi:NO");
     }
 
     // Battery
     snprintf(buf, sizeof(buf), "%d%%", (int)displayStatus.batteryPercent);
     display->drawStr(100, 38, buf);
 
-    // Row 4: Speed or upload stats
-    if (currentGPS.valid && currentGPS.speed > 0.5) {
-        snprintf(buf, sizeof(buf), "Speed: %.1f km/h", currentGPS.speed);
+    // Row 4: Pending uploads and upload stats
+    static unsigned long lastPendingCheck = 0;
+    static int pendingCount = 0;
+    if (millis() - lastPendingCheck > 5000) {  // Check every 5 sec
+        pendingCount = countPendingFiles();
+        lastPendingCheck = millis();
+    }
+
+    if (pendingCount > 0) {
+        snprintf(buf, sizeof(buf), "Pending:%d Up:%d", pendingCount, displayStatus.uploadsToday);
     } else {
-        snprintf(buf, sizeof(buf), "Up:%d Ar:%d", displayStatus.uploadsToday, displayStatus.archivesToday);
+        snprintf(buf, sizeof(buf), "Up:%d Fail:%d", displayStatus.uploadsToday, displayStatus.uploadsFailed);
     }
     display->drawStr(0, 50, buf);
 
