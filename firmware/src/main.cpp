@@ -1396,21 +1396,27 @@ void checkHomeStatus() {
     // Determine if at home using GPS + WiFi
     double distFromHome = getDistanceFromHome();
     bool wifiAtHome = isConnectedToHomeWiFi();
+    bool gpsNearHome = (distFromHome >= 0 && distFromHome < HOME_RADIUS_END);
 
-    // At home if: connected to home WiFi OR within home radius
-    if (wifiAtHome) {
-        isAtHome = true;
-    } else if (distFromHome >= 0) {
-        // Use different radius for entering vs leaving (hysteresis)
-        if (isAtHome) {
-            // Currently at home - need to go beyond START radius to leave
-            isAtHome = (distFromHome < HOME_RADIUS_START);
-        } else {
-            // Currently away - need to enter END radius to be home
-            isAtHome = (distFromHome < HOME_RADIUS_END);
+    // LEAVING HOME detection: WiFi disconnects OR GPS beyond start radius
+    // (More permissive - either signal means we left)
+    if (isAtHome) {
+        if (!wifiAtHome && distFromHome >= 0 && distFromHome > HOME_RADIUS_START) {
+            isAtHome = false;
         }
     }
-    // If no GPS and no WiFi, maintain previous state
+
+    // ARRIVING HOME detection: MUST have WiFi connected (solves park problem!)
+    // GPS alone near home won't trigger arrival - prevents false triggers in park
+    if (!isAtHome) {
+        #if REQUIRE_WIFI_TO_END
+            // Strict: only WiFi connection means home (not just GPS proximity)
+            isAtHome = wifiAtHome;
+        #else
+            // Lenient: WiFi OR GPS proximity
+            isAtHome = wifiAtHome || gpsNearHome;
+        #endif
+    }
 
     // Handle state transitions
     if (wasAtHome && !isAtHome) {
@@ -1428,17 +1434,29 @@ void checkHomeStatus() {
         }
     } else if (!wasAtHome && isAtHome) {
         // Just arrived home!
-        Serial.println("\n[GEOFENCE] Arrived home!");
-        writeLog(LOG_INFO, "GEOFENCE", "Arrived home - auto-ending walk");
+        Serial.println("\n[GEOFENCE] Arrived home (WiFi connected)!");
 
-        // Auto-end walk if active
-        if (currentWalk.isActive) {
+        // Check minimum walk duration before auto-ending
+        unsigned long walkDuration = currentWalk.isActive ? (millis() - currentWalk.startTime) : 0;
+
+        if (currentWalk.isActive && walkDuration >= MIN_WALK_BEFORE_END) {
+            writeLog(LOG_INFO, "GEOFENCE", "Arrived home - auto-ending walk");
             endWalkManual();
             displayStatus.lastEvent = "Auto: Home";
+        } else if (currentWalk.isActive) {
+            // Walk too short, don't auto-end yet
+            Serial.printf("[GEOFENCE] Walk only %lu sec, need %d sec before auto-end\n",
+                walkDuration/1000, MIN_WALK_BEFORE_END/1000);
+            writeLogf(LOG_INFO, "GEOFENCE", "Home but walk too short (%lu sec), not ending",
+                walkDuration/1000);
+            // Don't set isAtHome yet - stay in "away" mode
+            isAtHome = false;
         }
 
-        standbyMode = true;
-        displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
+        if (isAtHome) {
+            standbyMode = true;
+            displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
+        }
     }
 
     // Update standby mode

@@ -105,13 +105,14 @@
 // ============================================================================
 // Home Geofence Configuration (for auto start/stop)
 // ============================================================================
-// UPDATE THESE with your actual home coordinates from Google Maps!
-// Right-click location → "What's here?" → Copy coordinates
-#define HOME_LATITUDE       28.4744    // Neofox Media HQ latitude (UPDATE THIS!)
-#define HOME_LONGITUDE      77.0760    // Neofox Media HQ longitude (UPDATE THIS!)
+// Neofox Media HQ: 28°32'11.4"N 77°15'16.6"E
+#define HOME_LATITUDE       28.5365    // Neofox Media HQ latitude
+#define HOME_LONGITUDE      77.2546    // Neofox Media HQ longitude
 #define HOME_RADIUS_START   100        // meters - leave this radius to auto-start walk
-#define HOME_RADIUS_END     50         // meters - enter this radius to auto-end walk
+#define HOME_RADIUS_END     30         // meters - enter this radius to auto-end walk
 #define HOME_WIFI_SSID      "CTNF-Universal"  // Home WiFi SSID for detection
+#define REQUIRE_WIFI_TO_END true       // Must connect to home WiFi to auto-end walk
+#define MIN_WALK_BEFORE_END 300000     // ms (5 min) - minimum walk time before auto-end allowed
 
 // ============================================================================
 // Standby Mode Configuration (battery saving when at home)
