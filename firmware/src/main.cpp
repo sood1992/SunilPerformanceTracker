@@ -123,6 +123,7 @@ void initDisplay();
 void initLogging();
 void writeLog(LogLevel level, const char* category, const char* message);
 void writeLogf(LogLevel level, const char* category, const char* format, ...);
+String sendATCommandGetResponse(const char* cmd, unsigned long timeout);
 void readGPS();
 void readAccelerometer();
 void detectSteps();
@@ -135,6 +136,9 @@ void updateDisplay();
 void readBattery();
 bool sendATCommand(const char* cmd, const char* expected, unsigned long timeout);
 double calculateDistance(double lat1, double lon1, double lat2, double lon2);
+
+// External GPS query counter (defined in readGPS)
+extern unsigned long gpsQueryCount;
 
 // ============================================================================
 // Setup
@@ -188,15 +192,15 @@ void setup() {
     initAccelerometer();
     delay(100);
 
-    // Step 5: GPS (L76K direct UART)
-    Serial.println("[STEP 5/7] Initializing GPS (L76K)...");
-    initGPS();
-    delay(100);
-
-    // Step 6: Modem (for 4G, not GPS)
-    Serial.println("[STEP 6/7] Initializing Modem (4G)...");
+    // Step 5: Modem (required for GPS via AT commands)
+    Serial.println("[STEP 5/7] Initializing Modem (4G)...");
     Serial.println("  (Requires battery connection!)");
     initModem();
+    delay(100);
+
+    // Step 6: GPS (via modem AT commands)
+    Serial.println("[STEP 6/7] Initializing GPS (via modem)...");
+    initGPS();
     delay(100);
 
     // Step 7: WiFi
@@ -215,8 +219,8 @@ void setup() {
     Serial.printf("  OLED Display:  %s\n", displayReady ? "OK" : "FAIL");
     Serial.printf("  SD Card:       %s\n", sdCardReady ? "OK" : "FAIL");
     Serial.printf("  Accelerometer: %s\n", accelReady ? "OK" : "FAIL");
-    Serial.printf("  GPS (L76K):    %s\n", gpsEnabled ? "OK" : "FAIL");
     Serial.printf("  Modem (4G):    %s\n", modemReady ? "OK" : "FAIL");
+    Serial.printf("  GPS (modem):   %s\n", gpsEnabled ? "OK" : "FAIL");
     Serial.printf("  WiFi:          %s\n", WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
     Serial.println("============================================");
     Serial.println();
@@ -283,9 +287,10 @@ void loop() {
             currentGPS.satellites,
             WiFi.status() == WL_CONNECTED ? "OK" : "NO",
             displayStatus.batteryPercent);
-        // Log GPS diagnostic info
-        writeLogf(LOG_INFO, "GPS", "Chars: %lu | Sentences: %lu | Checksum fail: %lu",
-            gps.charsProcessed(), gps.sentencesWithFix(), gps.failedChecksum());
+        // Log GPS diagnostic info (AT command polling)
+        writeLogf(LOG_INFO, "GPS", "Queries: %lu | Fix: %s | Lat: %.6f, Lon: %.6f",
+            gpsQueryCount, currentGPS.valid ? "YES" : "NO",
+            currentGPS.latitude, currentGPS.longitude);
         if (currentWalk.isActive) {
             writeLogf(LOG_INFO, "STATUS", "Walk active: %.0fm, %d pts", currentWalk.totalDistance, currentWalk.dataPoints);
         }
@@ -302,7 +307,7 @@ void loop() {
             Serial.printf("[GPS]   Lat: %.6f, Lon: %.6f\n", currentGPS.latitude, currentGPS.longitude);
             Serial.printf("        Speed: %.1f km/h, Sats: %d\n", currentGPS.speed, currentGPS.satellites);
         } else {
-            Serial.printf("[GPS]   Waiting for fix... (chars: %lu)\n", gps.charsProcessed());
+            Serial.printf("[GPS]   Waiting for fix... (queries: %lu)\n", gpsQueryCount);
         }
 
         if (accelReady) {
@@ -448,36 +453,44 @@ void initAccelerometer() {
 }
 
 void initGPS() {
-    // Wake up GPS module
-    pinMode(GPS_WAKEUP_PIN, OUTPUT);
-    digitalWrite(GPS_WAKEUP_PIN, HIGH);
-    delay(100);
+    // On LilyGo T-A7670G R2, GPS (L76K) is accessed via modem AT commands
+    // NOT via direct UART on GPIO 21/22!
 
-    // Initialize GPS serial (L76K at 9600 baud)
-    SerialGPS.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_TX_PIN, GPS_RX_PIN);
+    if (!modemReady) {
+        Serial.println("  [SKIP] Modem not ready - GPS unavailable");
+        gpsEnabled = false;
+        return;
+    }
+
+    Serial.println("  GPS accessed via modem AT commands");
+
+    // Power on the GPS module
+    Serial.println("  Powering on GPS (AT+CGNSPWR=1)...");
+    if (sendATCommand("AT+CGNSPWR=1", "OK", 2000)) {
+        Serial.println("  [OK] GPS powered on");
+    } else {
+        Serial.println("  [WARN] GPS power command failed, trying anyway...");
+    }
+
     delay(500);
 
-    // Check for GPS data
-    Serial.printf("  GPS UART: TX=GPIO%d, RX=GPIO%d @ %d baud\n",
-        GPS_TX_PIN, GPS_RX_PIN, GPS_BAUDRATE);
-
-    // Wait briefly to see if we get any data
-    unsigned long start = millis();
-    int chars = 0;
-    while (millis() - start < 2000) {
-        if (SerialGPS.available()) {
-            SerialGPS.read();
-            chars++;
-        }
+    // Check GPS power status
+    Serial.println("  Checking GPS power status...");
+    SerialAT.println("AT+CGNSPWR?");
+    delay(500);
+    String response = "";
+    while (SerialAT.available()) {
+        response += (char)SerialAT.read();
     }
+    Serial.printf("  Response: %s\n", response.c_str());
 
-    if (chars > 0) {
-        gpsEnabled = true;
-        Serial.printf("  [OK] GPS responding (%d chars received)\n", chars);
-    } else {
-        gpsEnabled = true;  // Still enable, might just need time for fix
-        Serial.println("  [OK] GPS initialized (waiting for data)");
-    }
+    // Initiate cold start for fresh satellite search
+    Serial.println("  Starting GNSS cold start...");
+    sendATCommand("AT+CGNSCOLD", "OK", 2000);
+
+    gpsEnabled = true;
+    Serial.println("  [OK] GPS initialized via modem");
+    Serial.println("  Note: First fix may take 30-60 seconds outdoors");
 }
 
 void initModem() {
@@ -648,24 +661,105 @@ void writeLogf(LogLevel level, const char* category, const char* format, ...) {
 // Sensor Reading Functions
 // ============================================================================
 
-void readGPS() {
-    static bool hadFirstFix = false;
+// Helper to send AT command and get response
+String sendATCommandGetResponse(const char* cmd, unsigned long timeout) {
+    // Clear any pending data
+    while (SerialAT.available()) SerialAT.read();
 
-    // Read all available GPS data from L76K
-    while (SerialGPS.available() > 0) {
-        char c = SerialGPS.read();
-        gps.encode(c);
+    SerialAT.println(cmd);
+
+    String response = "";
+    unsigned long start = millis();
+    while (millis() - start < timeout) {
+        if (SerialAT.available()) {
+            char c = SerialAT.read();
+            response += c;
+            // Check if we got complete response
+            if (response.indexOf("OK") >= 0 || response.indexOf("ERROR") >= 0) {
+                break;
+            }
+        }
+    }
+    return response;
+}
+
+// Track GPS polling and fix status
+static unsigned long lastGPSPoll = 0;
+static bool hadFirstFix = false;
+static unsigned long gpsQueryCount = 0;
+
+void readGPS() {
+    if (!gpsEnabled || !modemReady) return;
+
+    // Poll GPS every 1 second
+    if (millis() - lastGPSPoll < 1000) return;
+    lastGPSPoll = millis();
+    gpsQueryCount++;
+
+    // Query GPS info via AT command
+    // Response format: +CGNSINF: <run>,<fix>,<datetime>,<lat>,<lon>,<alt>,<speed>,<course>,...,<sats_view>,<sats_used>,...
+    String response = sendATCommandGetResponse("AT+CGNSINF", 1000);
+
+    // Parse the response
+    int idx = response.indexOf("+CGNSINF:");
+    if (idx < 0) return;
+
+    String data = response.substring(idx + 10);  // Skip "+CGNSINF: "
+    data.trim();
+
+    // Split by comma
+    // Fields: run,fix,datetime,lat,lon,alt,speed,course,mode,reserved,hdop,pdop,vdop,reserved,sats_view,sats_used
+    int fieldStart = 0;
+    int fieldNum = 0;
+    int fixStatus = 0;
+    double lat = 0, lon = 0, alt = 0, speed = 0;
+    int satsUsed = 0;
+
+    for (int i = 0; i <= data.length(); i++) {
+        if (i == data.length() || data[i] == ',') {
+            String field = data.substring(fieldStart, i);
+            field.trim();
+
+            switch (fieldNum) {
+                case 0:  // Run status (1 = GPS on)
+                    break;
+                case 1:  // Fix status (1 = valid fix)
+                    fixStatus = field.toInt();
+                    break;
+                case 2:  // UTC datetime
+                    break;
+                case 3:  // Latitude
+                    if (field.length() > 0) lat = field.toDouble();
+                    break;
+                case 4:  // Longitude
+                    if (field.length() > 0) lon = field.toDouble();
+                    break;
+                case 5:  // MSL Altitude
+                    if (field.length() > 0) alt = field.toDouble();
+                    break;
+                case 6:  // Speed (km/h)
+                    if (field.length() > 0) speed = field.toDouble();
+                    break;
+                case 15: // GNSS Satellites Used
+                    if (field.length() > 0) satsUsed = field.toInt();
+                    break;
+            }
+
+            fieldStart = i + 1;
+            fieldNum++;
+        }
     }
 
-    // Update GPS data if valid
-    if (gps.location.isUpdated() && gps.location.isValid()) {
+    // Update GPS data
+    currentGPS.satellites = satsUsed;
+
+    if (fixStatus == 1 && lat != 0 && lon != 0) {
         bool wasValid = currentGPS.valid;
         currentGPS.valid = true;
-        currentGPS.latitude = gps.location.lat();
-        currentGPS.longitude = gps.location.lng();
-        currentGPS.altitude = gps.altitude.meters();
-        currentGPS.speed = gps.speed.kmph();
-        currentGPS.satellites = gps.satellites.value();
+        currentGPS.latitude = lat;
+        currentGPS.longitude = lon;
+        currentGPS.altitude = alt;
+        currentGPS.speed = speed;
 
         // Log first GPS fix
         if (!hadFirstFix) {
@@ -673,6 +767,8 @@ void readGPS() {
             writeLogf(LOG_INFO, "GPS", "First fix! Lat: %.6f, Lon: %.6f, Sats: %d",
                 currentGPS.latitude, currentGPS.longitude, currentGPS.satellites);
         }
+    } else {
+        currentGPS.valid = false;
     }
 }
 
@@ -1108,16 +1204,15 @@ void updateDisplay() {
     display->drawStr(0, 26, buf);
 
     // Row 3: GPS and connectivity status
-    // GPS status with satellite count or chars received
+    // GPS status with satellite count or query count
     if (currentGPS.valid) {
         snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
     } else {
-        // Show chars processed to indicate GPS module is responding
-        unsigned long chars = gps.charsProcessed();
-        if (chars > 0) {
-            snprintf(buf, sizeof(buf), "GPS:%luk", chars / 1000);  // Show as Xk chars
+        // Show query count to indicate GPS polling is happening
+        if (gpsQueryCount > 0) {
+            snprintf(buf, sizeof(buf), "GPS:Q%lu", gpsQueryCount);  // Show query count
         } else {
-            snprintf(buf, sizeof(buf), "GPS:0!");  // No data at all!
+            snprintf(buf, sizeof(buf), "GPS:--");  // Not polling yet
         }
     }
     display->drawStr(0, 38, buf);
