@@ -283,6 +283,9 @@ void loop() {
             currentGPS.satellites,
             WiFi.status() == WL_CONNECTED ? "OK" : "NO",
             displayStatus.batteryPercent);
+        // Log GPS diagnostic info
+        writeLogf(LOG_INFO, "GPS", "Chars: %lu | Sentences: %lu | Checksum fail: %lu",
+            gps.charsProcessed(), gps.sentencesWithFix(), gps.failedChecksum());
         if (currentWalk.isActive) {
             writeLogf(LOG_INFO, "STATUS", "Walk active: %.0fm, %d pts", currentWalk.totalDistance, currentWalk.dataPoints);
         }
@@ -1105,12 +1108,17 @@ void updateDisplay() {
     display->drawStr(0, 26, buf);
 
     // Row 3: GPS and connectivity status
-    // GPS status with satellite count
+    // GPS status with satellite count or chars received
     if (currentGPS.valid) {
         snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
     } else {
         // Show chars processed to indicate GPS module is responding
-        snprintf(buf, sizeof(buf), "GPS:--");
+        unsigned long chars = gps.charsProcessed();
+        if (chars > 0) {
+            snprintf(buf, sizeof(buf), "GPS:%luk", chars / 1000);  // Show as Xk chars
+        } else {
+            snprintf(buf, sizeof(buf), "GPS:0!");  // No data at all!
+        }
     }
     display->drawStr(0, 38, buf);
 
