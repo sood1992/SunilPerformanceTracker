@@ -52,6 +52,54 @@ struct GPSData {
     bool valid = false;
 } currentGPS;
 
+// Simple 1D Kalman Filter for GPS smoothing
+class KalmanFilter {
+public:
+    double Q;  // Process noise covariance
+    double R;  // Measurement noise covariance
+    double P;  // Estimation error covariance
+    double K;  // Kalman gain
+    double X;  // State estimate
+    bool initialized;
+
+    KalmanFilter(double processNoise = 0.00001, double measurementNoise = 0.0001) {
+        Q = processNoise;
+        R = measurementNoise;
+        P = 1.0;
+        K = 0;
+        X = 0;
+        initialized = false;
+    }
+
+    double update(double measurement) {
+        if (!initialized) {
+            X = measurement;
+            initialized = true;
+            return X;
+        }
+
+        // Prediction update
+        P = P + Q;
+
+        // Measurement update
+        K = P / (P + R);
+        X = X + K * (measurement - X);
+        P = (1 - K) * P;
+
+        return X;
+    }
+
+    void reset() {
+        initialized = false;
+        P = 1.0;
+    }
+};
+
+// Kalman filters for GPS coordinates
+KalmanFilter kalmanLat(0.00001, 0.0005);   // Lat filter (tune R based on GPS noise)
+KalmanFilter kalmanLon(0.00001, 0.0005);   // Lon filter
+KalmanFilter kalmanSpeed(0.1, 1.0);         // Speed filter (more aggressive smoothing)
+
 struct AccelData {
     float x = 0;
     float y = 0;
@@ -762,16 +810,19 @@ void readGPS() {
 
     // Check if we have a new valid location
     if (gps.location.isUpdated() && gps.location.isValid()) {
+        // Get raw GPS values
+        double rawLat = gps.location.lat();
+        double rawLon = gps.location.lng();
+        double rawSpeed = gps.speed.isValid() ? gps.speed.kmph() : 0;
+
+        // Apply Kalman filter to smooth GPS data
+        currentGPS.latitude = kalmanLat.update(rawLat);
+        currentGPS.longitude = kalmanLon.update(rawLon);
+        currentGPS.speed = kalmanSpeed.update(rawSpeed);
         currentGPS.valid = true;
-        currentGPS.latitude = gps.location.lat();
-        currentGPS.longitude = gps.location.lng();
 
         if (gps.altitude.isValid()) {
             currentGPS.altitude = gps.altitude.meters();
-        }
-
-        if (gps.speed.isValid()) {
-            currentGPS.speed = gps.speed.kmph();
         }
 
         gpsQueryCount++;  // Count valid location updates
@@ -779,13 +830,19 @@ void readGPS() {
         // Log first GPS fix
         if (!hadFirstFix) {
             hadFirstFix = true;
-            writeLogf(LOG_INFO, "GPS", "First fix! Lat: %.6f, Lon: %.6f, Sats: %d",
-                currentGPS.latitude, currentGPS.longitude, currentGPS.satellites);
-            Serial.printf("[GPS] First fix acquired! Lat: %.6f, Lon: %.6f\n",
+            writeLogf(LOG_INFO, "GPS", "First fix! Raw: %.6f, %.6f | Filtered: %.6f, %.6f",
+                rawLat, rawLon, currentGPS.latitude, currentGPS.longitude);
+            Serial.printf("[GPS] First fix acquired! Lat: %.6f, Lon: %.6f (Kalman filtered)\n",
                 currentGPS.latitude, currentGPS.longitude);
         }
     } else if (!gps.location.isValid()) {
         currentGPS.valid = false;
+        // Reset Kalman filters when GPS fix is lost
+        if (kalmanLat.initialized) {
+            kalmanLat.reset();
+            kalmanLon.reset();
+            kalmanSpeed.reset();
+        }
     }
 
     // Debug output every 30 seconds
