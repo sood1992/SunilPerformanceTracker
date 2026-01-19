@@ -71,8 +71,8 @@
 // ============================================================================
 // Button Configuration
 // ============================================================================
-// Using the BOOT button on GPIO 0 (active LOW - pressed = LOW)
-#define BUTTON_PIN          0
+// Button connected to GPIO 25, other end to GND (active LOW - pressed = LOW)
+#define BUTTON_PIN          25
 #define BUTTON_ACTIVE_LOW   true   // Button is LOW when pressed
 #define BUTTON_DEBOUNCE_MS  50     // Debounce time in ms
 #define BUTTON_LONG_PRESS_MS 2000  // Long press threshold (2 seconds)
