@@ -122,6 +122,7 @@ struct WalkSession {
 
 GPSData lastValidGPS;
 unsigned long lastGPSUpdate = 0;
+unsigned long lastGPSFixTime = 0;  // When we last had a good satellite fix
 unsigned long lastLogTime = 0;
 unsigned long lastActivityTime = 0;
 unsigned long lastStatusPrint = 0;
@@ -717,6 +718,12 @@ void initWiFi() {
     if (WiFi.status() == WL_CONNECTED) {
         Serial.printf("  [OK] IP: %s\n", WiFi.localIP().toString().c_str());
 
+        // Set explicit DNS servers (Google DNS) to avoid router DNS issues
+        IPAddress dns1(8, 8, 8, 8);
+        IPAddress dns2(8, 8, 4, 4);
+        WiFi.config(WiFi.localIP(), WiFi.gatewayIP(), WiFi.subnetMask(), dns1, dns2);
+        Serial.println("  [OK] DNS: 8.8.8.8, 8.8.4.4");
+
         // Sync time via NTP for proper archive folder naming
         configTime(19800, 0, "pool.ntp.org", "time.nist.gov");  // IST = UTC+5:30 = 19800 sec
         Serial.print("  Syncing time...");
@@ -872,7 +879,10 @@ void readGPS() {
     }
 
     // Check if we have a new valid location
-    if (gps.location.isUpdated() && gps.location.isValid()) {
+    // Also check satellite count - if 0 satellites, data is stale/invalid
+    bool hasGoodFix = gps.location.isUpdated() && gps.location.isValid() && currentGPS.satellites >= 3;
+
+    if (hasGoodFix) {
         // Get raw GPS values
         double rawLat = gps.location.lat();
         double rawLon = gps.location.lng();
@@ -895,6 +905,7 @@ void readGPS() {
         }
 
         currentGPS.valid = true;
+        lastGPSFixTime = millis();  // Track when we last had a good fix
 
         if (gps.altitude.isValid()) {
             currentGPS.altitude = gps.altitude.meters();
@@ -910,8 +921,14 @@ void readGPS() {
             Serial.printf("[GPS] First fix acquired! Lat: %.6f, Lon: %.6f (Kalman filtered)\n",
                 currentGPS.latitude, currentGPS.longitude);
         }
-    } else if (!gps.location.isValid()) {
+    } else if (!gps.location.isValid() || currentGPS.satellites < 3) {
+        // Mark invalid if no fix or too few satellites (data is stale)
+        if (currentGPS.valid) {
+            // Only log when transitioning from valid to invalid
+            Serial.printf("[GPS] Fix lost - satellites: %d\n", currentGPS.satellites);
+        }
         currentGPS.valid = false;
+        currentGPS.speed = 0;  // Clear stale speed
         // Reset Kalman filters when GPS fix is lost
         if (kalmanLat.initialized) {
             kalmanLat.reset();
