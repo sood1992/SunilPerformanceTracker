@@ -1265,29 +1265,54 @@ void uploadPendingWalks() {
                 continue;
             }
 
-            // Build JSON payload manually for memory efficiency
-            // Instead of loading all points into JsonDocument, we build the string directly
-            String payload = "{";
-            payload += "\"deviceId\":\"" + String(metaDoc["deviceId"] | DEVICE_ID) + "\",";
-            payload += "\"filename\":\"" + filename + "\",";
-            payload += "\"startTime\":" + String((long)(metaDoc["startTime"] | 0)) + ",";
+            // Get file size to estimate payload size (each point ~100 bytes in JSON)
+            size_t fileSize = walkFile.size();
+            size_t estimatedPayloadSize = fileSize + 500;  // Extra for metadata wrapper
 
-            // Add optional fields if present
-            if (metaDoc.containsKey("startLat")) {
-                payload += "\"startLat\":" + String((double)metaDoc["startLat"], 6) + ",";
+            // Limit payload to prevent memory issues (max ~80KB)
+            const size_t MAX_PAYLOAD_SIZE = 80000;
+            const int MAX_POINTS = 800;  // ~100 bytes per point
+
+            // Pre-allocate String to avoid heap fragmentation
+            String payload;
+            if (!payload.reserve(min(estimatedPayloadSize, MAX_PAYLOAD_SIZE))) {
+                Serial.println("    [ERROR] Failed to allocate memory for payload");
+                writeLogf(LOG_ERROR, "UPLOAD", "Memory allocation failed for %s", filename.c_str());
+                walkFile.close();
+                file = dir.openNextFile();
+                continue;
             }
-            if (metaDoc.containsKey("startLon")) {
-                payload += "\"startLon\":" + String((double)metaDoc["startLon"], 6) + ",";
+
+            // Build JSON header using snprintf for safety
+            char headerBuf[512];
+            const char* deviceId = metaDoc["deviceId"] | DEVICE_ID;
+            long startTime = metaDoc["startTime"] | 0;
+
+            int headerLen;
+            if (metaDoc.containsKey("startLat") && metaDoc.containsKey("startLon")) {
+                double startLat = metaDoc["startLat"];
+                double startLon = metaDoc["startLon"];
+                headerLen = snprintf(headerBuf, sizeof(headerBuf),
+                    "{\"deviceId\":\"%s\",\"startTime\":%ld,\"startLat\":%.6f,\"startLon\":%.6f,\"points\":[",
+                    deviceId, startTime, startLat, startLon);
+            } else {
+                headerLen = snprintf(headerBuf, sizeof(headerBuf),
+                    "{\"deviceId\":\"%s\",\"startTime\":%ld,\"points\":[",
+                    deviceId, startTime);
             }
 
-            payload += "\"points\":[";
+            payload = headerBuf;
 
-            // Read and append points line by line (memory efficient)
+            // Log header for debugging
+            writeLogf(LOG_DEBUG, "UPLOAD", "Header: deviceId=%s, startTime=%ld", deviceId, startTime);
+
+            // Read and append points line by line
             int pointCount = 0;
-            bool firstPoint = true;
-            char lineBuffer[256];  // Buffer for reading lines
+            int skippedPoints = 0;
+            char lineBuffer[256];
+            char pointBuf[200];  // Buffer for each point JSON
 
-            while (walkFile.available()) {
+            while (walkFile.available() && pointCount < MAX_POINTS) {
                 // Read line into buffer
                 int idx = 0;
                 while (walkFile.available() && idx < sizeof(lineBuffer) - 1) {
@@ -1303,45 +1328,60 @@ void uploadPendingWalks() {
                 // Parse the point JSON
                 JsonDocument pointDoc;
                 DeserializationError pointErr = deserializeJson(pointDoc, lineBuffer);
-                if (pointErr) continue;
+                if (pointErr) {
+                    skippedPoints++;
+                    continue;
+                }
 
                 // Validate point has required fields
-                if (!pointDoc.containsKey("lat") || !pointDoc.containsKey("lon")) continue;
-
-                // Add comma separator (except for first point)
-                if (!firstPoint) {
-                    payload += ",";
+                if (!pointDoc.containsKey("lat") || !pointDoc.containsKey("lon")) {
+                    skippedPoints++;
+                    continue;
                 }
-                firstPoint = false;
 
-                // Build point JSON directly
-                payload += "{";
-                payload += "\"t\":" + String((double)pointDoc["t"], 3) + ",";
-                payload += "\"lat\":" + String((double)pointDoc["lat"], 8) + ",";
-                payload += "\"lon\":" + String((double)pointDoc["lon"], 8) + ",";
-                payload += "\"spd\":" + String((double)pointDoc["spd"], 2);
+                // Build point JSON using snprintf
+                double t = pointDoc["t"] | 0.0;
+                double lat = pointDoc["lat"] | 0.0;
+                double lon = pointDoc["lon"] | 0.0;
+                double spd = pointDoc["spd"] | 0.0;
 
-                // Add accelerometer data if present (optional, saves bandwidth if not needed)
+                int pointLen;
                 if (pointDoc.containsKey("ax")) {
-                    payload += ",\"ax\":" + String((double)pointDoc["ax"], 2);
-                    payload += ",\"ay\":" + String((double)pointDoc["ay"], 2);
-                    payload += ",\"az\":" + String((double)pointDoc["az"], 2);
+                    double ax = pointDoc["ax"] | 0.0;
+                    double ay = pointDoc["ay"] | 0.0;
+                    double az = pointDoc["az"] | 0.0;
+                    pointLen = snprintf(pointBuf, sizeof(pointBuf),
+                        "%s{\"t\":%.3f,\"lat\":%.8f,\"lon\":%.8f,\"spd\":%.2f,\"ax\":%.2f,\"ay\":%.2f,\"az\":%.2f}",
+                        (pointCount > 0) ? "," : "", t, lat, lon, spd, ax, ay, az);
+                } else {
+                    pointLen = snprintf(pointBuf, sizeof(pointBuf),
+                        "%s{\"t\":%.3f,\"lat\":%.8f,\"lon\":%.8f,\"spd\":%.2f}",
+                        (pointCount > 0) ? "," : "", t, lat, lon, spd);
                 }
-                payload += "}";
 
+                // Check if we have space
+                if (payload.length() + pointLen + 10 > MAX_PAYLOAD_SIZE) {
+                    writeLogf(LOG_WARN, "UPLOAD", "Payload size limit reached at %d points", pointCount);
+                    break;
+                }
+
+                payload += pointBuf;
                 pointCount++;
 
-                // Yield to prevent watchdog timeout on large files
-                if (pointCount % 50 == 0) {
+                // Yield to prevent watchdog timeout
+                if (pointCount % 100 == 0) {
                     yield();
+                    Serial.printf("    Processing: %d points...\r", pointCount);
                 }
             }
 
             walkFile.close();
             payload += "]}";
 
-            Serial.printf("    Parsed %d points, payload: %d bytes\n", pointCount, payload.length());
-            writeLogf(LOG_UPLOAD, "UPLOAD", "Parsed %d GPS points, payload: %d bytes", pointCount, payload.length());
+            Serial.printf("    Parsed %d points (skipped %d), payload: %d bytes\n",
+                pointCount, skippedPoints, payload.length());
+            writeLogf(LOG_UPLOAD, "UPLOAD", "Parsed %d GPS points, payload: %d bytes",
+                pointCount, payload.length());
 
             // Validate we have actual data to upload
             if (pointCount == 0) {
@@ -1351,6 +1391,15 @@ void uploadPendingWalks() {
                 SD.mkdir("/failed");
                 SD.rename(fullPath.c_str(), failedPath.c_str());
                 writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
+                file = dir.openNextFile();
+                continue;
+            }
+
+            // Verify JSON is valid before sending
+            if (payload.length() < 50 || payload[0] != '{' || payload[payload.length()-1] != '}') {
+                Serial.println("    [ERROR] Malformed JSON payload");
+                writeLogf(LOG_ERROR, "UPLOAD", "Malformed JSON for %s - first char: %c, last char: %c",
+                    filename.c_str(), payload[0], payload[payload.length()-1]);
                 file = dir.openNextFile();
                 continue;
             }
@@ -1366,7 +1415,7 @@ void uploadPendingWalks() {
             http.begin(url);
             http.addHeader("Content-Type", "application/json");
             http.addHeader("X-Device-ID", DEVICE_ID);
-            http.setTimeout(30000);  // 30 second timeout
+            http.setTimeout(60000);  // 60 second timeout for large payloads
 
             writeLogf(LOG_UPLOAD, "UPLOAD", "Payload size: %d bytes, sending POST...", payload.length());
 
