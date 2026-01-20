@@ -147,13 +147,10 @@ struct DisplayStatus {
 String currentLogFile = "";
 unsigned long lastLogFlush = 0;
 
-// Geofence & Standby Mode
+// Geofence (standby mode disabled)
 bool isAtHome = true;              // Assume at home on boot
 bool wasAtHome = true;             // Previous state for edge detection
-bool standbyMode = true;           // Low power mode when at home
 unsigned long lastHomeCheck = 0;   // Last geofence check time
-unsigned long displayOffTime = 0;  // When to turn off display in standby
-bool displayIsOff = false;         // Display power state
 
 // Button State
 bool buttonPressed = false;
@@ -314,8 +311,8 @@ void setup() {
     // Log geofence configuration
     writeLogf(LOG_INFO, "GEOFENCE", "Home: %.6f, %.6f | Start: %dm | End: %dm",
         HOME_LATITUDE, HOME_LONGITUDE, HOME_RADIUS_START, HOME_RADIUS_END);
-    writeLogf(LOG_INFO, "GEOFENCE", "Home WiFi: %s | Standby display off: %ds",
-        HOME_WIFI_SSID, STANDBY_DISPLAY_OFF_MS / 1000);
+    writeLogf(LOG_INFO, "GEOFENCE", "Home WiFi: %s | Standby: DISABLED",
+        HOME_WIFI_SSID);
     Serial.printf("[GEOFENCE] Home: %.6f, %.6f\n", HOME_LATITUDE, HOME_LONGITUDE);
     Serial.printf("[GEOFENCE] Leave radius: %dm | Return radius: %dm\n", HOME_RADIUS_START, HOME_RADIUS_END);
 
@@ -324,9 +321,6 @@ void setup() {
         displayStatus.lastEvent = "System Ready";
         updateDisplay();
     }
-
-    // Initialize display off timer (prevent immediate turn-off in standby)
-    displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
 }
 
 // ============================================================================
@@ -337,15 +331,11 @@ void loop() {
     unsigned long now = millis();
 
     // Handle button input (for manual start/stop)
-    // Button press also wakes display from standby
+    // Button press handling
     handleButton();
 
-    // Read GPS (reduced frequency in standby mode)
-    static unsigned long lastStandbyGPS = 0;
-    if (!standbyMode || (now - lastStandbyGPS >= STANDBY_GPS_INTERVAL)) {
-        readGPS();
-        if (standbyMode) lastStandbyGPS = now;
-    }
+    // Read GPS continuously (no standby reduction)
+    readGPS();
 
     // Read accelerometer and detect steps
     readAccelerometer();
@@ -366,8 +356,8 @@ void loop() {
         lastActivityTime = now;
     }
 
-    // Update display every 500ms (skip if display is off in standby)
-    if (displayReady && !displayIsOff && now - lastDisplayUpdate >= 500) {
+    // Update display every 500ms
+    if (displayReady && now - lastDisplayUpdate >= 500) {
         updateDisplay();
         lastDisplayUpdate = now;
     }
@@ -381,10 +371,8 @@ void loop() {
             now / 60000, ESP.getFreeHeap());
 
         // Battery & Power
-        writeLogf(LOG_INFO, "POWER", "Battery: %.0f%% | Standby: %s | Display: %s",
-            displayStatus.batteryPercent,
-            standbyMode ? "YES" : "NO",
-            displayIsOff ? "OFF" : "ON");
+        writeLogf(LOG_INFO, "POWER", "Battery: %.0f%% | Free heap: %lu bytes",
+            displayStatus.batteryPercent, ESP.getFreeHeap());
 
         // GPS details
         writeLogf(LOG_INFO, "GPS", "Valid: %s | Sats: %d | Lat: %.6f | Lon: %.6f | Speed: %.1f km/h",
@@ -545,13 +533,6 @@ void handleButton() {
         buttonPressed = true;
         buttonPressStart = now;
         buttonHandled = false;
-
-        // Wake display from standby on any button press
-        if (displayIsOff) {
-            displayIsOff = false;
-            displayOffTime = now + STANDBY_DISPLAY_OFF_MS;
-            Serial.println("[BUTTON] Woke display from standby");
-        }
     } else if (!isPressed && buttonPressed) {
         // Button just released
         unsigned long pressDuration = now - buttonPressStart;
@@ -1544,9 +1525,6 @@ void checkHomeStatus() {
         Serial.println("\n[GEOFENCE] Left home area!");
         writeLog(LOG_INFO, "GEOFENCE", "Left home - auto-starting walk");
 
-        standbyMode = false;
-        displayIsOff = false;
-
         // Auto-start walk if not already active
         if (!currentWalk.isActive) {
             startWalkManual();  // Use manual mode (no auto-timeout)
@@ -1572,34 +1550,8 @@ void checkHomeStatus() {
             // Don't set isAtHome yet - stay in "away" mode
             isAtHome = false;
         }
-
-        if (isAtHome) {
-            standbyMode = true;
-            displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
-        }
     }
-
-    // Update standby mode
-    if (isAtHome && !currentWalk.isActive) {
-        standbyMode = true;
-
-        // Turn off display after timeout in standby
-        if (STANDBY_DISPLAY_DIM && millis() > displayOffTime && !displayIsOff) {
-            displayIsOff = true;
-            if (display != nullptr) {
-                display->clearBuffer();
-                display->sendBuffer();
-                Serial.println("[STANDBY] Display off to save power");
-            }
-        }
-    } else {
-        standbyMode = false;
-        if (displayIsOff) {
-            displayIsOff = false;
-            displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
-            Serial.println("[STANDBY] Display on");
-        }
-    }
+    // Standby mode disabled - display always on
 }
 
 // ============================================================================
@@ -1738,7 +1690,7 @@ void updateDisplay() {
 
     // ===== ROW 5: Location Status =====
     if (isAtHome) {
-        snprintf(buf, sizeof(buf), "HOME - Standby");
+        snprintf(buf, sizeof(buf), "HOME - Ready");
     } else if (currentWalk.isActive) {
         double dist = getDistanceFromHome();
         if (dist >= 1000) {
