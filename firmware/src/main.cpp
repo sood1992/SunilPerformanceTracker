@@ -988,6 +988,12 @@ void startWalk() {
 
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== WALK STARTED ==========");
+
+    // Warn if NTP hasn't synced yet (timestamp will be invalid)
+    if (currentWalk.startTimeUnix < 1600000000) {
+        writeLog(LOG_WARN, "WALK", "WARNING: NTP not synced, timestamp may be invalid!");
+        Serial.println("  [WARN] NTP not synced - timestamp will be incorrect!");
+    }
     writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
     writeLogf(LOG_INFO, "WALK", "GPS satellites: %d, Speed: %.1f km/h", currentGPS.satellites, currentGPS.speed);
     writeLogf(LOG_INFO, "WALK", "Unix timestamp: %ld", (long)currentWalk.startTimeUnix);
@@ -1071,6 +1077,12 @@ void startWalkManual() {
 
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== MANUAL WALK STARTED ==========");
+
+    // Warn if NTP hasn't synced yet (timestamp will be invalid)
+    if (currentWalk.startTimeUnix < 1600000000) {
+        writeLog(LOG_WARN, "WALK", "WARNING: NTP not synced, timestamp may be invalid!");
+        Serial.println("  [WARN] NTP not synced - timestamp will be incorrect!");
+    }
     if (currentGPS.valid) {
         writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
         writeLogf(LOG_INFO, "WALK", "GPS satellites: %d", currentGPS.satellites);
@@ -1198,32 +1210,34 @@ void uploadPendingWalks() {
     while (file) {
         if (!file.isDirectory()) {
             String filename = String(file.name());
+            String fullPath = "/pending/" + filename;
             Serial.printf("  Uploading: %s\n", filename.c_str());
             writeLogf(LOG_UPLOAD, "UPLOAD", "=== Processing: %s ===", filename.c_str());
 
-            // Read file content
-            String content = "";
-            while (file.available()) {
-                content += (char)file.read();
-            }
+            // Close the directory file handle and reopen the specific file
             file.close();
-
-            // Parse the file: first line is metadata, rest are points
-            int firstNewline = content.indexOf('\n');
-            if (firstNewline < 0) {
-                Serial.println("    [SKIP] Invalid file format - moving to /failed/");
-                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid file format (no newline)", filename.c_str());
-                // Move to failed directory so it doesn't block queue
-                String failedPath = "/failed/" + filename;
-                SD.mkdir("/failed");
-                SD.rename(("/pending/" + filename).c_str(), failedPath.c_str());
-                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
+            File walkFile = SD.open(fullPath, FILE_READ);
+            if (!walkFile) {
+                writeLogf(LOG_ERROR, "UPLOAD", "Failed to open: %s", fullPath.c_str());
                 file = dir.openNextFile();
                 continue;
             }
 
-            String metaLine = content.substring(0, firstNewline);
-            String pointsData = content.substring(firstNewline + 1);
+            // Read first line (metadata)
+            String metaLine = walkFile.readStringUntil('\n');
+            metaLine.trim();
+
+            if (metaLine.length() == 0) {
+                Serial.println("    [SKIP] Empty file - moving to /failed/");
+                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Empty file", filename.c_str());
+                walkFile.close();
+                String failedPath = "/failed/" + filename;
+                SD.mkdir("/failed");
+                SD.rename(fullPath.c_str(), failedPath.c_str());
+                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
+                file = dir.openNextFile();
+                continue;
+            }
 
             // Parse metadata
             JsonDocument metaDoc;
@@ -1231,56 +1245,120 @@ void uploadPendingWalks() {
             if (metaErr) {
                 Serial.printf("    [SKIP] Invalid metadata: %s - moving to /failed/\n", metaErr.c_str());
                 writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: Invalid metadata JSON: %s", filename.c_str(), metaErr.c_str());
-                // Move to failed directory so it doesn't block queue
+                walkFile.close();
                 String failedPath = "/failed/" + filename;
                 SD.mkdir("/failed");
-                SD.rename(("/pending/" + filename).c_str(), failedPath.c_str());
+                SD.rename(fullPath.c_str(), failedPath.c_str());
                 writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
                 file = dir.openNextFile();
                 continue;
             }
 
-            // Build upload payload
-            JsonDocument uploadDoc;
-            uploadDoc["deviceId"] = metaDoc["deviceId"] | DEVICE_ID;
-            uploadDoc["filename"] = filename;
-            uploadDoc["startTime"] = metaDoc["startTime"];
-            uploadDoc["startLat"] = metaDoc["startLat"];
-            uploadDoc["startLon"] = metaDoc["startLon"];
-
-            // Parse points (NDJSON format - one JSON per line)
-            JsonArray pointsArray = uploadDoc["points"].to<JsonArray>();
-            int pointCount = 0;
-
-            int lineStart = 0;
-            while (lineStart < pointsData.length()) {
-                int lineEnd = pointsData.indexOf('\n', lineStart);
-                if (lineEnd < 0) lineEnd = pointsData.length();
-
-                String line = pointsData.substring(lineStart, lineEnd);
-                line.trim();
-
-                if (line.length() > 0) {
-                    JsonDocument pointDoc;
-                    DeserializationError pointErr = deserializeJson(pointDoc, line);
-                    if (!pointErr) {
-                        JsonObject point = pointsArray.add<JsonObject>();
-                        point["t"] = pointDoc["t"];
-                        point["lat"] = pointDoc["lat"];
-                        point["lon"] = pointDoc["lon"];
-                        point["spd"] = pointDoc["spd"];
-                        point["ax"] = pointDoc["ax"];
-                        point["ay"] = pointDoc["ay"];
-                        point["az"] = pointDoc["az"];
-                        pointCount++;
-                    }
-                }
-
-                lineStart = lineEnd + 1;
+            // Check if there are any data points (file should have more content after metadata)
+            if (!walkFile.available()) {
+                Serial.println("    [SKIP] No GPS points in file - moving to /failed/");
+                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: No GPS data points", filename.c_str());
+                walkFile.close();
+                String failedPath = "/failed/" + filename;
+                SD.mkdir("/failed");
+                SD.rename(fullPath.c_str(), failedPath.c_str());
+                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
+                file = dir.openNextFile();
+                continue;
             }
 
-            Serial.printf("    Parsed %d points\n", pointCount);
-            writeLogf(LOG_UPLOAD, "UPLOAD", "Parsed %d GPS points from file", pointCount);
+            // Build JSON payload manually for memory efficiency
+            // Instead of loading all points into JsonDocument, we build the string directly
+            String payload = "{";
+            payload += "\"deviceId\":\"" + String(metaDoc["deviceId"] | DEVICE_ID) + "\",";
+            payload += "\"filename\":\"" + filename + "\",";
+            payload += "\"startTime\":" + String((long)(metaDoc["startTime"] | 0)) + ",";
+
+            // Add optional fields if present
+            if (metaDoc.containsKey("startLat")) {
+                payload += "\"startLat\":" + String((double)metaDoc["startLat"], 6) + ",";
+            }
+            if (metaDoc.containsKey("startLon")) {
+                payload += "\"startLon\":" + String((double)metaDoc["startLon"], 6) + ",";
+            }
+
+            payload += "\"points\":[";
+
+            // Read and append points line by line (memory efficient)
+            int pointCount = 0;
+            bool firstPoint = true;
+            char lineBuffer[256];  // Buffer for reading lines
+
+            while (walkFile.available()) {
+                // Read line into buffer
+                int idx = 0;
+                while (walkFile.available() && idx < sizeof(lineBuffer) - 1) {
+                    char c = walkFile.read();
+                    if (c == '\n') break;
+                    lineBuffer[idx++] = c;
+                }
+                lineBuffer[idx] = '\0';
+
+                // Skip empty lines
+                if (idx == 0) continue;
+
+                // Parse the point JSON
+                JsonDocument pointDoc;
+                DeserializationError pointErr = deserializeJson(pointDoc, lineBuffer);
+                if (pointErr) continue;
+
+                // Validate point has required fields
+                if (!pointDoc.containsKey("lat") || !pointDoc.containsKey("lon")) continue;
+
+                // Add comma separator (except for first point)
+                if (!firstPoint) {
+                    payload += ",";
+                }
+                firstPoint = false;
+
+                // Build point JSON directly
+                payload += "{";
+                payload += "\"t\":" + String((double)pointDoc["t"], 3) + ",";
+                payload += "\"lat\":" + String((double)pointDoc["lat"], 8) + ",";
+                payload += "\"lon\":" + String((double)pointDoc["lon"], 8) + ",";
+                payload += "\"spd\":" + String((double)pointDoc["spd"], 2);
+
+                // Add accelerometer data if present (optional, saves bandwidth if not needed)
+                if (pointDoc.containsKey("ax")) {
+                    payload += ",\"ax\":" + String((double)pointDoc["ax"], 2);
+                    payload += ",\"ay\":" + String((double)pointDoc["ay"], 2);
+                    payload += ",\"az\":" + String((double)pointDoc["az"], 2);
+                }
+                payload += "}";
+
+                pointCount++;
+
+                // Yield to prevent watchdog timeout on large files
+                if (pointCount % 50 == 0) {
+                    yield();
+                }
+            }
+
+            walkFile.close();
+            payload += "]}";
+
+            Serial.printf("    Parsed %d points, payload: %d bytes\n", pointCount, payload.length());
+            writeLogf(LOG_UPLOAD, "UPLOAD", "Parsed %d GPS points, payload: %d bytes", pointCount, payload.length());
+
+            // Validate we have actual data to upload
+            if (pointCount == 0) {
+                Serial.println("    [SKIP] No valid GPS points - moving to /failed/");
+                writeLogf(LOG_ERROR, "UPLOAD", "SKIP %s: No valid GPS points parsed", filename.c_str());
+                String failedPath = "/failed/" + filename;
+                SD.mkdir("/failed");
+                SD.rename(fullPath.c_str(), failedPath.c_str());
+                writeLogf(LOG_WARN, "UPLOAD", "Moved to: %s", failedPath.c_str());
+                file = dir.openNextFile();
+                continue;
+            }
+
+            // Log free heap before HTTP request
+            writeLogf(LOG_DEBUG, "UPLOAD", "Free heap: %lu bytes", ESP.getFreeHeap());
 
             // Send to server
             HTTPClient http;
@@ -1292,10 +1370,6 @@ void uploadPendingWalks() {
             http.addHeader("X-Device-ID", DEVICE_ID);
             http.setTimeout(30000);  // 30 second timeout
 
-            String payload;
-            serializeJson(uploadDoc, payload);
-
-            Serial.printf("    Payload size: %d bytes\n", payload.length());
             writeLogf(LOG_UPLOAD, "UPLOAD", "Payload size: %d bytes, sending POST...", payload.length());
 
             unsigned long uploadStart = millis();
@@ -1303,8 +1377,6 @@ void uploadPendingWalks() {
             unsigned long uploadDuration = millis() - uploadStart;
             if (httpCode == 200 || httpCode == 201) {
                 writeLogf(LOG_UPLOAD, "UPLOAD", "SUCCESS! HTTP %d in %lums", httpCode, uploadDuration);
-
-                String fullPath = "/pending/" + filename;
 
                 // Archive instead of delete - organize by year/month
                 // Extract timestamp from filename (walk_XXXXXXXX.json)
