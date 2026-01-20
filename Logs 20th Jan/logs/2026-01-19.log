@@ -1,0 +1,608 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 13:35:11 ===
+================================================================================
+[13:35:11][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[13:35:11][INFO][SYSTEM] Device: DOG_WALKER_001
+[13:35:11][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[13:35:11][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[13:35:11][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[13:36:00][INFO][WIFI] Connected! IP: 192.168.29.107
+[13:36:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:37:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:38:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:39:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:40:00][INFO][STATUS] Uptime: 5 min | Steps: 0 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[13:40:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:41:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:42:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:43:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:44:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:45:00][INFO][STATUS] Uptime: 10 min | Steps: 0 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[13:45:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:46:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:47:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:48:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:49:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:50:00][INFO][STATUS] Uptime: 15 min | Steps: 39 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[13:50:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:51:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:52:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:53:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:54:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:55:00][INFO][STATUS] Uptime: 20 min | Steps: 39 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[13:55:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:56:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:57:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:58:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[13:59:00][UPLOAD][UPLOAD] --- Starting upload check ---
+[14:00:00][INFO][STATUS] Uptime: 25 min | Steps: 39 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[14:00:00][UPLOAD][UPLOAD] --- Starting upload check ---
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 16:08:32 ===
+================================================================================
+[16:08:32][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[16:08:33][INFO][SYSTEM] Device: DOG_WALKER_001
+[16:08:33][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[16:08:33][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[16:08:33][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 16:08:55 ===
+================================================================================
+[16:08:55][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[16:08:55][INFO][SYSTEM] Device: DOG_WALKER_001
+[16:08:55][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[16:08:55][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[16:08:55][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[16:09:42][INFO][WIFI] Connected! IP: 192.168.29.107
+[16:09:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:10:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:11:42][WARN][WIFI] Connection lost!
+[16:11:42][INFO][WIFI] Attempting reconnection...
+[16:11:57][WARN][WIFI] Reconnection failed
+[16:12:42][INFO][WIFI] Attempting reconnection...
+[16:12:57][WARN][WIFI] Reconnection failed
+[16:13:42][INFO][STATUS] Uptime: 5 min | Steps: 281 | GPS: NO (0 sats) | WiFi: NO | Batt: 67%
+[16:13:42][INFO][WIFI] Attempting reconnection...
+[16:13:57][WARN][WIFI] Reconnection failed
+[16:14:42][INFO][WIFI] Attempting reconnection...
+[16:14:57][WARN][WIFI] Reconnection failed
+[16:15:42][INFO][WIFI] Attempting reconnection...
+[16:15:57][WARN][WIFI] Reconnection failed
+[16:16:42][INFO][WIFI] Attempting reconnection...
+[16:16:57][WARN][WIFI] Reconnection failed
+[16:17:42][INFO][WIFI] Attempting reconnection...
+[16:17:57][WARN][WIFI] Reconnection failed
+[16:18:42][INFO][STATUS] Uptime: 10 min | Steps: 464 | GPS: NO (0 sats) | WiFi: NO | Batt: 67%
+[16:18:42][INFO][WIFI] Attempting reconnection...
+[16:18:57][WARN][WIFI] Reconnection failed
+[16:19:42][INFO][WIFI] Attempting reconnection...
+[16:19:57][WARN][WIFI] Reconnection failed
+[16:20:42][INFO][WIFI] Attempting reconnection...
+[16:20:57][WARN][WIFI] Reconnection failed
+[16:21:42][INFO][WIFI] Attempting reconnection...
+[16:21:57][WARN][WIFI] Reconnection failed
+[16:22:42][INFO][WIFI] Attempting reconnection...
+[16:22:57][WARN][WIFI] Reconnection failed
+[16:23:42][INFO][STATUS] Uptime: 15 min | Steps: 607 | GPS: NO (0 sats) | WiFi: NO | Batt: 66%
+[16:23:42][INFO][WIFI] Attempting reconnection...
+[16:23:57][WARN][WIFI] Reconnection failed
+[16:24:42][INFO][WIFI] Attempting reconnection...
+[16:24:57][WARN][WIFI] Reconnection failed
+[16:25:42][INFO][WIFI] Attempting reconnection...
+[16:25:57][WARN][WIFI] Reconnection failed
+[16:26:42][INFO][WIFI] Attempting reconnection...
+[16:26:57][WARN][WIFI] Reconnection failed
+[16:27:42][INFO][WIFI] Attempting reconnection...
+[16:27:57][WARN][WIFI] Reconnection failed
+[16:28:42][INFO][STATUS] Uptime: 20 min | Steps: 844 | GPS: NO (0 sats) | WiFi: NO | Batt: 65%
+[16:28:42][INFO][WIFI] Attempting reconnection...
+[16:28:57][WARN][WIFI] Reconnection failed
+[16:29:42][INFO][WIFI] Attempting reconnection...
+[16:29:57][WARN][WIFI] Reconnection failed
+[16:30:42][INFO][WIFI] Attempting reconnection...
+[16:30:57][WARN][WIFI] Reconnection failed
+[16:31:42][INFO][WIFI] Attempting reconnection...
+[16:31:57][WARN][WIFI] Reconnection failed
+[16:32:42][INFO][WIFI] Attempting reconnection...
+[16:32:57][WARN][WIFI] Reconnection failed
+[16:33:42][INFO][STATUS] Uptime: 25 min | Steps: 905 | GPS: NO (0 sats) | WiFi: NO | Batt: 64%
+[16:33:42][INFO][WIFI] Attempting reconnection...
+[16:33:57][WARN][WIFI] Reconnection failed
+[16:34:42][INFO][WIFI] Attempting reconnection...
+[16:34:57][WARN][WIFI] Reconnection failed
+[16:35:42][INFO][WIFI] Attempting reconnection...
+[16:35:57][WARN][WIFI] Reconnection failed
+[16:36:42][INFO][WIFI] Attempting reconnection...
+[16:36:57][WARN][WIFI] Reconnection failed
+[16:37:42][INFO][WIFI] Attempting reconnection...
+[16:37:57][WARN][WIFI] Reconnection failed
+[16:38:42][INFO][STATUS] Uptime: 30 min | Steps: 1206 | GPS: NO (0 sats) | WiFi: NO | Batt: 64%
+[16:38:42][INFO][WIFI] Attempting reconnection...
+[16:38:57][WARN][WIFI] Reconnection failed
+[16:39:42][INFO][WIFI] Attempting reconnection...
+[16:39:51][INFO][WIFI] Reconnected! IP: 192.168.29.107
+[16:39:51][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:40:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:41:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:42:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:43:41][INFO][STATUS] Uptime: 35 min | Steps: 1512 | GPS: NO (0 sats) | WiFi: OK | Batt: 64%
+[16:43:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:44:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:45:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:46:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:47:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:48:42][INFO][STATUS] Uptime: 40 min | Steps: 1512 | GPS: NO (0 sats) | WiFi: OK | Batt: 67%
+[16:48:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:49:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:50:42][UPLOAD][UPLOAD] --- Starting upload check ---
+[16:51:42][UPLOAD][UPLOAD] --- Starting upload check ---
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 16:52:16 ===
+================================================================================
+[16:52:16][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[16:52:16][INFO][SYSTEM] Device: DOG_WALKER_001
+[16:52:16][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[16:52:16][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[16:52:16][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 18:49:08 ===
+================================================================================
+[18:49:08][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[18:49:08][INFO][SYSTEM] Device: DOG_WALKER_001
+[18:49:08][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[18:49:08][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[18:49:08][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 19:13:49 ===
+================================================================================
+[19:13:49][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[19:13:49][INFO][SYSTEM] Device: DOG_WALKER_001
+[19:13:49][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[19:13:49][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[19:13:49][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[19:14:17][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:17][INFO][WALK] Start location: GPS not available
+[19:14:17][INFO][WALK] Data file: /walks/walk_46982.json
+[19:14:17][INFO][WALK] ========== WALK ENDED ==========
+[19:14:17][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:17][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:17][INFO][WALK] Data points: 0
+[19:14:17][INFO][WALK] Steps: 0
+[19:14:17][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:17][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:24][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:24][INFO][WALK] Start location: GPS not available
+[19:14:24][INFO][WALK] Data file: /walks/walk_53754.json
+[19:14:24][INFO][WALK] ========== WALK ENDED ==========
+[19:14:24][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:24][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:24][INFO][WALK] Data points: 0
+[19:14:24][INFO][WALK] Steps: 0
+[19:14:24][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:24][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:25][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:26][INFO][WALK] Start location: GPS not available
+[19:14:26][INFO][WALK] Data file: /walks/walk_55460.json
+[19:14:26][INFO][WALK] ========== WALK ENDED ==========
+[19:14:26][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:26][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:26][INFO][WALK] Data points: 0
+[19:14:26][INFO][WALK] Steps: 0
+[19:14:26][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:26][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:30][INFO][WIFI] Connected! IP: 192.168.29.107
+[19:14:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:14:31][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:31][INFO][WALK] Start location: GPS not available
+[19:14:31][INFO][WALK] Data file: /walks/walk_60811.json
+[19:14:31][INFO][WALK] ========== WALK ENDED ==========
+[19:14:31][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:31][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:31][INFO][WALK] Data points: 0
+[19:14:31][INFO][WALK] Steps: 0
+[19:14:31][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:31][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:39][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:39][INFO][WALK] Start location: GPS not available
+[19:14:39][INFO][WALK] Data file: /walks/walk_68822.json
+[19:14:39][INFO][WALK] ========== WALK ENDED ==========
+[19:14:39][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:39][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:39][INFO][WALK] Data points: 0
+[19:14:39][INFO][WALK] Steps: 0
+[19:14:39][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:39][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:40][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:40][INFO][WALK] Start location: GPS not available
+[19:14:40][INFO][WALK] Data file: /walks/walk_70388.json
+[19:14:41][INFO][WALK] ========== WALK ENDED ==========
+[19:14:41][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:41][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:41][INFO][WALK] Data points: 0
+[19:14:41][INFO][WALK] Steps: 0
+[19:14:41][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:41][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:41][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:41][INFO][WALK] Start location: GPS not available
+[19:14:41][INFO][WALK] Data file: /walks/walk_70798.json
+[19:14:41][INFO][WALK] ========== WALK ENDED ==========
+[19:14:41][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:41][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:41][INFO][WALK] Data points: 0
+[19:14:41][INFO][WALK] Steps: 0
+[19:14:41][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:41][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:14:41][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:14:41][INFO][WALK] Start location: GPS not available
+[19:14:41][INFO][WALK] Data file: /walks/walk_71194.json
+[19:14:41][INFO][WALK] ========== WALK ENDED ==========
+[19:14:41][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:14:41][INFO][WALK] Distance: 0 m (0.00 km)
+[19:14:41][INFO][WALK] Data points: 0
+[19:14:41][INFO][WALK] Steps: 0
+[19:14:41][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:14:41][WARN][WALK] Walk too short (<60000 ms) - discarding
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 19:15:39 ===
+================================================================================
+[19:15:39][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[19:15:39][INFO][SYSTEM] Device: DOG_WALKER_001
+[19:15:39][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[19:15:39][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[19:15:39][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[19:16:05][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:16:05][INFO][WALK] Start location: GPS not available
+[19:16:05][INFO][WALK] Data file: /walks/walk_45418.json
+[19:16:05][INFO][WALK] ========== WALK ENDED ==========
+[19:16:05][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:16:05][INFO][WALK] Distance: 0 m (0.00 km)
+[19:16:05][INFO][WALK] Data points: 0
+[19:16:05][INFO][WALK] Steps: 0
+[19:16:05][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:16:05][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:16:19][INFO][WIFI] Connected! IP: 192.168.29.107
+[19:16:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:16:24][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:16:24][INFO][WALK] Start location: GPS not available
+[19:16:24][INFO][WALK] Data file: /walks/walk_64797.json
+[19:16:24][INFO][WALK] ========== WALK ENDED ==========
+[19:16:24][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:16:24][INFO][WALK] Distance: 0 m (0.00 km)
+[19:16:24][INFO][WALK] Data points: 0
+[19:16:24][INFO][WALK] Steps: 0
+[19:16:24][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:16:24][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:16:31][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:16:31][INFO][WALK] Start location: GPS not available
+[19:16:31][INFO][WALK] Data file: /walks/walk_71378.json
+[19:16:31][INFO][WALK] ========== WALK ENDED ==========
+[19:16:31][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:16:31][INFO][WALK] Distance: 0 m (0.00 km)
+[19:16:31][INFO][WALK] Data points: 0
+[19:16:31][INFO][WALK] Steps: 0
+[19:16:31][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:16:31][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:16:33][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:16:33][INFO][WALK] Start location: GPS not available
+[19:16:33][INFO][WALK] Data file: /walks/walk_74047.json
+[19:16:33][INFO][WALK] ========== WALK ENDED ==========
+[19:16:34][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:16:34][INFO][WALK] Distance: 0 m (0.00 km)
+[19:16:34][INFO][WALK] Data points: 0
+[19:16:34][INFO][WALK] Steps: 0
+[19:16:34][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:16:34][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:17:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:17:57][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:17:57][INFO][WALK] Start location: GPS not available
+[19:17:57][INFO][WALK] Data file: /walks/walk_157894.json
+[19:17:57][INFO][WALK] ========== WALK ENDED ==========
+[19:17:57][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:17:57][INFO][WALK] Distance: 0 m (0.00 km)
+[19:17:57][INFO][WALK] Data points: 0
+[19:17:57][INFO][WALK] Steps: 0
+[19:17:57][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:17:57][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:06][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:06][INFO][WALK] Start location: GPS not available
+[19:18:06][INFO][WALK] Data file: /walks/walk_166223.json
+[19:18:06][INFO][WALK] ========== WALK ENDED ==========
+[19:18:06][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:06][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:06][INFO][WALK] Data points: 0
+[19:18:06][INFO][WALK] Steps: 0
+[19:18:06][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:06][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:13][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:13][INFO][WALK] Start location: GPS not available
+[19:18:13][INFO][WALK] Data file: /walks/walk_173793.json
+[19:18:13][INFO][WALK] ========== WALK ENDED ==========
+[19:18:13][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:13][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:13][INFO][WALK] Data points: 0
+[19:18:13][INFO][WALK] Steps: 0
+[19:18:13][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:13][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:18:33][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:33][INFO][WALK] Start location: GPS not available
+[19:18:33][INFO][WALK] Data file: /walks/walk_193615.json
+[19:18:33][INFO][WALK] ========== WALK ENDED ==========
+[19:18:33][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:33][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:33][INFO][WALK] Data points: 0
+[19:18:33][INFO][WALK] Steps: 0
+[19:18:33][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:33][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:34][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:34][INFO][WALK] Start location: GPS not available
+[19:18:34][INFO][WALK] Data file: /walks/walk_194547.json
+[19:18:34][INFO][WALK] ========== WALK ENDED ==========
+[19:18:34][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:34][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:34][INFO][WALK] Data points: 0
+[19:18:34][INFO][WALK] Steps: 0
+[19:18:34][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:34][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:34][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:34][INFO][WALK] Start location: GPS not available
+[19:18:34][INFO][WALK] Data file: /walks/walk_195042.json
+[19:18:34][INFO][WALK] ========== WALK ENDED ==========
+[19:18:35][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:35][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:35][INFO][WALK] Data points: 0
+[19:18:35][INFO][WALK] Steps: 0
+[19:18:35][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:35][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:35][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:35][INFO][WALK] Start location: GPS not available
+[19:18:35][INFO][WALK] Data file: /walks/walk_195810.json
+[19:18:35][INFO][WALK] ========== WALK ENDED ==========
+[19:18:35][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:35][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:35][INFO][WALK] Data points: 0
+[19:18:35][INFO][WALK] Steps: 0
+[19:18:35][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:35][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:36][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:36][INFO][WALK] Start location: GPS not available
+[19:18:36][INFO][WALK] Data file: /walks/walk_196186.json
+[19:18:36][INFO][WALK] ========== WALK ENDED ==========
+[19:18:36][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:36][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:36][INFO][WALK] Data points: 0
+[19:18:36][INFO][WALK] Steps: 0
+[19:18:36][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:36][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:36][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:36][INFO][WALK] Start location: GPS not available
+[19:18:36][INFO][WALK] Data file: /walks/walk_196991.json
+[19:18:36][INFO][WALK] ========== WALK ENDED ==========
+[19:18:36][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:36][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:36][INFO][WALK] Data points: 0
+[19:18:37][INFO][WALK] Steps: 0
+[19:18:37][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:37][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:37][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:37][INFO][WALK] Start location: GPS not available
+[19:18:37][INFO][WALK] Data file: /walks/walk_197301.json
+[19:18:37][INFO][WALK] ========== WALK ENDED ==========
+[19:18:37][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:37][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:37][INFO][WALK] Data points: 0
+[19:18:37][INFO][WALK] Steps: 0
+[19:18:37][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:37][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:38][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:38][INFO][WALK] Start location: GPS not available
+[19:18:38][INFO][WALK] Data file: /walks/walk_198646.json
+[19:18:38][INFO][WALK] ========== WALK ENDED ==========
+[19:18:38][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:38][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:38][INFO][WALK] Data points: 0
+[19:18:38][INFO][WALK] Steps: 0
+[19:18:38][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:38][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:18:52][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:18:52][INFO][WALK] Start location: GPS not available
+[19:18:52][INFO][WALK] Data file: /walks/walk_212256.json
+[19:18:52][INFO][WALK] ========== WALK ENDED ==========
+[19:18:52][INFO][WALK] Duration: 0 sec (0.0 min)
+[19:18:52][INFO][WALK] Distance: 0 m (0.00 km)
+[19:18:52][INFO][WALK] Data points: 0
+[19:18:52][INFO][WALK] Steps: 0
+[19:18:52][INFO][WALK] Max speed: 0.0 km/h, Avg speed: 0.0 km/h
+[19:18:52][WARN][WALK] Walk too short (<60000 ms) - discarding
+[19:19:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:20:19][INFO][STATUS] Uptime: 5 min | Steps: 1 | GPS: NO (0 sats) | WiFi: OK | Batt: 75%
+[19:20:19][INFO][GPS] Queries: 279 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:20:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:21:19][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:22:19][UPLOAD][UPLOAD] --- Starting upload check ---
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 19:24:23 ===
+================================================================================
+[19:24:23][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[19:24:23][INFO][SYSTEM] Device: DOG_WALKER_001
+[19:24:23][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[19:24:23][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[19:24:23][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[19:24:34][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:24:34][INFO][WALK] Start location: GPS not available
+[19:24:34][INFO][WALK] Data file: /walks/walk_30540.json
+[19:24:59][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[19:24:59][INFO][WALK] Duration: 24 sec (0.4 min)
+[19:24:59][INFO][WALK] Distance: 0 m (0.00 km)
+[19:24:59][INFO][WALK] Data points: 0
+[19:24:59][INFO][WALK] Steps: 11
+[19:24:59][INFO][WALK] Queued for upload: /pending/walk_30488.json
+[19:25:04][INFO][WIFI] Connected! IP: 192.168.29.107
+[19:25:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:25:04][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:25:04][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 19:25:54 ===
+================================================================================
+[19:25:54][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[19:25:54][INFO][SYSTEM] Device: DOG_WALKER_001
+[19:25:54][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[19:25:54][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[19:25:54][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 19:26:17 ===
+================================================================================
+[19:26:17][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[19:26:17][INFO][SYSTEM] Device: DOG_WALKER_001
+[19:26:17][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[19:26:17][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[19:26:17][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[19:26:33][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[19:26:33][INFO][WALK] Start location: GPS not available
+[19:26:33][INFO][WALK] Data file: /walks/walk_31818.json
+[19:27:01][INFO][WIFI] Connected! IP: 192.168.29.107
+[19:27:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:27:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:27:02][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:28:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:28:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:28:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:29:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:29:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:29:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:30:01][WARN][WIFI] Connection lost!
+[19:30:01][INFO][WIFI] Attempting reconnection...
+[19:30:17][WARN][WIFI] Reconnection failed
+[19:31:01][INFO][STATUS] Uptime: 5 min | Steps: 298 | GPS: NO (0 sats) | WiFi: NO | Batt: 68%
+[19:31:01][INFO][GPS] Queries: 268 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:31:01][INFO][STATUS] Walk active: 0m, 0 pts
+[19:31:02][INFO][WIFI] Attempting reconnection...
+[19:31:17][WARN][WIFI] Reconnection failed
+[19:32:02][INFO][WIFI] Attempting reconnection...
+[19:32:17][WARN][WIFI] Reconnection failed
+[19:33:02][INFO][WIFI] Attempting reconnection...
+[19:33:17][WARN][WIFI] Reconnection failed
+[19:34:02][INFO][WIFI] Attempting reconnection...
+[19:34:17][WARN][WIFI] Reconnection failed
+[19:35:02][INFO][WIFI] Attempting reconnection...
+[19:35:17][WARN][WIFI] Reconnection failed
+[19:36:01][INFO][STATUS] Uptime: 10 min | Steps: 511 | GPS: NO (0 sats) | WiFi: NO | Batt: 66%
+[19:36:01][INFO][GPS] Queries: 493 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:36:01][INFO][STATUS] Walk active: 0m, 0 pts
+[19:36:02][INFO][WIFI] Attempting reconnection...
+[19:36:17][WARN][WIFI] Reconnection failed
+[19:37:02][INFO][WIFI] Attempting reconnection...
+[19:37:17][WARN][WIFI] Reconnection failed
+[19:38:02][INFO][WIFI] Attempting reconnection...
+[19:38:17][WARN][WIFI] Reconnection failed
+[19:39:02][INFO][WIFI] Attempting reconnection...
+[19:39:17][WARN][WIFI] Reconnection failed
+[19:40:02][INFO][WIFI] Attempting reconnection...
+[19:40:17][WARN][WIFI] Reconnection failed
+[19:41:01][INFO][STATUS] Uptime: 15 min | Steps: 720 | GPS: NO (0 sats) | WiFi: NO | Batt: 65%
+[19:41:01][INFO][GPS] Queries: 718 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:41:01][INFO][STATUS] Walk active: 0m, 0 pts
+[19:41:02][INFO][WIFI] Attempting reconnection...
+[19:41:17][WARN][WIFI] Reconnection failed
+[19:42:02][INFO][WIFI] Attempting reconnection...
+[19:42:17][WARN][WIFI] Reconnection failed
+[19:43:02][INFO][WIFI] Attempting reconnection...
+[19:43:17][WARN][WIFI] Reconnection failed
+[19:44:02][INFO][WIFI] Attempting reconnection...
+[19:44:03][INFO][WIFI] Reconnected! IP: 192.168.29.107
+[19:44:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:44:03][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:44:03][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:45:01][WARN][WIFI] Connection lost!
+[19:45:01][INFO][WIFI] Attempting reconnection...
+[19:45:16][WARN][WIFI] Reconnection failed
+[19:46:01][INFO][STATUS] Uptime: 20 min | Steps: 1075 | GPS: NO (0 sats) | WiFi: NO | Batt: 65%
+[19:46:01][INFO][GPS] Queries: 957 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:46:01][INFO][STATUS] Walk active: 0m, 0 pts
+[19:46:01][INFO][WIFI] Attempting reconnection...
+[19:46:16][WARN][WIFI] Reconnection failed
+[19:47:01][INFO][WIFI] Attempting reconnection...
+[19:47:16][WARN][WIFI] Reconnection failed
+[19:48:01][INFO][WIFI] Attempting reconnection...
+[19:48:16][WARN][WIFI] Reconnection failed
+[19:49:01][INFO][WIFI] Attempting reconnection...
+[19:49:16][WARN][WIFI] Reconnection failed
+[19:50:01][INFO][WIFI] Attempting reconnection...
+[19:50:01][INFO][WIFI] Reconnected! IP: 192.168.29.107
+[19:50:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:50:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:50:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:50:59][INFO][STATUS] Uptime: 25 min | Steps: 1483 | GPS: NO (0 sats) | WiFi: OK | Batt: 65%
+[19:50:59][INFO][GPS] Queries: 1197 | Fix: NO | Lat: 0.000000, Lon: 0.000000
+[19:50:59][INFO][STATUS] Walk active: 0m, 0 pts
+[19:50:59][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:50:59][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:50:59][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:51:59][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:51:59][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[19:51:59][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[19:52:24][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[19:52:24][INFO][WALK] Duration: 1553 sec (25.9 min)
+[19:52:24][INFO][WALK] Distance: 0 m (0.00 km)
+[19:52:24][INFO][WALK] Data points: 0
+[19:52:24][INFO][WALK] Steps: 1528
+[19:52:24][INFO][WALK] Queued for upload: /pending/walk_31771.json
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 20:06:20 ===
+================================================================================
+[20:06:20][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[20:06:20][INFO][SYSTEM] Device: DOG_WALKER_001
+[20:06:20][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[20:06:20][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[20:06:21][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[20:07:01][INFO][WIFI] Connected! IP: 192.168.29.107
+[20:07:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:07:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[20:07:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[20:07:01][UPLOAD][UPLOAD] === Processing: walk_31771.json ===
+[20:07:01][ERROR][UPLOAD] SKIP walk_31771.json: Invalid file format (no newline)
+[20:08:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:08:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[20:08:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[20:08:01][UPLOAD][UPLOAD] === Processing: walk_31771.json ===
+[20:08:01][ERROR][UPLOAD] SKIP walk_31771.json: Invalid file format (no newline)
+[20:09:01][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:09:01][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[20:09:01][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[20:09:01][UPLOAD][UPLOAD] === Processing: walk_31771.json ===
+[20:09:01][ERROR][UPLOAD] SKIP walk_31771.json: Invalid file format (no newline)
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 20:10:43 ===
+================================================================================
+[20:10:44][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[20:10:44][INFO][SYSTEM] Device: DOG_WALKER_001
+[20:10:44][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[20:10:44][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[20:10:44][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[20:11:01][DEBUG][GPS] Chars: 10334, Good: 0, Errors: 1, Sats: 0
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-19 20:31:23 ===
+================================================================================
+[20:31:23][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[20:31:23][INFO][SYSTEM] Device: DOG_WALKER_001
+[20:31:23][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[20:31:23][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[20:31:23][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[20:31:53][DEBUG][GPS] Chars: 12209, Good: 0, Errors: 2, Sats: 0
+[20:32:23][DEBUG][GPS] Chars: 30619, Good: 0, Errors: 2, Sats: 0
+[20:32:23][INFO][WIFI] Connected! IP: 192.168.29.107
+[20:32:23][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:32:53][DEBUG][GPS] Chars: 49188, Good: 0, Errors: 2, Sats: 0

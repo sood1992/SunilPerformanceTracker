@@ -1,0 +1,230 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: Boot+23687ms ===
+================================================================================
+[23][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[23][INFO][SYSTEM] Device: DOG_WALKER_001
+[23][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[23][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: FAIL
+[23][INFO][GEOFENCE] Home: 28.536500, 77.254600 | Start: 100m | End: 30m
+[23][INFO][GEOFENCE] Home WiFi: CTNF-Universal | Standby display off: 60s
+[30][DEBUG][GPS] Chars: 328, Good: 0, Errors: 0, Sats: 0
+[60][INFO][WIFI] Attempting reconnection...
+[75][WARN][WIFI] Reconnection failed
+[75][DEBUG][GPS] Chars: 700, Good: 0, Errors: 1, Sats: 0
+[76][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[76][INFO][WALK] Start location: GPS not available
+[76][INFO][WALK] Unix timestamp: 76
+[76][INFO][WALK] Data file: /walks/walk_76.json
+[81][INFO][GPS] First fix! Raw: 28.536744, 77.254790 | Filtered: 28.536744, 77.254790
+[105][DEBUG][GPS] Chars: 18421, Good: 48, Errors: 2, Sats: 5
+[120][INFO][STATUS] === Periodic Status Report ===
+[120][INFO][STATUS] Uptime: 2 min | Free heap: 208040 bytes
+[120][INFO][POWER] Battery: 66% | Standby: NO | Display: ON
+[120][INFO][GPS] Valid: YES | Sats: 5 | Lat: 28.536172 | Lon: 77.255299 | Speed: 2.8 km/h
+[120][INFO][GPS] Chars: 29046 | Fixes: 77 | Errors: 2 | Alt: 240.8m
+[120][INFO][GEOFENCE] AtHome: YES | Distance: 77m | WiFi: disconnected
+[120][INFO][WALK] Active: YES | Duration: 43 sec | Distance: 82m | Points: 38
+[120][INFO][WALK] Steps: 63 | MaxSpeed: 6.0 | AvgSpeed: 3.0 | Manual: YES
+[120][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[120][INFO][WIFI] Disconnected
+[120][INFO][ACCEL] X: 0.24 | Y: -3.53 | Z: 7.14 | Mag: 7.97 | Moving: NO
+[120][INFO][WIFI] Attempting reconnection...
+[135][WARN][WIFI] Reconnection failed
+[135][DEBUG][GPS] Chars: 29415, Good: 78, Errors: 2, Sats: 5
+[150][INFO][GEOFENCE] Left home - auto-starting walk
+[165][DEBUG][GPS] Chars: 51801, Good: 138, Errors: 2, Sats: 5
+[180][INFO][WIFI] Attempting reconnection...
+[195][WARN][WIFI] Reconnection failed
+[195][DEBUG][GPS] Chars: 63277, Good: 169, Errors: 3, Sats: 5
+[225][DEBUG][GPS] Chars: 85739, Good: 229, Errors: 3, Sats: 5
+[240][INFO][STATUS] === Periodic Status Report ===
+[240][INFO][STATUS] Uptime: 4 min | Free heap: 208028 bytes
+[240][INFO][POWER] Battery: 66% | Standby: NO | Display: ON
+[240][INFO][GPS] Valid: YES | Sats: 5 | Lat: 28.535845 | Lon: 77.254389 | Speed: 4.3 km/h
+[240][INFO][GPS] Chars: 96732 | Fixes: 258 | Errors: 3 | Alt: 243.1m
+[240][INFO][GEOFENCE] AtHome: NO | Distance: 76m | WiFi: disconnected
+[240][INFO][WALK] Active: YES | Duration: 163 sec | Distance: 247m | Points: 128
+[240][INFO][WALK] Steps: 215 | MaxSpeed: 8.9 | AvgSpeed: 3.3 | Manual: YES
+[240][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[240][INFO][WIFI] Disconnected
+[240][INFO][ACCEL] X: 1.41 | Y: -3.26 | Z: 14.51 | Mag: 14.94 | Moving: YES
+[240][INFO][WIFI] Attempting reconnection...
+[255][WARN][WIFI] Reconnection failed
+[255][DEBUG][GPS] Chars: 97263, Good: 260, Errors: 4, Sats: 5
+[285][DEBUG][GPS] Chars: 119809, Good: 320, Errors: 4, Sats: 5
+[300][INFO][WIFI] Attempting reconnection...
+[315][WARN][WIFI] Reconnection failed
+[315][DEBUG][GPS] Chars: 131584, Good: 352, Errors: 5, Sats: 4
+[345][DEBUG][GPS] Chars: 152820, Good: 412, Errors: 5, Sats: 7
+[360][INFO][STATUS] === Periodic Status Report ===
+[360][INFO][STATUS] Uptime: 6 min | Free heap: 207888 bytes
+[360][INFO][POWER] Battery: 66% | Standby: NO | Display: ON
+[360][INFO][GPS] Valid: YES | Sats: 4 | Lat: 28.536359 | Lon: 77.254636 | Speed: 5.1 km/h
+[360][INFO][GPS] Chars: 163200 | Fixes: 440 | Errors: 5 | Alt: 183.5m
+[360][INFO][GEOFENCE] AtHome: NO | Distance: 16m | WiFi: disconnected
+[360][INFO][WALK] Active: YES | Duration: 283 sec | Distance: 340m | Points: 218
+[360][INFO][WALK] Steps: 298 | MaxSpeed: 8.9 | AvgSpeed: 2.7 | Manual: YES
+[360][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[360][INFO][WIFI] Disconnected
+[360][INFO][ACCEL] X: 0.31 | Y: -2.86 | Z: 9.34 | Mag: 9.77 | Moving: NO
+[360][INFO][WIFI] Attempting reconnection...
+[375][WARN][WIFI] Reconnection failed
+[375][DEBUG][GPS] Chars: 163812, Good: 442, Errors: 6, Sats: 0
+[405][DEBUG][GPS] Chars: 180084, Good: 442, Errors: 6, Sats: 0
+[420][INFO][WIFI] Attempting reconnection...
+[435][WARN][WIFI] Reconnection failed
+[436][DEBUG][GPS] Chars: 188763, Good: 442, Errors: 7, Sats: 0
+[466][DEBUG][GPS] Chars: 207067, Good: 488, Errors: 7, Sats: 4
+[480][INFO][STATUS] === Periodic Status Report ===
+[480][INFO][STATUS] Uptime: 8 min | Free heap: 207888 bytes
+[480][INFO][POWER] Battery: 66% | Standby: NO | Display: ON
+[480][INFO][GPS] Valid: YES | Sats: 5 | Lat: 28.536464 | Lon: 77.254198 | Speed: 8.4 km/h
+[480][INFO][GPS] Chars: 215597 | Fixes: 509 | Errors: 7 | Alt: 123.2m
+[480][INFO][GEOFENCE] AtHome: NO | Distance: 39m | WiFi: disconnected
+[480][INFO][WALK] Active: YES | Duration: 403 sec | Distance: 434m | Points: 308
+[480][INFO][WALK] Steps: 341 | MaxSpeed: 8.9 | AvgSpeed: 3.2 | Manual: YES
+[480][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[480][INFO][WIFI] Disconnected
+[480][INFO][ACCEL] X: 1.49 | Y: -1.84 | Z: 11.18 | Mag: 11.43 | Moving: NO
+[480][INFO][WIFI] Attempting reconnection...
+[495][WARN][WIFI] Reconnection failed
+[496][DEBUG][GPS] Chars: 216650, Good: 512, Errors: 8, Sats: 5
+[526][DEBUG][GPS] Chars: 233908, Good: 537, Errors: 8, Sats: 0
+[540][INFO][WIFI] Attempting reconnection...
+[555][WARN][WIFI] Reconnection failed
+[556][DEBUG][GPS] Chars: 242065, Good: 537, Errors: 9, Sats: 0
+[586][DEBUG][GPS] Chars: 257431, Good: 537, Errors: 9, Sats: 0
+[600][INFO][STATUS] === Periodic Status Report ===
+[600][INFO][STATUS] Uptime: 10 min | Free heap: 207888 bytes
+[600][INFO][POWER] Battery: 65% | Standby: NO | Display: ON
+[600][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[600][INFO][GPS] Chars: 264645 | Fixes: 537 | Errors: 9 | Alt: 114.4m
+[600][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[600][INFO][WALK] Active: YES | Duration: 523 sec | Distance: 508m | Points: 398
+[600][INFO][WALK] Steps: 376 | MaxSpeed: 8.9 | AvgSpeed: 3.8 | Manual: YES
+[600][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[600][INFO][WIFI] Disconnected
+[600][INFO][ACCEL] X: 0.27 | Y: -1.77 | Z: 10.75 | Mag: 10.90 | Moving: NO
+[600][INFO][WIFI] Attempting reconnection...
+[615][WARN][WIFI] Reconnection failed
+[616][DEBUG][GPS] Chars: 265516, Good: 537, Errors: 10, Sats: 0
+[646][DEBUG][GPS] Chars: 280914, Good: 537, Errors: 10, Sats: 0
+[660][INFO][WIFI] Attempting reconnection...
+[675][WARN][WIFI] Reconnection failed
+[676][DEBUG][GPS] Chars: 288942, Good: 537, Errors: 11, Sats: 0
+[687][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[687][INFO][WALK] Duration: 611 sec (10.2 min)
+[687][INFO][WALK] Distance: 508 m (0.51 km)
+[687][INFO][WALK] Data points: 456
+[687][INFO][WALK] Steps: 377
+[687][INFO][WALK] Queued for upload: /pending/walk_76.json
+[695][INFO][WALK] ========== WALK STARTED ==========
+[695][INFO][WALK] Start location: 28.537051, 77.254508
+[695][INFO][WALK] GPS satellites: 0, Speed: 5.7 km/h
+[695][INFO][WALK] Unix timestamp: 695
+[695][INFO][WALK] Data file: /walks/walk_695.json
+[706][DEBUG][GPS] Chars: 304340, Good: 537, Errors: 11, Sats: 0
+[720][INFO][STATUS] === Periodic Status Report ===
+[720][INFO][STATUS] Uptime: 12 min | Free heap: 207840 bytes
+[720][INFO][POWER] Battery: 65% | Standby: NO | Display: ON
+[720][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[720][INFO][GPS] Chars: 311538 | Fixes: 537 | Errors: 11 | Alt: 114.4m
+[720][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[720][INFO][WALK] Active: YES | Duration: 24 sec | Distance: 0m | Points: 25
+[720][INFO][WALK] Steps: 0 | MaxSpeed: 5.7 | AvgSpeed: 5.7 | Manual: NO
+[720][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 0
+[720][INFO][WIFI] Disconnected
+[720][INFO][ACCEL] X: 0.08 | Y: -1.84 | Z: 10.71 | Mag: 10.87 | Moving: NO
+[720][INFO][WIFI] Attempting reconnection...
+[735][WARN][WIFI] Reconnection failed
+[735][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[735][INFO][WALK] Duration: 40 sec (0.7 min)
+[735][INFO][WALK] Distance: 0 m (0.00 km)
+[735][INFO][WALK] Data points: 25
+[735][INFO][WALK] Steps: 0
+[735][INFO][WALK] Queued for upload: /pending/walk_695.json
+[736][DEBUG][GPS] Chars: 312183, Good: 537, Errors: 12, Sats: 0
+[766][DEBUG][GPS] Chars: 327693, Good: 537, Errors: 12, Sats: 0
+[780][INFO][WIFI] Attempting reconnection...
+[795][WARN][WIFI] Reconnection failed
+[796][DEBUG][GPS] Chars: 335721, Good: 537, Errors: 13, Sats: 0
+[826][DEBUG][GPS] Chars: 351231, Good: 537, Errors: 13, Sats: 0
+[840][INFO][STATUS] === Periodic Status Report ===
+[840][INFO][STATUS] Uptime: 14 min | Free heap: 207840 bytes
+[840][INFO][POWER] Battery: 65% | Standby: NO | Display: ON
+[840][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[840][INFO][GPS] Chars: 358469 | Fixes: 537 | Errors: 13 | Alt: 114.4m
+[840][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[840][INFO][WALK] Active: NO | Today steps: 407
+[840][INFO][UPLOAD] Pending: 2 | Today uploads: 0 | Failed: 0
+[840][INFO][WIFI] Disconnected
+[840][INFO][ACCEL] X: 0.08 | Y: -1.80 | Z: 10.63 | Mag: 10.78 | Moving: NO
+[840][INFO][WIFI] Attempting reconnection...
+[855][WARN][WIFI] Reconnection failed
+[856][DEBUG][GPS] Chars: 359259, Good: 537, Errors: 14, Sats: 0
+[886][DEBUG][GPS] Chars: 374761, Good: 537, Errors: 14, Sats: 0
+[900][INFO][WIFI] Attempting reconnection...
+[915][WARN][WIFI] Reconnection failed
+[916][DEBUG][GPS] Chars: 382781, Good: 537, Errors: 15, Sats: 0
+[946][DEBUG][GPS] Chars: 398139, Good: 537, Errors: 15, Sats: 0
+[960][INFO][STATUS] === Periodic Status Report ===
+[960][INFO][STATUS] Uptime: 16 min | Free heap: 206792 bytes
+[960][INFO][POWER] Battery: 68% | Standby: NO | Display: ON
+[960][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[960][INFO][GPS] Chars: 405241 | Fixes: 537 | Errors: 15 | Alt: 114.4m
+[960][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[960][INFO][WALK] Active: NO | Today steps: 407
+[960][INFO][UPLOAD] Pending: 2 | Today uploads: 0 | Failed: 0
+[960][INFO][WIFI] Disconnected
+[960][INFO][ACCEL] X: 0.04 | Y: -2.28 | Z: 10.51 | Mag: 10.76 | Moving: NO
+[960][INFO][WIFI] Attempting reconnection...
+[975][WARN][WIFI] Reconnection failed
+[976][DEBUG][GPS] Chars: 406032, Good: 537, Errors: 16, Sats: 0
+[987][INFO][WALK] ========== WALK STARTED ==========
+[987][INFO][WALK] Start location: 28.537051, 77.254508
+[987][INFO][WALK] GPS satellites: 0, Speed: 5.7 km/h
+[987][INFO][WALK] Unix timestamp: 987
+[987][INFO][WALK] Data file: /walks/walk_987.json
+[1006][DEBUG][GPS] Chars: 421182, Good: 537, Errors: 16, Sats: 0
+[1020][INFO][WIFI] Attempting reconnection...
+[1035][WARN][WIFI] Reconnection failed
+[1036][DEBUG][GPS] Chars: 429051, Good: 537, Errors: 17, Sats: 0
+[1066][DEBUG][GPS] Chars: 444209, Good: 537, Errors: 17, Sats: 0
+[1080][INFO][STATUS] === Periodic Status Report ===
+[1080][INFO][STATUS] Uptime: 18 min | Free heap: 206792 bytes
+[1080][INFO][POWER] Battery: 68% | Standby: NO | Display: ON
+[1080][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[1080][INFO][GPS] Chars: 451287 | Fixes: 537 | Errors: 17 | Alt: 114.4m
+[1080][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[1080][INFO][WALK] Active: YES | Duration: 92 sec | Distance: 0m | Points: 78
+[1080][INFO][WALK] Steps: 0 | MaxSpeed: 5.7 | AvgSpeed: 5.7 | Manual: NO
+[1080][INFO][UPLOAD] Pending: 2 | Today uploads: 0 | Failed: 0
+[1080][INFO][WIFI] Disconnected
+[1080][INFO][ACCEL] X: -0.08 | Y: -2.04 | Z: 10.75 | Mag: 10.94 | Moving: NO
+[1080][INFO][WIFI] Attempting reconnection...
+[1095][WARN][WIFI] Reconnection failed
+[1096][DEBUG][GPS] Chars: 452079, Good: 537, Errors: 17, Sats: 0
+[1126][DEBUG][GPS] Chars: 467109, Good: 537, Errors: 17, Sats: 0
+[1140][INFO][WIFI] Attempting reconnection...
+[1155][WARN][WIFI] Reconnection failed
+[1156][DEBUG][GPS] Chars: 474915, Good: 537, Errors: 17, Sats: 0
+[1186][DEBUG][GPS] Chars: 489945, Good: 537, Errors: 17, Sats: 0
+[1200][INFO][STATUS] === Periodic Status Report ===
+[1200][INFO][STATUS] Uptime: 20 min | Free heap: 207344 bytes
+[1200][INFO][POWER] Battery: 75% | Standby: NO | Display: ON
+[1200][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.537051 | Lon: 77.254508 | Speed: 5.7 km/h
+[1200][INFO][GPS] Chars: 496999 | Fixes: 537 | Errors: 17 | Alt: 114.4m
+[1200][INFO][GEOFENCE] AtHome: NO | Distance: 62m | WiFi: disconnected
+[1200][INFO][WALK] Active: YES | Duration: 212 sec | Distance: 0m | Points: 168
+[1200][INFO][WALK] Steps: 4 | MaxSpeed: 5.7 | AvgSpeed: 5.7 | Manual: NO
+[1200][INFO][UPLOAD] Pending: 2 | Today uploads: 0 | Failed: 0
+[1200][INFO][WIFI] Disconnected
+[1200][INFO][ACCEL] X: -0.12 | Y: -2.51 | Z: 10.51 | Mag: 10.81 | Moving: NO
+[1200][INFO][WIFI] Attempting reconnection...
+[1213][INFO][WIFI] Reconnected! IP: 192.168.29.106
+[1213][UPLOAD][UPLOAD] --- Starting upload check ---
+[1213][UPLOAD][UPLOAD] === Processing: walk_76.json ===
+[1214][UPLOAD][UPLOAD] Parsed 352 GPS points from file
+[1214][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[1216][UPLOAD][UPLOAD] Payload size: 341 bytes, sending POST...

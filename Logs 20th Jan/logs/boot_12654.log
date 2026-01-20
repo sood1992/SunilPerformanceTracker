@@ -1,0 +1,130 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: Boot+12680ms ===
+================================================================================
+[12][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[12][INFO][SYSTEM] Device: DOG_WALKER_001
+[12][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[12][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[12][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[20:12:19][DEBUG][GPS] Chars: 10460, Good: 0, Errors: 1, Sats: 0
+[20:12:30][INFO][GPS] First fix! Lat: 28.536587, Lon: 77.254292, Sats: 5
+[20:12:41][INFO][WALK] ========== WALK STARTED ==========
+[20:12:41][INFO][WALK] Start location: 28.536550, 77.254108
+[20:12:41][INFO][WALK] GPS satellites: 8, Speed: 2.4 km/h
+[20:12:41][INFO][WALK] Data file: /walks/walk_52713.json
+[20:12:49][DEBUG][GPS] Chars: 30407, Good: 37, Errors: 1, Sats: 5
+[20:12:49][INFO][WIFI] Connected! IP: 192.168.29.107
+[20:12:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:12:49][UPLOAD][UPLOAD] === Processing: walk_30488.json ===
+[20:12:49][ERROR][UPLOAD] SKIP walk_30488.json: Invalid file format (no newline)
+[20:12:49][WARN][UPLOAD] Moved to: /failed/walk_30488.json
+[20:12:49][UPLOAD][UPLOAD] === Processing: walk_31771.json ===
+[20:12:49][ERROR][UPLOAD] SKIP walk_31771.json: Invalid file format (no newline)
+[20:12:49][WARN][UPLOAD] Moved to: /failed/walk_31771.json
+[20:13:19][DEBUG][GPS] Chars: 52094, Good: 97, Errors: 1, Sats: 12
+[20:13:49][DEBUG][GPS] Chars: 74705, Good: 157, Errors: 1, Sats: 13
+[20:13:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:14:19][DEBUG][GPS] Chars: 97529, Good: 217, Errors: 1, Sats: 11
+[20:14:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:14:49][DEBUG][GPS] Chars: 120291, Good: 277, Errors: 1, Sats: 13
+[20:15:02][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[20:15:02][INFO][WALK] Duration: 140 sec (2.3 min)
+[20:15:02][INFO][WALK] Distance: 209 m (0.21 km)
+[20:15:02][INFO][WALK] Data points: 140
+[20:15:02][INFO][WALK] Steps: 170
+[20:15:02][INFO][WALK] Queued for upload: /pending/walk_52658.json
+[20:15:07][INFO][WALK] ========== WALK STARTED ==========
+[20:15:07][INFO][WALK] Start location: 28.536303, 77.255010
+[20:15:07][INFO][WALK] GPS satellites: 8, Speed: 2.9 km/h
+[20:15:07][INFO][WALK] Data file: /walks/walk_198373.json
+[20:15:19][DEBUG][GPS] Chars: 143000, Good: 337, Errors: 1, Sats: 8
+[20:15:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:15:49][UPLOAD][UPLOAD] === Processing: walk_52658.json ===
+[20:15:49][UPLOAD][UPLOAD] Parsed 140 GPS points from file
+[20:15:49][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[20:15:49][UPLOAD][UPLOAD] Payload size: 14660 bytes, sending POST...
+[20:15:56][ERROR][UPLOAD] FAILED! HTTP -1 after 7040ms
+[20:15:56][ERROR][UPLOAD] Server response: 
+[20:15:56][ERROR][UPLOAD] File: walk_52658.json, Points: 140, Size: 14660 bytes
+[20:15:57][DEBUG][GPS] Chars: 166038, Good: 398, Errors: 2, Sats: 7
+[20:16:27][DEBUG][GPS] Chars: 183908, Good: 398, Errors: 2, Sats: 0
+[20:16:32][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[20:16:32][INFO][WALK] Duration: 84 sec (1.4 min)
+[20:16:32][INFO][WALK] Distance: 65 m (0.07 km)
+[20:16:32][INFO][WALK] Data points: 78
+[20:16:32][INFO][WALK] Steps: 60
+[20:16:32][INFO][WALK] Queued for upload: /pending/walk_198317.json
+[20:16:49][INFO][STATUS] Uptime: 5 min | Steps: 253 | GPS: OK (0 sats) | WiFi: OK | Batt: 67%
+[20:16:49][INFO][GPS] Fixes: 398 | Valid: YES | Lat: 28.536420, Lon: 77.254599 | Sats: 0
+[20:16:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:16:49][UPLOAD][UPLOAD] === Processing: walk_52658.json ===
+[20:16:49][UPLOAD][UPLOAD] Parsed 140 GPS points from file
+[20:16:49][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[20:16:49][UPLOAD][UPLOAD] Payload size: 14660 bytes, sending POST...
+[20:16:49][ERROR][UPLOAD] FAILED! HTTP -1 after 55ms
+[20:16:49][ERROR][UPLOAD] Server response: 
+[20:16:49][ERROR][UPLOAD] File: walk_52658.json, Points: 140, Size: 14660 bytes
+[20:16:50][UPLOAD][UPLOAD] === Processing: walk_198317.json ===
+[20:16:50][UPLOAD][UPLOAD] Parsed 78 GPS points from file
+[20:16:50][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[20:16:50][UPLOAD][UPLOAD] Payload size: 8298 bytes, sending POST...
+[20:16:59][UPLOAD][UPLOAD] SUCCESS! HTTP 201 in 9245ms
+[20:17:00][UPLOAD][UPLOAD] Archived to: /archived/2026/01/walk_198317.json
+[20:17:00][DEBUG][GPS] Chars: 197205, Good: 398, Errors: 3, Sats: 0
+[20:17:30][DEBUG][GPS] Chars: 214605, Good: 398, Errors: 3, Sats: 0
+[20:17:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:17:49][UPLOAD][UPLOAD] === Processing: walk_52658.json ===
+[20:17:49][UPLOAD][UPLOAD] Parsed 140 GPS points from file
+[20:17:49][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[20:17:49][UPLOAD][UPLOAD] Payload size: 14660 bytes, sending POST...
+[20:17:54][UPLOAD][UPLOAD] SUCCESS! HTTP 201 in 4320ms
+[20:17:54][UPLOAD][UPLOAD] Archived to: /archived/2026/01/walk_52658.json
+[20:18:00][DEBUG][GPS] Chars: 229456, Good: 398, Errors: 4, Sats: 0
+[20:18:30][DEBUG][GPS] Chars: 247070, Good: 398, Errors: 4, Sats: 0
+[20:18:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:19:00][DEBUG][GPS] Chars: 264740, Good: 398, Errors: 4, Sats: 0
+[20:19:30][DEBUG][GPS] Chars: 282426, Good: 398, Errors: 4, Sats: 0
+[20:19:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:20:00][DEBUG][GPS] Chars: 299908, Good: 398, Errors: 4, Sats: 0
+[20:20:30][DEBUG][GPS] Chars: 317308, Good: 398, Errors: 4, Sats: 0
+[20:20:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:21:00][DEBUG][GPS] Chars: 334876, Good: 398, Errors: 4, Sats: 0
+[20:21:30][DEBUG][GPS] Chars: 352276, Good: 398, Errors: 4, Sats: 0
+[20:21:49][INFO][STATUS] Uptime: 10 min | Steps: 253 | GPS: OK (0 sats) | WiFi: OK | Batt: 75%
+[20:21:49][INFO][GPS] Fixes: 398 | Valid: YES | Lat: 28.536420, Lon: 77.254599 | Sats: 0
+[20:21:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:22:00][DEBUG][GPS] Chars: 369860, Good: 398, Errors: 4, Sats: 0
+[20:22:30][DEBUG][GPS] Chars: 387316, Good: 398, Errors: 4, Sats: 0
+[20:22:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:23:00][DEBUG][GPS] Chars: 404978, Good: 398, Errors: 4, Sats: 0
+[20:23:30][DEBUG][GPS] Chars: 422522, Good: 398, Errors: 4, Sats: 0
+[20:23:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:24:00][DEBUG][GPS] Chars: 440164, Good: 398, Errors: 4, Sats: 0
+[20:24:30][DEBUG][GPS] Chars: 457716, Good: 398, Errors: 4, Sats: 0
+[20:24:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:25:00][DEBUG][GPS] Chars: 475122, Good: 398, Errors: 4, Sats: 0
+[20:25:30][DEBUG][GPS] Chars: 492578, Good: 398, Errors: 4, Sats: 0
+[20:25:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:26:00][DEBUG][GPS] Chars: 510146, Good: 398, Errors: 4, Sats: 0
+[20:26:30][DEBUG][GPS] Chars: 527610, Good: 398, Errors: 4, Sats: 0
+[20:26:49][INFO][STATUS] Uptime: 15 min | Steps: 253 | GPS: OK (0 sats) | WiFi: OK | Batt: 75%
+[20:26:49][INFO][GPS] Fixes: 398 | Valid: YES | Lat: 28.536420, Lon: 77.254599 | Sats: 0
+[20:26:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:27:00][DEBUG][GPS] Chars: 545162, Good: 398, Errors: 4, Sats: 0
+[20:27:30][DEBUG][GPS] Chars: 562600, Good: 398, Errors: 4, Sats: 0
+[20:27:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:28:00][DEBUG][GPS] Chars: 580034, Good: 398, Errors: 4, Sats: 0
+[20:28:18][INFO][WALK] ========== WALK STARTED ==========
+[20:28:18][INFO][WALK] Start location: 28.536420, 77.254599
+[20:28:18][INFO][WALK] GPS satellites: 0, Speed: 12.7 km/h
+[20:28:18][INFO][WALK] Data file: /walks/walk_989103.json
+[20:28:30][DEBUG][GPS] Chars: 597492, Good: 398, Errors: 4, Sats: 0
+[20:28:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:29:00][DEBUG][GPS] Chars: 615148, Good: 398, Errors: 4, Sats: 0
+[20:29:30][DEBUG][GPS] Chars: 632604, Good: 398, Errors: 4, Sats: 0
+[20:29:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:30:00][DEBUG][GPS] Chars: 650092, Good: 398, Errors: 4, Sats: 0
+[20:30:30][DEBUG][GPS] Chars: 667644, Good: 398, Errors: 4, Sats: 0
+[20:30:49][UPLOAD][UPLOAD] --- Starting upload check ---
+[20:31:00][DEBUG][GPS] Chars: 685212, Good: 398, Errors: 4, Sats: 0

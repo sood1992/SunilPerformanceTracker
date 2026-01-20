@@ -1,0 +1,27 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: Boot+17286ms ===
+================================================================================
+[17][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[17][INFO][SYSTEM] Device: DOG_WALKER_001
+[17][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[17][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[17][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.107
+[17:07:30][INFO][WIFI] Connected! IP: 192.168.29.107
+[17:07:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:08:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:09:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:10:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:11:30][INFO][STATUS] Uptime: 5 min | Steps: 35 | GPS: NO (0 sats) | WiFi: OK | Batt: 76%
+[17:11:30][INFO][GPS] Chars: 0 | Sentences: 0 | Checksum fail: 0
+[17:11:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:12:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:13:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:14:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:15:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:16:30][INFO][STATUS] Uptime: 10 min | Steps: 35 | GPS: NO (0 sats) | WiFi: OK | Batt: 75%
+[17:16:30][INFO][GPS] Chars: 0 | Sentences: 0 | Checksum fail: 0
+[17:16:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:17:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:18:30][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:19:30][UPLOAD][UPLOAD] --- Starting upload check ---
