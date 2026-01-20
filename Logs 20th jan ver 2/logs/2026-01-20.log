@@ -1,0 +1,980 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-20 17:19:25 ===
+================================================================================
+[17:19:25][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[17:19:25][INFO][SYSTEM] Device: DOG_WALKER_001
+[17:19:25][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[17:19:25][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[17:19:25][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.106
+[17:19:25][INFO][GEOFENCE] Home: 28.536500, 77.254600 | Start: 100m | End: 30m
+[17:19:25][INFO][GEOFENCE] Home WiFi: CTNF-Universal | Standby: DISABLED
+[17:19:46][DEBUG][GPS] Chars: 9744, Good: 0, Errors: 1, Sats: 0
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-20 17:21:29 ===
+================================================================================
+[17:21:29][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[17:21:29][INFO][SYSTEM] Device: DOG_WALKER_001
+[17:21:30][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[17:21:30][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[17:21:30][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.106
+[17:21:30][INFO][GEOFENCE] Home: 28.536500, 77.254600 | Start: 100m | End: 30m
+[17:21:30][INFO][GEOFENCE] Home WiFi: CTNF-Universal | Standby: DISABLED
+[17:21:45][DEBUG][GPS] Chars: 8355, Good: 0, Errors: 1, Sats: 0
+[17:22:15][DEBUG][GPS] Chars: 23693, Good: 0, Errors: 1, Sats: 0
+[17:22:15][INFO][WIFI] Connected! IP: 192.168.29.106
+[17:22:15][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:22:45][DEBUG][GPS] Chars: 39019, Good: 0, Errors: 1, Sats: 0
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: 2026-01-20 17:23:13 ===
+================================================================================
+[17:23:13][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[17:23:13][INFO][SYSTEM] Device: DOG_WALKER_001
+[17:23:13][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[17:23:13][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[17:23:13][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.106
+[17:23:13][INFO][GEOFENCE] Home: 28.536500, 77.254600 | Start: 100m | End: 30m
+[17:23:13][INFO][GEOFENCE] Home WiFi: CTNF-Universal | Standby: DISABLED
+[17:23:33][DEBUG][GPS] Chars: 10166, Good: 0, Errors: 1, Sats: 0
+[17:24:03][INFO][WIFI] Connected! IP: 192.168.29.106
+[17:24:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:24:03][DEBUG][GPS] Chars: 25487, Good: 0, Errors: 1, Sats: 0
+[17:24:33][DEBUG][GPS] Chars: 40794, Good: 0, Errors: 1, Sats: 0
+[17:25:03][INFO][STATUS] === Periodic Status Report ===
+[17:25:03][INFO][STATUS] Uptime: 2 min | Free heap: 206576 bytes
+[17:25:03][INFO][POWER] Battery: 65% | Free heap: 206576 bytes
+[17:25:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:25:03][INFO][GPS] Chars: 55986 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:25:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:25:03][INFO][WALK] Active: NO | Today steps: 11
+[17:25:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:25:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -63 dBm
+[17:25:03][INFO][ACCEL] X: 0.04 | Y: -2.71 | Z: 10.59 | Mag: 10.93 | Moving: NO
+[17:25:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:25:03][DEBUG][GPS] Chars: 56200, Good: 0, Errors: 1, Sats: 0
+[17:25:33][DEBUG][GPS] Chars: 71534, Good: 0, Errors: 1, Sats: 0
+[17:26:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:26:03][DEBUG][GPS] Chars: 86844, Good: 0, Errors: 1, Sats: 0
+[17:26:33][DEBUG][GPS] Chars: 102162, Good: 0, Errors: 1, Sats: 0
+[17:27:03][INFO][STATUS] === Periodic Status Report ===
+[17:27:03][INFO][STATUS] Uptime: 4 min | Free heap: 206608 bytes
+[17:27:03][INFO][POWER] Battery: 65% | Free heap: 206608 bytes
+[17:27:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:27:03][INFO][GPS] Chars: 117224 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:27:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:27:03][INFO][WALK] Active: NO | Today steps: 11
+[17:27:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:27:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -60 dBm
+[17:27:03][INFO][ACCEL] X: -0.08 | Y: -2.75 | Z: 10.51 | Mag: 10.87 | Moving: NO
+[17:27:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:27:03][DEBUG][GPS] Chars: 117432, Good: 0, Errors: 1, Sats: 0
+[17:27:33][DEBUG][GPS] Chars: 132710, Good: 0, Errors: 1, Sats: 0
+[17:28:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:28:03][DEBUG][GPS] Chars: 148068, Good: 0, Errors: 1, Sats: 0
+[17:28:33][DEBUG][GPS] Chars: 163362, Good: 0, Errors: 1, Sats: 0
+[17:29:03][INFO][STATUS] === Periodic Status Report ===
+[17:29:03][INFO][STATUS] Uptime: 6 min | Free heap: 206608 bytes
+[17:29:03][INFO][POWER] Battery: 65% | Free heap: 206608 bytes
+[17:29:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:29:03][INFO][GPS] Chars: 178458 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:29:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:29:03][INFO][WALK] Active: NO | Today steps: 11
+[17:29:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:29:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -58 dBm
+[17:29:03][INFO][ACCEL] X: -0.20 | Y: -2.90 | Z: 10.51 | Mag: 10.91 | Moving: NO
+[17:29:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:29:03][DEBUG][GPS] Chars: 178656, Good: 0, Errors: 1, Sats: 0
+[17:29:33][DEBUG][GPS] Chars: 194014, Good: 0, Errors: 1, Sats: 0
+[17:30:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:30:03][DEBUG][GPS] Chars: 209284, Good: 0, Errors: 1, Sats: 0
+[17:30:33][DEBUG][GPS] Chars: 224554, Good: 0, Errors: 1, Sats: 0
+[17:31:03][INFO][STATUS] === Periodic Status Report ===
+[17:31:03][INFO][STATUS] Uptime: 8 min | Free heap: 206608 bytes
+[17:31:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:31:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:31:03][INFO][GPS] Chars: 239637 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:31:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:31:03][INFO][WALK] Active: NO | Today steps: 11
+[17:31:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:31:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -73 dBm
+[17:31:03][INFO][ACCEL] X: -0.16 | Y: -2.59 | Z: 10.36 | Mag: 10.68 | Moving: NO
+[17:31:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:31:03][DEBUG][GPS] Chars: 239824, Good: 0, Errors: 1, Sats: 0
+[17:31:33][DEBUG][GPS] Chars: 255094, Good: 0, Errors: 1, Sats: 0
+[17:32:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:32:03][DEBUG][GPS] Chars: 270372, Good: 0, Errors: 1, Sats: 0
+[17:32:33][DEBUG][GPS] Chars: 285642, Good: 0, Errors: 1, Sats: 0
+[17:33:03][INFO][STATUS] === Periodic Status Report ===
+[17:33:03][INFO][STATUS] Uptime: 10 min | Free heap: 206608 bytes
+[17:33:03][INFO][POWER] Battery: 61% | Free heap: 206608 bytes
+[17:33:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:33:03][INFO][GPS] Chars: 300734 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:33:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:33:03][INFO][WALK] Active: NO | Today steps: 11
+[17:33:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:33:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -61 dBm
+[17:33:03][INFO][ACCEL] X: -0.12 | Y: -2.94 | Z: 10.36 | Mag: 10.77 | Moving: NO
+[17:33:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:33:03][DEBUG][GPS] Chars: 300912, Good: 0, Errors: 1, Sats: 0
+[17:33:33][DEBUG][GPS] Chars: 316222, Good: 0, Errors: 1, Sats: 0
+[17:34:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:34:03][DEBUG][GPS] Chars: 331771, Good: 0, Errors: 1, Sats: 0
+[17:34:33][DEBUG][GPS] Chars: 347971, Good: 0, Errors: 1, Sats: 0
+[17:35:03][INFO][STATUS] === Periodic Status Report ===
+[17:35:03][INFO][STATUS] Uptime: 12 min | Free heap: 206608 bytes
+[17:35:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:35:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:35:03][INFO][GPS] Chars: 363970 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:35:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:35:03][INFO][WALK] Active: NO | Today steps: 11
+[17:35:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:35:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -53 dBm
+[17:35:03][INFO][ACCEL] X: -0.04 | Y: -2.75 | Z: 10.59 | Mag: 10.94 | Moving: NO
+[17:35:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:35:03][DEBUG][GPS] Chars: 364171, Good: 0, Errors: 1, Sats: 0
+[17:35:33][DEBUG][GPS] Chars: 380371, Good: 0, Errors: 1, Sats: 0
+[17:36:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:36:03][DEBUG][GPS] Chars: 396571, Good: 0, Errors: 1, Sats: 0
+[17:36:33][DEBUG][GPS] Chars: 412819, Good: 0, Errors: 1, Sats: 0
+[17:37:03][INFO][STATUS] === Periodic Status Report ===
+[17:37:03][INFO][STATUS] Uptime: 14 min | Free heap: 206608 bytes
+[17:37:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:37:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:37:03][INFO][GPS] Chars: 428877 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:37:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:37:03][INFO][WALK] Active: NO | Today steps: 11
+[17:37:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:37:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -64 dBm
+[17:37:03][INFO][ACCEL] X: -0.04 | Y: -2.86 | Z: 10.32 | Mag: 10.71 | Moving: NO
+[17:37:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:37:03][DEBUG][GPS] Chars: 429059, Good: 0, Errors: 1, Sats: 0
+[17:37:33][DEBUG][GPS] Chars: 445259, Good: 0, Errors: 1, Sats: 0
+[17:38:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:38:03][DEBUG][GPS] Chars: 461459, Good: 0, Errors: 1, Sats: 0
+[17:38:33][DEBUG][GPS] Chars: 477675, Good: 0, Errors: 1, Sats: 0
+[17:39:03][INFO][STATUS] === Periodic Status Report ===
+[17:39:03][INFO][STATUS] Uptime: 16 min | Free heap: 206608 bytes
+[17:39:03][INFO][POWER] Battery: 61% | Free heap: 206608 bytes
+[17:39:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:39:03][INFO][GPS] Chars: 493694 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:39:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:39:03][INFO][WALK] Active: NO | Today steps: 11
+[17:39:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:39:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -64 dBm
+[17:39:03][INFO][ACCEL] X: -0.04 | Y: -2.94 | Z: 10.40 | Mag: 10.80 | Moving: NO
+[17:39:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:39:03][DEBUG][GPS] Chars: 493875, Good: 0, Errors: 1, Sats: 0
+[17:39:33][DEBUG][GPS] Chars: 510163, Good: 0, Errors: 1, Sats: 0
+[17:40:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:40:03][DEBUG][GPS] Chars: 526363, Good: 0, Errors: 1, Sats: 0
+[17:40:33][DEBUG][GPS] Chars: 542563, Good: 0, Errors: 1, Sats: 0
+[17:41:03][INFO][STATUS] === Periodic Status Report ===
+[17:41:03][INFO][STATUS] Uptime: 18 min | Free heap: 206608 bytes
+[17:41:03][INFO][POWER] Battery: 63% | Free heap: 206472 bytes
+[17:41:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:41:03][INFO][GPS] Chars: 558645 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:41:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:41:03][INFO][WALK] Active: NO | Today steps: 15
+[17:41:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:41:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -56 dBm
+[17:41:03][INFO][ACCEL] X: -0.12 | Y: -2.67 | Z: 10.59 | Mag: 10.92 | Moving: NO
+[17:41:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:41:03][DEBUG][GPS] Chars: 558801, Good: 0, Errors: 1, Sats: 0
+[17:41:33][DEBUG][GPS] Chars: 575061, Good: 0, Errors: 1, Sats: 0
+[17:42:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:42:03][DEBUG][GPS] Chars: 591441, Good: 0, Errors: 1, Sats: 0
+[17:42:33][DEBUG][GPS] Chars: 607869, Good: 0, Errors: 1, Sats: 0
+[17:43:03][INFO][STATUS] === Periodic Status Report ===
+[17:43:03][INFO][STATUS] Uptime: 20 min | Free heap: 206608 bytes
+[17:43:03][INFO][POWER] Battery: 65% | Free heap: 206608 bytes
+[17:43:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:43:03][INFO][GPS] Chars: 624109 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:43:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:43:03][INFO][WALK] Active: NO | Today steps: 15
+[17:43:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:43:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -52 dBm
+[17:43:03][INFO][ACCEL] X: 0.12 | Y: -2.63 | Z: 10.51 | Mag: 10.84 | Moving: NO
+[17:43:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:43:03][DEBUG][GPS] Chars: 624257, Good: 0, Errors: 1, Sats: 0
+[17:43:33][DEBUG][GPS] Chars: 640613, Good: 0, Errors: 1, Sats: 0
+[17:44:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:44:03][DEBUG][GPS] Chars: 656929, Good: 0, Errors: 1, Sats: 0
+[17:44:33][DEBUG][GPS] Chars: 673237, Good: 0, Errors: 1, Sats: 0
+[17:45:03][INFO][STATUS] === Periodic Status Report ===
+[17:45:03][INFO][STATUS] Uptime: 22 min | Free heap: 206608 bytes
+[17:45:03][INFO][POWER] Battery: 65% | Free heap: 206608 bytes
+[17:45:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:45:03][INFO][GPS] Chars: 689526 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:45:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:45:03][INFO][WALK] Active: NO | Today steps: 15
+[17:45:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:45:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -58 dBm
+[17:45:03][INFO][ACCEL] X: 0.20 | Y: -2.79 | Z: 10.63 | Mag: 10.99 | Moving: NO
+[17:45:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:45:03][DEBUG][GPS] Chars: 689673, Good: 0, Errors: 1, Sats: 0
+[17:45:33][DEBUG][GPS] Chars: 706205, Good: 0, Errors: 1, Sats: 0
+[17:46:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:46:03][DEBUG][GPS] Chars: 722529, Good: 0, Errors: 1, Sats: 0
+[17:46:33][DEBUG][GPS] Chars: 738965, Good: 0, Errors: 1, Sats: 0
+[17:47:03][INFO][STATUS] === Periodic Status Report ===
+[17:47:03][INFO][STATUS] Uptime: 24 min | Free heap: 206608 bytes
+[17:47:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:47:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:47:03][INFO][GPS] Chars: 755144 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:47:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:47:03][INFO][WALK] Active: NO | Today steps: 15
+[17:47:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:47:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -55 dBm
+[17:47:03][INFO][ACCEL] X: 0.16 | Y: -2.86 | Z: 10.71 | Mag: 11.09 | Moving: NO
+[17:47:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:47:03][DEBUG][GPS] Chars: 755265, Good: 0, Errors: 1, Sats: 0
+[17:47:33][DEBUG][GPS] Chars: 771733, Good: 0, Errors: 1, Sats: 0
+[17:48:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:48:03][DEBUG][GPS] Chars: 788105, Good: 0, Errors: 1, Sats: 0
+[17:48:33][DEBUG][GPS] Chars: 804541, Good: 0, Errors: 1, Sats: 0
+[17:49:03][INFO][STATUS] === Periodic Status Report ===
+[17:49:03][INFO][STATUS] Uptime: 26 min | Free heap: 206608 bytes
+[17:49:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:49:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:49:03][INFO][GPS] Chars: 820927 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:49:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:49:03][INFO][WALK] Active: NO | Today steps: 15
+[17:49:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:49:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -59 dBm
+[17:49:03][INFO][ACCEL] X: 0.04 | Y: -2.75 | Z: 10.71 | Mag: 11.06 | Moving: NO
+[17:49:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:49:03][DEBUG][GPS] Chars: 821057, Good: 0, Errors: 1, Sats: 0
+[17:49:33][DEBUG][GPS] Chars: 837485, Good: 0, Errors: 1, Sats: 0
+[17:50:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:50:03][DEBUG][GPS] Chars: 853937, Good: 0, Errors: 1, Sats: 0
+[17:50:33][DEBUG][GPS] Chars: 870261, Good: 0, Errors: 1, Sats: 0
+[17:51:03][INFO][STATUS] === Periodic Status Report ===
+[17:51:03][INFO][STATUS] Uptime: 28 min | Free heap: 206608 bytes
+[17:51:03][INFO][POWER] Battery: 62% | Free heap: 206608 bytes
+[17:51:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:51:03][INFO][GPS] Chars: 886593 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:51:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:51:03][INFO][WALK] Active: NO | Today steps: 15
+[17:51:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:51:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -52 dBm
+[17:51:03][INFO][ACCEL] X: -0.04 | Y: -2.79 | Z: 10.55 | Mag: 10.91 | Moving: NO
+[17:51:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:51:03][DEBUG][GPS] Chars: 886721, Good: 0, Errors: 1, Sats: 0
+[17:51:33][DEBUG][GPS] Chars: 903197, Good: 0, Errors: 1, Sats: 0
+[17:52:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:52:03][DEBUG][GPS] Chars: 919737, Good: 0, Errors: 1, Sats: 0
+[17:52:33][DEBUG][GPS] Chars: 936229, Good: 0, Errors: 1, Sats: 0
+[17:53:03][INFO][STATUS] === Periodic Status Report ===
+[17:53:03][INFO][STATUS] Uptime: 30 min | Free heap: 206608 bytes
+[17:53:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:53:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:53:03][INFO][GPS] Chars: 952566 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:53:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:53:03][INFO][WALK] Active: NO | Today steps: 15
+[17:53:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:53:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -60 dBm
+[17:53:03][INFO][ACCEL] X: -0.12 | Y: -2.82 | Z: 10.40 | Mag: 10.77 | Moving: NO
+[17:53:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:53:03][DEBUG][GPS] Chars: 952681, Good: 0, Errors: 1, Sats: 0
+[17:53:33][DEBUG][GPS] Chars: 969101, Good: 0, Errors: 1, Sats: 0
+[17:54:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:54:03][DEBUG][GPS] Chars: 985553, Good: 0, Errors: 1, Sats: 0
+[17:54:33][DEBUG][GPS] Chars: 1001949, Good: 0, Errors: 1, Sats: 0
+[17:55:03][INFO][STATUS] === Periodic Status Report ===
+[17:55:03][INFO][STATUS] Uptime: 32 min | Free heap: 206608 bytes
+[17:55:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[17:55:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:55:03][INFO][GPS] Chars: 1018449 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:55:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:55:03][INFO][WALK] Active: NO | Today steps: 15
+[17:55:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:55:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -53 dBm
+[17:55:03][INFO][ACCEL] X: 0.12 | Y: -2.63 | Z: 10.43 | Mag: 10.76 | Moving: NO
+[17:55:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:55:03][DEBUG][GPS] Chars: 1018569, Good: 0, Errors: 1, Sats: 0
+[17:55:33][DEBUG][GPS] Chars: 1035101, Good: 0, Errors: 1, Sats: 0
+[17:56:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:56:03][DEBUG][GPS] Chars: 1051417, Good: 0, Errors: 1, Sats: 0
+[17:56:33][DEBUG][GPS] Chars: 1067853, Good: 0, Errors: 1, Sats: 0
+[17:57:03][INFO][STATUS] === Periodic Status Report ===
+[17:57:03][INFO][STATUS] Uptime: 34 min | Free heap: 206608 bytes
+[17:57:03][INFO][POWER] Battery: 63% | Free heap: 206608 bytes
+[17:57:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:57:03][INFO][GPS] Chars: 1084098 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:57:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:57:03][INFO][WALK] Active: NO | Today steps: 15
+[17:57:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:57:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -55 dBm
+[17:57:03][INFO][ACCEL] X: 0.08 | Y: -2.71 | Z: 10.32 | Mag: 10.67 | Moving: NO
+[17:57:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:57:03][DEBUG][GPS] Chars: 1084209, Good: 0, Errors: 1, Sats: 0
+[17:57:33][DEBUG][GPS] Chars: 1100869, Good: 0, Errors: 1, Sats: 0
+[17:58:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:58:04][DEBUG][GPS] Chars: 1117327, Good: 0, Errors: 1, Sats: 0
+[17:58:34][DEBUG][GPS] Chars: 1133676, Good: 0, Errors: 1, Sats: 0
+[17:59:03][INFO][STATUS] === Periodic Status Report ===
+[17:59:03][INFO][STATUS] Uptime: 36 min | Free heap: 206608 bytes
+[17:59:03][INFO][POWER] Battery: 61% | Free heap: 206608 bytes
+[17:59:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[17:59:03][INFO][GPS] Chars: 1150123 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[17:59:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[17:59:03][INFO][WALK] Active: NO | Today steps: 15
+[17:59:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[17:59:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -55 dBm
+[17:59:03][INFO][ACCEL] X: 0.16 | Y: -2.67 | Z: 10.40 | Mag: 10.73 | Moving: NO
+[17:59:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[17:59:04][DEBUG][GPS] Chars: 1150236, Good: 0, Errors: 1, Sats: 0
+[17:59:34][DEBUG][GPS] Chars: 1166703, Good: 0, Errors: 1, Sats: 0
+[18:00:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:00:04][DEBUG][GPS] Chars: 1183191, Good: 0, Errors: 1, Sats: 0
+[18:00:34][DEBUG][GPS] Chars: 1199622, Good: 0, Errors: 1, Sats: 0
+[18:01:03][INFO][STATUS] === Periodic Status Report ===
+[18:01:03][INFO][STATUS] Uptime: 38 min | Free heap: 206608 bytes
+[18:01:03][INFO][POWER] Battery: 65% | Free heap: 206608 bytes
+[18:01:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:01:03][INFO][GPS] Chars: 1215998 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:01:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:01:03][INFO][WALK] Active: NO | Today steps: 15
+[18:01:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:01:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -61 dBm
+[18:01:03][INFO][ACCEL] X: 0.04 | Y: -2.67 | Z: 10.47 | Mag: 10.81 | Moving: NO
+[18:01:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:01:04][DEBUG][GPS] Chars: 1216121, Good: 0, Errors: 1, Sats: 0
+[18:01:34][DEBUG][GPS] Chars: 1232016, Good: 0, Errors: 1, Sats: 0
+[18:02:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:02:04][DEBUG][GPS] Chars: 1247531, Good: 0, Errors: 1, Sats: 0
+[18:02:34][DEBUG][GPS] Chars: 1263045, Good: 0, Errors: 1, Sats: 0
+[18:03:03][INFO][STATUS] === Periodic Status Report ===
+[18:03:03][INFO][STATUS] Uptime: 40 min | Free heap: 206608 bytes
+[18:03:03][INFO][POWER] Battery: 60% | Free heap: 206608 bytes
+[18:03:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:03:03][INFO][GPS] Chars: 1278210 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:03:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:03:03][INFO][WALK] Active: NO | Today steps: 17
+[18:03:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:03:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -49 dBm
+[18:03:03][INFO][ACCEL] X: 0.04 | Y: -2.86 | Z: 10.47 | Mag: 10.86 | Moving: NO
+[18:03:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:03:04][DEBUG][GPS] Chars: 1278322, Good: 0, Errors: 1, Sats: 0
+[18:03:34][DEBUG][GPS] Chars: 1293662, Good: 0, Errors: 1, Sats: 0
+[18:04:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:04:04][DEBUG][GPS] Chars: 1308940, Good: 0, Errors: 1, Sats: 0
+[18:04:34][DEBUG][GPS] Chars: 1324159, Good: 0, Errors: 1, Sats: 0
+[18:05:03][INFO][STATUS] === Periodic Status Report ===
+[18:05:03][INFO][STATUS] Uptime: 42 min | Free heap: 206608 bytes
+[18:05:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[18:05:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:05:03][INFO][GPS] Chars: 1339047 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:05:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:05:03][INFO][WALK] Active: NO | Today steps: 17
+[18:05:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:05:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -51 dBm
+[18:05:03][INFO][ACCEL] X: -0.08 | Y: -2.90 | Z: 10.59 | Mag: 10.98 | Moving: NO
+[18:05:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:05:04][DEBUG][GPS] Chars: 1339173, Good: 0, Errors: 1, Sats: 0
+[18:05:34][DEBUG][GPS] Chars: 1354290, Good: 0, Errors: 1, Sats: 0
+[18:06:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:06:04][DEBUG][GPS] Chars: 1369254, Good: 0, Errors: 1, Sats: 0
+[18:06:34][DEBUG][GPS] Chars: 1384196, Good: 0, Errors: 1, Sats: 0
+[18:07:03][INFO][STATUS] === Periodic Status Report ===
+[18:07:03][INFO][STATUS] Uptime: 44 min | Free heap: 206608 bytes
+[18:07:03][INFO][POWER] Battery: 60% | Free heap: 206608 bytes
+[18:07:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:07:03][INFO][GPS] Chars: 1399191 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:07:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:07:03][INFO][WALK] Active: NO | Today steps: 21
+[18:07:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:07:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -58 dBm
+[18:07:03][INFO][ACCEL] X: -0.20 | Y: -2.39 | Z: 10.51 | Mag: 10.78 | Moving: NO
+[18:07:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:07:04][DEBUG][GPS] Chars: 1399325, Good: 0, Errors: 1, Sats: 0
+[18:07:34][DEBUG][GPS] Chars: 1414453, Good: 0, Errors: 1, Sats: 0
+[18:08:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:08:04][DEBUG][GPS] Chars: 1429633, Good: 0, Errors: 1, Sats: 0
+[18:08:34][DEBUG][GPS] Chars: 1444576, Good: 0, Errors: 1, Sats: 0
+[18:09:03][INFO][STATUS] === Periodic Status Report ===
+[18:09:03][INFO][STATUS] Uptime: 46 min | Free heap: 206608 bytes
+[18:09:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[18:09:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:09:03][INFO][GPS] Chars: 1459368 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:09:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:09:03][INFO][WALK] Active: NO | Today steps: 21
+[18:09:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:09:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -48 dBm
+[18:09:03][INFO][ACCEL] X: -0.04 | Y: -2.59 | Z: 10.55 | Mag: 10.86 | Moving: NO
+[18:09:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:09:04][DEBUG][GPS] Chars: 1459531, Good: 0, Errors: 1, Sats: 0
+[18:09:34][DEBUG][GPS] Chars: 1474653, Good: 0, Errors: 1, Sats: 0
+[18:10:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:10:04][DEBUG][GPS] Chars: 1489704, Good: 0, Errors: 1, Sats: 0
+[18:10:34][DEBUG][GPS] Chars: 1504662, Good: 0, Errors: 1, Sats: 0
+[18:11:03][INFO][STATUS] === Periodic Status Report ===
+[18:11:03][INFO][STATUS] Uptime: 48 min | Free heap: 206608 bytes
+[18:11:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[18:11:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:11:03][INFO][GPS] Chars: 1519432 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:11:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:11:03][INFO][WALK] Active: NO | Today steps: 21
+[18:11:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:11:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -47 dBm
+[18:11:03][INFO][ACCEL] X: -0.20 | Y: -2.55 | Z: 10.47 | Mag: 10.78 | Moving: NO
+[18:11:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:11:04][DEBUG][GPS] Chars: 1519615, Good: 0, Errors: 1, Sats: 0
+[18:11:34][DEBUG][GPS] Chars: 1534795, Good: 0, Errors: 1, Sats: 0
+[18:12:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:12:04][DEBUG][GPS] Chars: 1549772, Good: 0, Errors: 1, Sats: 0
+[18:12:34][DEBUG][GPS] Chars: 1564715, Good: 0, Errors: 1, Sats: 0
+[18:13:03][INFO][STATUS] === Periodic Status Report ===
+[18:13:03][INFO][STATUS] Uptime: 50 min | Free heap: 206608 bytes
+[18:13:03][INFO][POWER] Battery: 63% | Free heap: 206608 bytes
+[18:13:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:13:03][INFO][GPS] Chars: 1579464 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:13:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:13:03][INFO][WALK] Active: NO | Today steps: 21
+[18:13:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:13:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -46 dBm
+[18:13:03][INFO][ACCEL] X: -0.04 | Y: -2.47 | Z: 10.36 | Mag: 10.65 | Moving: NO
+[18:13:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:13:04][DEBUG][GPS] Chars: 1579672, Good: 0, Errors: 1, Sats: 0
+[18:13:34][DEBUG][GPS] Chars: 1594651, Good: 0, Errors: 1, Sats: 0
+[18:14:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:14:04][DEBUG][GPS] Chars: 1609638, Good: 0, Errors: 1, Sats: 0
+[18:14:34][DEBUG][GPS] Chars: 1624620, Good: 0, Errors: 1, Sats: 0
+[18:15:03][INFO][STATUS] === Periodic Status Report ===
+[18:15:03][INFO][STATUS] Uptime: 52 min | Free heap: 206608 bytes
+[18:15:03][INFO][POWER] Battery: 64% | Free heap: 206608 bytes
+[18:15:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:15:03][INFO][GPS] Chars: 1639448 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:15:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:15:03][INFO][WALK] Active: NO | Today steps: 21
+[18:15:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:15:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -54 dBm
+[18:15:03][INFO][ACCEL] X: -0.16 | Y: -2.35 | Z: 10.55 | Mag: 10.81 | Moving: NO
+[18:15:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:15:04][DEBUG][GPS] Chars: 1639683, Good: 0, Errors: 1, Sats: 0
+[18:15:34][DEBUG][GPS] Chars: 1654770, Good: 0, Errors: 1, Sats: 0
+[18:16:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:16:04][DEBUG][GPS] Chars: 1669812, Good: 0, Errors: 1, Sats: 0
+[18:16:34][DEBUG][GPS] Chars: 1684884, Good: 0, Errors: 1, Sats: 0
+[18:17:03][INFO][STATUS] === Periodic Status Report ===
+[18:17:03][INFO][STATUS] Uptime: 54 min | Free heap: 206408 bytes
+[18:17:03][INFO][POWER] Battery: 61% | Free heap: 206408 bytes
+[18:17:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:17:03][INFO][GPS] Chars: 1699568 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:17:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:17:03][INFO][WALK] Active: NO | Today steps: 21
+[18:17:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:17:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -52 dBm
+[18:17:03][INFO][ACCEL] X: 0.08 | Y: -2.55 | Z: 10.40 | Mag: 10.70 | Moving: NO
+[18:17:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:17:04][DEBUG][GPS] Chars: 1699825, Good: 0, Errors: 1, Sats: 0
+[18:17:34][DEBUG][GPS] Chars: 1714948, Good: 0, Errors: 1, Sats: 0
+[18:18:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:18:04][DEBUG][GPS] Chars: 1730163, Good: 0, Errors: 1, Sats: 0
+[18:18:34][DEBUG][GPS] Chars: 1745177, Good: 0, Errors: 1, Sats: 0
+[18:19:03][INFO][STATUS] === Periodic Status Report ===
+[18:19:03][INFO][STATUS] Uptime: 56 min | Free heap: 206408 bytes
+[18:19:03][INFO][POWER] Battery: 60% | Free heap: 206408 bytes
+[18:19:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:19:03][INFO][GPS] Chars: 1760004 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:19:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:19:03][INFO][WALK] Active: NO | Today steps: 21
+[18:19:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:19:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -57 dBm
+[18:19:03][INFO][ACCEL] X: -0.08 | Y: -2.31 | Z: 10.40 | Mag: 10.65 | Moving: NO
+[18:19:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:19:04][DEBUG][GPS] Chars: 1760272, Good: 0, Errors: 1, Sats: 0
+[18:19:34][DEBUG][GPS] Chars: 1775392, Good: 0, Errors: 1, Sats: 0
+[18:20:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:20:04][DEBUG][GPS] Chars: 1790349, Good: 0, Errors: 1, Sats: 0
+[18:20:34][DEBUG][GPS] Chars: 1805290, Good: 0, Errors: 1, Sats: 0
+[18:21:03][INFO][STATUS] === Periodic Status Report ===
+[18:21:03][INFO][STATUS] Uptime: 58 min | Free heap: 206408 bytes
+[18:21:03][INFO][POWER] Battery: 63% | Free heap: 206408 bytes
+[18:21:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:21:03][INFO][GPS] Chars: 1820008 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:21:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:21:03][INFO][WALK] Active: NO | Today steps: 21
+[18:21:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:21:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -59 dBm
+[18:21:03][INFO][ACCEL] X: -0.27 | Y: -2.59 | Z: 10.47 | Mag: 10.79 | Moving: NO
+[18:21:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:21:04][DEBUG][GPS] Chars: 1820326, Good: 0, Errors: 1, Sats: 0
+[18:21:34][DEBUG][GPS] Chars: 1835283, Good: 0, Errors: 1, Sats: 0
+[18:22:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:22:04][DEBUG][GPS] Chars: 1850228, Good: 0, Errors: 1, Sats: 0
+[18:22:34][DEBUG][GPS] Chars: 1865177, Good: 0, Errors: 1, Sats: 0
+[18:22:55][INFO][WALK] ========== MANUAL WALK STARTED ==========
+[18:22:55][INFO][WALK] Start location: GPS not available
+[18:22:55][INFO][WALK] Unix timestamp: 1768913575
+[18:22:55][INFO][WALK] Data file: /walks/walk_1768913575.json
+[18:23:03][INFO][STATUS] === Periodic Status Report ===
+[18:23:03][INFO][STATUS] Uptime: 60 min | Free heap: 206312 bytes
+[18:23:03][INFO][POWER] Battery: 63% | Free heap: 206312 bytes
+[18:23:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:23:03][INFO][GPS] Chars: 1879870 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:23:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:23:03][INFO][WALK] Active: YES | Duration: 8 sec | Distance: 0m | Points: 0
+[18:23:03][INFO][WALK] Steps: 2 | MaxSpeed: 0.0 | AvgSpeed: 0.0 | Manual: YES
+[18:23:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:23:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -53 dBm
+[18:23:03][INFO][ACCEL] X: -0.04 | Y: -1.69 | Z: 10.63 | Mag: 10.76 | Moving: NO
+[18:23:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:23:04][DEBUG][GPS] Chars: 1880211, Good: 0, Errors: 1, Sats: 0
+[18:23:34][DEBUG][GPS] Chars: 1895248, Good: 0, Errors: 1, Sats: 0
+[18:24:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:24:04][DEBUG][GPS] Chars: 1910443, Good: 0, Errors: 1, Sats: 0
+[18:24:34][DEBUG][GPS] Chars: 1925793, Good: 0, Errors: 1, Sats: 0
+[18:25:03][INFO][STATUS] === Periodic Status Report ===
+[18:25:03][INFO][STATUS] Uptime: 62 min | Free heap: 206312 bytes
+[18:25:03][INFO][POWER] Battery: 63% | Free heap: 206312 bytes
+[18:25:03][INFO][GPS] Valid: NO | Sats: 0 | Lat: 0.000000 | Lon: 0.000000 | Speed: 0.0 km/h
+[18:25:03][INFO][GPS] Chars: 1940654 | Fixes: 0 | Errors: 1 | Alt: 0.0m
+[18:25:03][INFO][GEOFENCE] AtHome: YES | Distance: -1m | WiFi: CTNF-Universal
+[18:25:03][INFO][WALK] Active: YES | Duration: 128 sec | Distance: 0m | Points: 0
+[18:25:03][INFO][WALK] Steps: 20 | MaxSpeed: 0.0 | AvgSpeed: 0.0 | Manual: YES
+[18:25:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:25:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -34 dBm
+[18:25:03][INFO][ACCEL] X: 3.33 | Y: -1.88 | Z: 10.28 | Mag: 10.97 | Moving: NO
+[18:25:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:25:04][DEBUG][GPS] Chars: 1941033, Good: 0, Errors: 1, Sats: 0
+[18:25:34][DEBUG][GPS] Chars: 1956395, Good: 0, Errors: 1, Sats: 0
+[18:26:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:26:04][DEBUG][GPS] Chars: 1971833, Good: 0, Errors: 1, Sats: 0
+[18:26:09][INFO][GPS] First fix! Raw: 28.536125, 77.254741 | Filtered: 28.536125, 77.254741
+[18:26:34][DEBUG][GPS] Chars: 1991363, Good: 51, Errors: 1, Sats: 6
+[18:27:03][INFO][STATUS] === Periodic Status Report ===
+[18:27:03][INFO][STATUS] Uptime: 64 min | Free heap: 206480 bytes
+[18:27:03][INFO][POWER] Battery: 60% | Free heap: 206480 bytes
+[18:27:03][INFO][GPS] Valid: YES | Sats: 7 | Lat: 28.536093 | Lon: 77.254985 | Speed: 0.7 km/h
+[18:27:03][INFO][GPS] Chars: 2012079 | Fixes: 109 | Errors: 1 | Alt: 263.5m
+[18:27:03][INFO][GEOFENCE] AtHome: YES | Distance: 59m | WiFi: CTNF-Universal
+[18:27:03][INFO][WALK] Active: YES | Duration: 248 sec | Distance: 30m | Points: 54
+[18:27:03][INFO][WALK] Steps: 86 | MaxSpeed: 3.1 | AvgSpeed: 1.5 | Manual: YES
+[18:27:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:27:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -92 dBm
+[18:27:03][INFO][ACCEL] X: 2.04 | Y: -2.86 | Z: 10.04 | Mag: 10.64 | Moving: NO
+[18:27:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:27:04][DEBUG][GPS] Chars: 2012625, Good: 111, Errors: 1, Sats: 7
+[18:27:34][DEBUG][GPS] Chars: 2034184, Good: 171, Errors: 1, Sats: 8
+[18:28:03][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:28:04][DEBUG][GPS] Chars: 2055857, Good: 231, Errors: 1, Sats: 9
+[18:28:34][DEBUG][GPS] Chars: 2077737, Good: 291, Errors: 1, Sats: 9
+[18:29:03][INFO][STATUS] === Periodic Status Report ===
+[18:29:03][INFO][STATUS] Uptime: 66 min | Free heap: 207148 bytes
+[18:29:03][INFO][POWER] Battery: 60% | Free heap: 207148 bytes
+[18:29:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.536321 | Lon: 77.255277 | Speed: 0.0 km/h
+[18:29:03][INFO][GPS] Chars: 2099037 | Fixes: 349 | Errors: 1 | Alt: 247.9m
+[18:29:03][INFO][GEOFENCE] AtHome: YES | Distance: 69m | WiFi: disconnected
+[18:29:03][INFO][WALK] Active: YES | Duration: 368 sec | Distance: 117m | Points: 173
+[18:29:03][INFO][WALK] Steps: 143 | MaxSpeed: 15.0 | AvgSpeed: 1.7 | Manual: YES
+[18:29:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:29:03][INFO][WIFI] Disconnected
+[18:29:03][INFO][ACCEL] X: 2.20 | Y: -1.37 | Z: 15.34 | Mag: 15.55 | Moving: YES
+[18:29:03][WARN][WIFI] Connection lost!
+[18:29:03][INFO][WIFI] Attempting reconnection...
+[18:29:18][WARN][WIFI] Reconnection failed
+[18:29:19][DEBUG][GPS] Chars: 2100359, Good: 353, Errors: 1, Sats: 9
+[18:29:49][DEBUG][GPS] Chars: 2122555, Good: 413, Errors: 1, Sats: 10
+[18:30:03][INFO][WIFI] Attempting reconnection...
+[18:30:18][WARN][WIFI] Reconnection failed
+[18:30:19][DEBUG][GPS] Chars: 2133921, Good: 444, Errors: 2, Sats: 10
+[18:30:44][INFO][GEOFENCE] Left home - auto-starting walk
+[18:30:49][DEBUG][GPS] Chars: 2155826, Good: 504, Errors: 2, Sats: 9
+[18:31:03][INFO][STATUS] === Periodic Status Report ===
+[18:31:03][INFO][STATUS] Uptime: 68 min | Free heap: 207136 bytes
+[18:31:03][INFO][POWER] Battery: 59% | Free heap: 207136 bytes
+[18:31:03][INFO][GPS] Valid: YES | Sats: 10 | Lat: 28.536117 | Lon: 77.256008 | Speed: 1.8 km/h
+[18:31:03][INFO][GPS] Chars: 2165750 | Fixes: 531 | Errors: 2 | Alt: 253.1m
+[18:31:03][INFO][GEOFENCE] AtHome: NO | Distance: 144m | WiFi: disconnected
+[18:31:03][INFO][WALK] Active: YES | Duration: 488 sec | Distance: 201m | Points: 263
+[18:31:03][INFO][WALK] Steps: 215 | MaxSpeed: 15.0 | AvgSpeed: 2.0 | Manual: YES
+[18:31:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:31:03][INFO][WIFI] Disconnected
+[18:31:03][INFO][ACCEL] X: 1.14 | Y: 0.16 | Z: 10.75 | Mag: 10.81 | Moving: NO
+[18:31:03][INFO][WIFI] Attempting reconnection...
+[18:31:18][WARN][WIFI] Reconnection failed
+[18:31:19][DEBUG][GPS] Chars: 2167044, Good: 535, Errors: 3, Sats: 10
+[18:31:49][DEBUG][GPS] Chars: 2189003, Good: 595, Errors: 3, Sats: 10
+[18:32:03][INFO][WIFI] Attempting reconnection...
+[18:32:18][WARN][WIFI] Reconnection failed
+[18:32:19][DEBUG][GPS] Chars: 2200472, Good: 626, Errors: 4, Sats: 10
+[18:32:49][DEBUG][GPS] Chars: 2222759, Good: 686, Errors: 4, Sats: 9
+[18:33:03][INFO][STATUS] === Periodic Status Report ===
+[18:33:03][INFO][STATUS] Uptime: 70 min | Free heap: 207136 bytes
+[18:33:03][INFO][POWER] Battery: 59% | Free heap: 207136 bytes
+[18:33:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535738 | Lon: 77.256071 | Speed: 0.3 km/h
+[18:33:03][INFO][GPS] Chars: 2232890 | Fixes: 713 | Errors: 4 | Alt: 226.6m
+[18:33:03][INFO][GEOFENCE] AtHome: NO | Distance: 167m | WiFi: disconnected
+[18:33:03][INFO][WALK] Active: YES | Duration: 608 sec | Distance: 271m | Points: 353
+[18:33:03][INFO][WALK] Steps: 277 | MaxSpeed: 15.0 | AvgSpeed: 1.9 | Manual: YES
+[18:33:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:33:03][INFO][WIFI] Disconnected
+[18:33:03][INFO][ACCEL] X: 2.71 | Y: -1.65 | Z: 10.20 | Mag: 10.68 | Moving: NO
+[18:33:03][INFO][WIFI] Attempting reconnection...
+[18:33:18][WARN][WIFI] Reconnection failed
+[18:33:19][DEBUG][GPS] Chars: 2234230, Good: 717, Errors: 4, Sats: 9
+[18:33:49][DEBUG][GPS] Chars: 2256046, Good: 777, Errors: 4, Sats: 6
+[18:34:03][INFO][WIFI] Attempting reconnection...
+[18:34:19][WARN][WIFI] Reconnection failed
+[18:34:19][DEBUG][GPS] Chars: 2266866, Good: 808, Errors: 5, Sats: 5
+[18:34:49][DEBUG][GPS] Chars: 2286144, Good: 844, Errors: 5, Sats: 6
+[18:35:03][INFO][STATUS] === Periodic Status Report ===
+[18:35:03][INFO][STATUS] Uptime: 72 min | Free heap: 207136 bytes
+[18:35:03][INFO][POWER] Battery: 59% | Free heap: 207112 bytes
+[18:35:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535421 | Lon: 77.254395 | Speed: 11.2 km/h
+[18:35:03][INFO][GPS] Chars: 2295786 | Fixes: 871 | Errors: 5 | Alt: 90.2m
+[18:35:03][INFO][GEOFENCE] AtHome: NO | Distance: 122m | WiFi: disconnected
+[18:35:03][INFO][WALK] Active: YES | Duration: 728 sec | Distance: 638m | Points: 443
+[18:35:03][INFO][WALK] Steps: 326 | MaxSpeed: 15.0 | AvgSpeed: 2.8 | Manual: YES
+[18:35:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:35:03][INFO][WIFI] Disconnected
+[18:35:03][INFO][ACCEL] X: 2.04 | Y: -1.65 | Z: 10.04 | Mag: 10.38 | Moving: NO
+[18:35:03][INFO][WIFI] Attempting reconnection...
+[18:35:19][WARN][WIFI] Reconnection failed
+[18:35:19][DEBUG][GPS] Chars: 2296952, Good: 875, Errors: 6, Sats: 9
+[18:35:49][DEBUG][GPS] Chars: 2317565, Good: 931, Errors: 6, Sats: 10
+[18:36:03][INFO][WIFI] Attempting reconnection...
+[18:36:19][WARN][WIFI] Reconnection failed
+[18:36:19][DEBUG][GPS] Chars: 2328568, Good: 960, Errors: 7, Sats: 9
+[18:36:49][DEBUG][GPS] Chars: 2350047, Good: 1016, Errors: 7, Sats: 7
+[18:37:03][INFO][STATUS] === Periodic Status Report ===
+[18:37:03][INFO][STATUS] Uptime: 74 min | Free heap: 207136 bytes
+[18:37:03][INFO][POWER] Battery: 59% | Free heap: 207136 bytes
+[18:37:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535810 | Lon: 77.254938 | Speed: 1.7 km/h
+[18:37:03][INFO][GPS] Chars: 2359923 | Fixes: 1043 | Errors: 7 | Alt: 116.7m
+[18:37:03][INFO][GEOFENCE] AtHome: NO | Distance: 84m | WiFi: disconnected
+[18:37:03][INFO][WALK] Active: YES | Duration: 848 sec | Distance: 883m | Points: 533
+[18:37:03][INFO][WALK] Steps: 348 | MaxSpeed: 15.0 | AvgSpeed: 3.0 | Manual: YES
+[18:37:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:37:03][INFO][WIFI] Disconnected
+[18:37:03][INFO][ACCEL] X: 4.04 | Y: 0.08 | Z: 13.02 | Mag: 13.64 | Moving: YES
+[18:37:03][INFO][WIFI] Attempting reconnection...
+[18:37:19][WARN][WIFI] Reconnection failed
+[18:37:19][DEBUG][GPS] Chars: 2361092, Good: 1047, Errors: 7, Sats: 5
+[18:37:49][DEBUG][GPS] Chars: 2381499, Good: 1107, Errors: 7, Sats: 6
+[18:38:03][INFO][WIFI] Attempting reconnection...
+[18:38:19][WARN][WIFI] Reconnection failed
+[18:38:19][DEBUG][GPS] Chars: 2392035, Good: 1138, Errors: 8, Sats: 6
+[18:38:49][DEBUG][GPS] Chars: 2412168, Good: 1194, Errors: 8, Sats: 7
+[18:39:03][INFO][STATUS] === Periodic Status Report ===
+[18:39:03][INFO][STATUS] Uptime: 76 min | Free heap: 207136 bytes
+[18:39:03][INFO][POWER] Battery: 59% | Free heap: 207136 bytes
+[18:39:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535727 | Lon: 77.254921 | Speed: 0.0 km/h
+[18:39:03][INFO][GPS] Chars: 2421624 | Fixes: 1221 | Errors: 8 | Alt: 80.2m
+[18:39:03][INFO][GEOFENCE] AtHome: NO | Distance: 92m | WiFi: disconnected
+[18:39:03][INFO][WALK] Active: YES | Duration: 968 sec | Distance: 1042m | Points: 623
+[18:39:03][INFO][WALK] Steps: 356 | MaxSpeed: 15.0 | AvgSpeed: 2.8 | Manual: YES
+[18:39:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:39:03][INFO][WIFI] Disconnected
+[18:39:03][INFO][ACCEL] X: 1.22 | Y: -2.82 | Z: 10.28 | Mag: 10.73 | Moving: NO
+[18:39:03][INFO][WIFI] Attempting reconnection...
+[18:39:19][WARN][WIFI] Reconnection failed
+[18:39:19][DEBUG][GPS] Chars: 2422818, Good: 1225, Errors: 9, Sats: 7
+[18:39:50][DEBUG][GPS] Chars: 2443600, Good: 1285, Errors: 9, Sats: 10
+[18:40:03][INFO][WIFI] Attempting reconnection...
+[18:40:19][WARN][WIFI] Reconnection failed
+[18:40:20][DEBUG][GPS] Chars: 2454625, Good: 1316, Errors: 9, Sats: 10
+[18:40:50][DEBUG][GPS] Chars: 2476509, Good: 1376, Errors: 9, Sats: 9
+[18:41:03][INFO][STATUS] === Periodic Status Report ===
+[18:41:03][INFO][STATUS] Uptime: 78 min | Free heap: 207024 bytes
+[18:41:03][INFO][POWER] Battery: 59% | Free heap: 207024 bytes
+[18:41:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535913 | Lon: 77.254766 | Speed: 0.0 km/h
+[18:41:03][INFO][GPS] Chars: 2486523 | Fixes: 1403 | Errors: 9 | Alt: 74.0m
+[18:41:03][INFO][GEOFENCE] AtHome: NO | Distance: 67m | WiFi: disconnected
+[18:41:03][INFO][WALK] Active: YES | Duration: 1088 sec | Distance: 1083m | Points: 713
+[18:41:03][INFO][WALK] Steps: 359 | MaxSpeed: 15.0 | AvgSpeed: 2.5 | Manual: YES
+[18:41:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:41:03][INFO][WIFI] Disconnected
+[18:41:03][INFO][ACCEL] X: 0.08 | Y: -1.37 | Z: 9.02 | Mag: 9.13 | Moving: NO
+[18:41:04][INFO][WIFI] Attempting reconnection...
+[18:41:19][WARN][WIFI] Reconnection failed
+[18:41:20][DEBUG][GPS] Chars: 2487695, Good: 1406, Errors: 10, Sats: 9
+[18:41:50][DEBUG][GPS] Chars: 2509389, Good: 1466, Errors: 10, Sats: 8
+[18:42:04][INFO][WIFI] Attempting reconnection...
+[18:42:19][WARN][WIFI] Reconnection failed
+[18:42:20][DEBUG][GPS] Chars: 2520544, Good: 1497, Errors: 10, Sats: 11
+[18:42:50][DEBUG][GPS] Chars: 2543171, Good: 1557, Errors: 10, Sats: 11
+[18:43:03][INFO][STATUS] === Periodic Status Report ===
+[18:43:03][INFO][STATUS] Uptime: 80 min | Free heap: 206952 bytes
+[18:43:03][INFO][POWER] Battery: 59% | Free heap: 206952 bytes
+[18:43:03][INFO][GPS] Valid: YES | Sats: 8 | Lat: 28.535881 | Lon: 77.254861 | Speed: 3.0 km/h
+[18:43:03][INFO][GPS] Chars: 2553310 | Fixes: 1584 | Errors: 10 | Alt: 78.4m
+[18:43:03][INFO][GEOFENCE] AtHome: NO | Distance: 73m | WiFi: disconnected
+[18:43:03][INFO][WALK] Active: YES | Duration: 1208 sec | Distance: 1134m | Points: 803
+[18:43:03][INFO][WALK] Steps: 424 | MaxSpeed: 15.0 | AvgSpeed: 2.4 | Manual: YES
+[18:43:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:43:03][INFO][WIFI] Disconnected
+[18:43:03][INFO][ACCEL] X: 3.65 | Y: -1.14 | Z: 11.69 | Mag: 12.30 | Moving: YES
+[18:43:04][INFO][WIFI] Attempting reconnection...
+[18:43:19][WARN][WIFI] Reconnection failed
+[18:43:20][DEBUG][GPS] Chars: 2554428, Good: 1587, Errors: 11, Sats: 8
+[18:43:50][DEBUG][GPS] Chars: 2576223, Good: 1647, Errors: 11, Sats: 11
+[18:44:04][INFO][WIFI] Attempting reconnection...
+[18:44:19][WARN][WIFI] Reconnection failed
+[18:44:20][DEBUG][GPS] Chars: 2587480, Good: 1678, Errors: 11, Sats: 11
+[18:44:50][DEBUG][GPS] Chars: 2608411, Good: 1738, Errors: 11, Sats: 11
+[18:45:03][INFO][STATUS] === Periodic Status Report ===
+[18:45:03][INFO][STATUS] Uptime: 82 min | Free heap: 206956 bytes
+[18:45:03][INFO][POWER] Battery: 59% | Free heap: 206956 bytes
+[18:45:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535395 | Lon: 77.255426 | Speed: 1.3 km/h
+[18:45:03][INFO][GPS] Chars: 2618230 | Fixes: 1765 | Errors: 11 | Alt: 105.6m
+[18:45:03][INFO][GEOFENCE] AtHome: NO | Distance: 147m | WiFi: disconnected
+[18:45:03][INFO][WALK] Active: YES | Duration: 1328 sec | Distance: 1404m | Points: 893
+[18:45:03][INFO][WALK] Steps: 493 | MaxSpeed: 15.0 | AvgSpeed: 2.7 | Manual: YES
+[18:45:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:45:03][INFO][WIFI] Disconnected
+[18:45:03][INFO][ACCEL] X: 0.94 | Y: -3.30 | Z: 10.00 | Mag: 10.57 | Moving: NO
+[18:45:04][INFO][WIFI] Attempting reconnection...
+[18:45:19][WARN][WIFI] Reconnection failed
+[18:45:20][DEBUG][GPS] Chars: 2619376, Good: 1769, Errors: 11, Sats: 10
+[18:45:50][DEBUG][GPS] Chars: 2640844, Good: 1829, Errors: 11, Sats: 9
+[18:46:04][INFO][WIFI] Attempting reconnection...
+[18:46:19][WARN][WIFI] Reconnection failed
+[18:46:20][DEBUG][GPS] Chars: 2651886, Good: 1859, Errors: 12, Sats: 9
+[18:46:50][DEBUG][GPS] Chars: 2673840, Good: 1919, Errors: 12, Sats: 10
+[18:47:03][INFO][STATUS] === Periodic Status Report ===
+[18:47:03][INFO][STATUS] Uptime: 84 min | Free heap: 206956 bytes
+[18:47:03][INFO][POWER] Battery: 59% | Free heap: 206956 bytes
+[18:47:03][INFO][GPS] Valid: YES | Sats: 10 | Lat: 28.535732 | Lon: 77.255500 | Speed: 1.2 km/h
+[18:47:03][INFO][GPS] Chars: 2683882 | Fixes: 1946 | Errors: 12 | Alt: 154.6m
+[18:47:03][INFO][GEOFENCE] AtHome: NO | Distance: 123m | WiFi: disconnected
+[18:47:03][INFO][WALK] Active: YES | Duration: 1448 sec | Distance: 1450m | Points: 983
+[18:47:03][INFO][WALK] Steps: 512 | MaxSpeed: 15.0 | AvgSpeed: 2.6 | Manual: YES
+[18:47:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:47:03][INFO][WIFI] Disconnected
+[18:47:03][INFO][ACCEL] X: 1.73 | Y: 1.06 | Z: 9.45 | Mag: 9.67 | Moving: NO
+[18:47:04][INFO][WIFI] Attempting reconnection...
+[18:47:19][WARN][WIFI] Reconnection failed
+[18:47:20][DEBUG][GPS] Chars: 2685143, Good: 1950, Errors: 13, Sats: 10
+[18:47:50][DEBUG][GPS] Chars: 2707135, Good: 2010, Errors: 13, Sats: 10
+[18:48:04][INFO][WIFI] Attempting reconnection...
+[18:48:19][WARN][WIFI] Reconnection failed
+[18:48:20][DEBUG][GPS] Chars: 2718425, Good: 2041, Errors: 13, Sats: 10
+[18:48:50][DEBUG][GPS] Chars: 2740423, Good: 2101, Errors: 13, Sats: 10
+[18:49:03][INFO][STATUS] === Periodic Status Report ===
+[18:49:03][INFO][STATUS] Uptime: 86 min | Free heap: 206956 bytes
+[18:49:03][INFO][POWER] Battery: 59% | Free heap: 206956 bytes
+[18:49:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.535838 | Lon: 77.256053 | Speed: 0.4 km/h
+[18:49:03][INFO][GPS] Chars: 2750456 | Fixes: 2128 | Errors: 13 | Alt: 232.1m
+[18:49:03][INFO][GEOFENCE] AtHome: NO | Distance: 160m | WiFi: disconnected
+[18:49:03][INFO][WALK] Active: YES | Duration: 1568 sec | Distance: 1536m | Points: 1073
+[18:49:03][INFO][WALK] Steps: 630 | MaxSpeed: 15.0 | AvgSpeed: 2.4 | Manual: YES
+[18:49:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:49:03][INFO][WIFI] Disconnected
+[18:49:03][INFO][ACCEL] X: 2.43 | Y: 3.06 | Z: 9.61 | Mag: 10.37 | Moving: NO
+[18:49:04][INFO][WIFI] Attempting reconnection...
+[18:49:19][WARN][WIFI] Reconnection failed
+[18:49:20][DEBUG][GPS] Chars: 2751610, Good: 2131, Errors: 14, Sats: 9
+[18:49:50][DEBUG][GPS] Chars: 2773900, Good: 2191, Errors: 14, Sats: 10
+[18:50:04][INFO][WIFI] Attempting reconnection...
+[18:50:19][WARN][WIFI] Reconnection failed
+[18:50:20][DEBUG][GPS] Chars: 2785142, Good: 2221, Errors: 15, Sats: 10
+[18:50:50][DEBUG][GPS] Chars: 2807278, Good: 2282, Errors: 15, Sats: 8
+[18:51:03][INFO][STATUS] === Periodic Status Report ===
+[18:51:03][INFO][STATUS] Uptime: 88 min | Free heap: 206912 bytes
+[18:51:03][INFO][POWER] Battery: 59% | Free heap: 206912 bytes
+[18:51:03][INFO][GPS] Valid: YES | Sats: 6 | Lat: 28.535697 | Lon: 77.255725 | Speed: 5.0 km/h
+[18:51:03][INFO][GPS] Chars: 2816735 | Fixes: 2309 | Errors: 15 | Alt: 180.7m
+[18:51:03][INFO][GEOFENCE] AtHome: NO | Distance: 142m | WiFi: disconnected
+[18:51:03][INFO][WALK] Active: YES | Duration: 1688 sec | Distance: 1603m | Points: 1163
+[18:51:03][INFO][WALK] Steps: 707 | MaxSpeed: 15.0 | AvgSpeed: 2.4 | Manual: YES
+[18:51:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:51:03][INFO][WIFI] Disconnected
+[18:51:03][INFO][ACCEL] X: 5.22 | Y: 1.80 | Z: 6.00 | Mag: 8.15 | Moving: NO
+[18:51:04][INFO][WIFI] Attempting reconnection...
+[18:51:19][WARN][WIFI] Reconnection failed
+[18:51:20][DEBUG][GPS] Chars: 2817876, Good: 2312, Errors: 16, Sats: 6
+[18:51:50][DEBUG][GPS] Chars: 2838892, Good: 2372, Errors: 16, Sats: 8
+[18:52:04][INFO][WIFI] Attempting reconnection...
+[18:52:19][WARN][WIFI] Reconnection failed
+[18:52:20][DEBUG][GPS] Chars: 2849678, Good: 2402, Errors: 17, Sats: 4
+[18:52:50][DEBUG][GPS] Chars: 2870274, Good: 2462, Errors: 17, Sats: 7
+[18:53:03][INFO][STATUS] === Periodic Status Report ===
+[18:53:03][INFO][STATUS] Uptime: 90 min | Free heap: 206920 bytes
+[18:53:03][INFO][POWER] Battery: 59% | Free heap: 206920 bytes
+[18:53:03][INFO][GPS] Valid: YES | Sats: 5 | Lat: 28.534970 | Lon: 77.255648 | Speed: 8.7 km/h
+[18:53:03][INFO][GPS] Chars: 2879574 | Fixes: 2489 | Errors: 17 | Alt: 86.9m
+[18:53:03][INFO][GEOFENCE] AtHome: NO | Distance: 199m | WiFi: disconnected
+[18:53:03][INFO][WALK] Active: YES | Duration: 1808 sec | Distance: 1772m | Points: 1253
+[18:53:03][INFO][WALK] Steps: 780 | MaxSpeed: 15.0 | AvgSpeed: 2.7 | Manual: YES
+[18:53:03][INFO][UPLOAD] Pending: 0 | Today uploads: 0 | Failed: 0
+[18:53:03][INFO][WIFI] Disconnected
+[18:53:03][INFO][ACCEL] X: 3.02 | Y: 2.12 | Z: 9.92 | Mag: 10.59 | Moving: NO
+[18:53:04][INFO][WIFI] Attempting reconnection...
+[18:53:19][WARN][WIFI] Reconnection failed
+[18:53:20][DEBUG][GPS] Chars: 2880754, Good: 2492, Errors: 17, Sats: 5
+[18:53:50][DEBUG][GPS] Chars: 2901492, Good: 2552, Errors: 17, Sats: 5
+[18:54:04][INFO][WIFI] Attempting reconnection...
+[18:54:19][WARN][WIFI] Reconnection failed
+[18:54:20][DEBUG][GPS] Chars: 2912172, Good: 2582, Errors: 18, Sats: 7
+[18:54:49][INFO][GEOFENCE] Arrived home - auto-ending walk
+[18:54:49][INFO][WALK] ========== MANUAL WALK ENDED ==========
+[18:54:49][INFO][WALK] Duration: 1914 sec (31.9 min)
+[18:54:49][INFO][WALK] Distance: 1902 m (1.90 km)
+[18:54:49][INFO][WALK] Data points: 1329
+[18:54:49][INFO][WALK] Steps: 851
+[18:54:50][INFO][WALK] Queued for upload: /pending/walk_1768913575.json
+[18:54:50][INFO][WALK] ========== WALK STARTED ==========
+[18:54:50][INFO][WALK] Start location: 28.535857, 77.255168
+[18:54:50][INFO][WALK] GPS satellites: 9, Speed: 2.0 km/h
+[18:54:50][INFO][WALK] Unix timestamp: 1768915490
+[18:54:50][INFO][WALK] Data file: /walks/walk_1768915490.json
+[18:54:50][DEBUG][GPS] Chars: 2933215, Good: 2642, Errors: 18, Sats: 9
+[18:55:03][INFO][STATUS] === Periodic Status Report ===
+[18:55:03][INFO][STATUS] Uptime: 92 min | Free heap: 206096 bytes
+[18:55:03][INFO][POWER] Battery: 59% | Free heap: 206096 bytes
+[18:55:03][INFO][GPS] Valid: YES | Sats: 9 | Lat: 28.536000 | Lon: 77.255091 | Speed: 2.9 km/h
+[18:55:03][INFO][GPS] Chars: 2942640 | Fixes: 2668 | Errors: 18 | Alt: 71.2m
+[18:55:03][INFO][GEOFENCE] AtHome: YES | Distance: 73m | WiFi: CTNF-Universal
+[18:55:03][INFO][WALK] Active: YES | Duration: 13 sec | Distance: 17m | Points: 14
+[18:55:03][INFO][WALK] Steps: 17 | MaxSpeed: 3.2 | AvgSpeed: 2.1 | Manual: NO
+[18:55:03][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 0
+[18:55:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -96 dBm
+[18:55:03][INFO][ACCEL] X: 3.06 | Y: 2.71 | Z: 9.26 | Mag: 10.12 | Moving: NO
+[18:55:04][INFO][WIFI] Connected! IP: 192.168.29.106
+[18:55:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:55:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[18:55:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[18:55:08][DEBUG][UPLOAD] Free heap: 138956 bytes
+[18:55:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[18:55:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[18:55:10][ERROR][UPLOAD] FAILED! HTTP -1 after 2369ms
+[18:55:10][ERROR][UPLOAD] Server response: 
+[18:55:10][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[18:55:20][DEBUG][GPS] Chars: 2949829, Good: 2689, Errors: 19, Sats: 10
+[18:55:50][DEBUG][GPS] Chars: 2969303, Good: 2717, Errors: 19, Sats: 6
+[18:56:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:56:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[18:56:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[18:56:08][DEBUG][UPLOAD] Free heap: 138956 bytes
+[18:56:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[18:56:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[18:56:13][ERROR][UPLOAD] FAILED! HTTP 400 after 5117ms
+[18:56:13][ERROR][UPLOAD] Server response: {"error":"Missing required fields","required":["deviceId","startTime"]}
+[18:56:13][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[18:56:20][DEBUG][GPS] Chars: 2983728, Good: 2759, Errors: 19, Sats: 5
+[18:56:50][DEBUG][GPS] Chars: 3001269, Good: 2764, Errors: 19, Sats: 0
+[18:57:03][INFO][STATUS] === Periodic Status Report ===
+[18:57:03][INFO][STATUS] Uptime: 94 min | Free heap: 205156 bytes
+[18:57:03][INFO][POWER] Battery: 58% | Free heap: 205156 bytes
+[18:57:03][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.536936 | Lon: 77.254594 | Speed: 14.9 km/h
+[18:57:03][INFO][GPS] Chars: 3008887 | Fixes: 2764 | Errors: 19 | Alt: 158.0m
+[18:57:03][INFO][GEOFENCE] AtHome: YES | Distance: 48m | WiFi: CTNF-Universal
+[18:57:03][INFO][WALK] Active: YES | Duration: 133 sec | Distance: 157m | Points: 117
+[18:57:03][INFO][WALK] Steps: 164 | MaxSpeed: 14.9 | AvgSpeed: 8.6 | Manual: NO
+[18:57:03][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 2
+[18:57:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -78 dBm
+[18:57:03][INFO][ACCEL] X: -1.33 | Y: -1.14 | Z: 15.34 | Mag: 15.44 | Moving: YES
+[18:57:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:57:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[18:57:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[18:57:08][DEBUG][UPLOAD] Free heap: 138464 bytes
+[18:57:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[18:57:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[18:57:11][ERROR][UPLOAD] FAILED! HTTP 400 after 3384ms
+[18:57:11][ERROR][UPLOAD] Server response: {"error":"Missing required fields","required":["deviceId","startTime"]}
+[18:57:11][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[18:57:20][DEBUG][GPS] Chars: 3014025, Good: 2764, Errors: 20, Sats: 0
+[18:57:50][DEBUG][GPS] Chars: 3030328, Good: 2764, Errors: 20, Sats: 0
+[18:58:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:58:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[18:58:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[18:58:08][DEBUG][UPLOAD] Free heap: 138360 bytes
+[18:58:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[18:58:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[18:58:15][ERROR][UPLOAD] FAILED! HTTP 400 after 7253ms
+[18:58:15][ERROR][UPLOAD] Server response: {"error":"Missing required fields","required":["deviceId","startTime"]}
+[18:58:15][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[18:58:20][DEBUG][GPS] Chars: 3040493, Good: 2764, Errors: 21, Sats: 0
+[18:58:50][DEBUG][GPS] Chars: 3056623, Good: 2764, Errors: 21, Sats: 0
+[18:59:03][INFO][STATUS] === Periodic Status Report ===
+[18:59:03][INFO][STATUS] Uptime: 96 min | Free heap: 205056 bytes
+[18:59:03][INFO][POWER] Battery: 75% | Free heap: 205056 bytes
+[18:59:03][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.536936 | Lon: 77.254594 | Speed: 14.9 km/h
+[18:59:03][INFO][GPS] Chars: 3064062 | Fixes: 2764 | Errors: 21 | Alt: 158.0m
+[18:59:03][INFO][GEOFENCE] AtHome: YES | Distance: 48m | WiFi: CTNF-Universal
+[18:59:03][INFO][WALK] Active: YES | Duration: 253 sec | Distance: 157m | Points: 218
+[18:59:03][INFO][WALK] Steps: 208 | MaxSpeed: 14.9 | AvgSpeed: 11.5 | Manual: NO
+[18:59:03][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 4
+[18:59:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -49 dBm
+[18:59:03][INFO][ACCEL] X: 0.08 | Y: -2.86 | Z: 10.71 | Mag: 11.09 | Moving: NO
+[18:59:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[18:59:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[18:59:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[18:59:08][DEBUG][UPLOAD] Free heap: 138360 bytes
+[18:59:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[18:59:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[18:59:08][ERROR][UPLOAD] FAILED! HTTP -1 after 63ms
+[18:59:08][ERROR][UPLOAD] Server response: 
+[18:59:08][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[18:59:20][DEBUG][GPS] Chars: 3071131, Good: 2764, Errors: 21, Sats: 0
+[18:59:50][DEBUG][GPS] Chars: 3088236, Good: 2764, Errors: 21, Sats: 0
+[19:00:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:00:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[19:00:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[19:00:08][DEBUG][UPLOAD] Free heap: 138380 bytes
+[19:00:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[19:00:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[19:00:08][ERROR][UPLOAD] FAILED! HTTP -1 after 210ms
+[19:00:08][ERROR][UPLOAD] Server response: 
+[19:00:08][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[19:00:20][DEBUG][GPS] Chars: 3102986, Good: 2764, Errors: 22, Sats: 0
+[19:00:50][DEBUG][GPS] Chars: 3119848, Good: 2764, Errors: 22, Sats: 0
+[19:01:03][INFO][STATUS] === Periodic Status Report ===
+[19:01:03][INFO][STATUS] Uptime: 98 min | Free heap: 205088 bytes
+[19:01:03][INFO][POWER] Battery: 75% | Free heap: 205088 bytes
+[19:01:03][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.536936 | Lon: 77.254594 | Speed: 14.9 km/h
+[19:01:03][INFO][GPS] Chars: 3127490 | Fixes: 2764 | Errors: 22 | Alt: 158.0m
+[19:01:03][INFO][GEOFENCE] AtHome: YES | Distance: 48m | WiFi: CTNF-Universal
+[19:01:03][INFO][WALK] Active: YES | Duration: 373 sec | Distance: 157m | Points: 330
+[19:01:03][INFO][WALK] Steps: 208 | MaxSpeed: 14.9 | AvgSpeed: 12.7 | Manual: NO
+[19:01:03][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 6
+[19:01:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -50 dBm
+[19:01:03][INFO][ACCEL] X: 0.12 | Y: -2.86 | Z: 10.51 | Mag: 10.90 | Moving: NO
+[19:01:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:01:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[19:01:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[19:01:08][DEBUG][UPLOAD] Free heap: 138380 bytes
+[19:01:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[19:01:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[19:01:08][ERROR][UPLOAD] FAILED! HTTP -1 after 55ms
+[19:01:08][ERROR][UPLOAD] Server response: 
+[19:01:08][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[19:01:20][DEBUG][GPS] Chars: 3134637, Good: 2764, Errors: 23, Sats: 0
+[19:01:50][DEBUG][GPS] Chars: 3151522, Good: 2764, Errors: 23, Sats: 0
+[19:02:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:02:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[19:02:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[19:02:08][DEBUG][UPLOAD] Free heap: 138380 bytes
+[19:02:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[19:02:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[19:02:11][ERROR][UPLOAD] FAILED! HTTP 400 after 2549ms
+[19:02:11][ERROR][UPLOAD] Server response: {"error":"Missing required fields","required":["deviceId","startTime"]}
+[19:02:11][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[19:02:20][DEBUG][GPS] Chars: 3164959, Good: 2764, Errors: 23, Sats: 0
+[19:02:50][DEBUG][GPS] Chars: 3182324, Good: 2764, Errors: 23, Sats: 0
+[19:03:03][INFO][STATUS] === Periodic Status Report ===
+[19:03:03][INFO][STATUS] Uptime: 100 min | Free heap: 205056 bytes
+[19:03:03][INFO][POWER] Battery: 76% | Free heap: 202732 bytes
+[19:03:03][INFO][GPS] Valid: YES | Sats: 0 | Lat: 28.536936 | Lon: 77.254594 | Speed: 14.9 km/h
+[19:03:03][INFO][GPS] Chars: 3190409 | Fixes: 2764 | Errors: 23 | Alt: 158.0m
+[19:03:03][INFO][GEOFENCE] AtHome: YES | Distance: 48m | WiFi: CTNF-Universal
+[19:03:03][INFO][WALK] Active: YES | Duration: 493 sec | Distance: 157m | Points: 440
+[19:03:03][INFO][WALK] Steps: 208 | MaxSpeed: 14.9 | AvgSpeed: 13.2 | Manual: NO
+[19:03:03][INFO][UPLOAD] Pending: 1 | Today uploads: 0 | Failed: 8
+[19:03:03][INFO][WIFI] Connected: CTNF-Universal | IP: 192.168.29.106 | RSSI: -47 dBm
+[19:03:03][INFO][ACCEL] X: 0.04 | Y: -2.79 | Z: 10.55 | Mag: 10.91 | Moving: NO
+[19:03:04][UPLOAD][UPLOAD] --- Starting upload check ---
+[19:03:04][UPLOAD][UPLOAD] === Processing: walk_1768913575.json ===
+[19:03:08][UPLOAD][UPLOAD] Parsed 1329 GPS points, payload: 65519 bytes
+[19:03:08][DEBUG][UPLOAD] Free heap: 138360 bytes
+[19:03:08][UPLOAD][UPLOAD] URL: https://sunilperformancetracker-production.up.railway.app/api/walks/upload
+[19:03:08][UPLOAD][UPLOAD] Payload size: 65519 bytes, sending POST...
+[19:03:10][ERROR][UPLOAD] FAILED! HTTP 400 after 2262ms
+[19:03:10][ERROR][UPLOAD] Server response: {"error":"Missing required fields","required":["deviceId","startTime"]}
+[19:03:10][ERROR][UPLOAD] File: walk_1768913575.json, Points: 1329, Size: 65519 bytes
+[19:03:20][DEBUG][GPS] Chars: 3196627, Good: 2764, Errors: 24, Sats: 0
+[19:03:50][DEBUG][GPS] Chars: 3213960, Good: 2764, Errors: 24, Sats: 0

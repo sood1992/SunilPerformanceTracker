@@ -1,0 +1,11 @@
+
+================================================================================
+=== DOG WALKER GPS TRACKER - Session Started: Boot+14183ms ===
+================================================================================
+[14][INFO][SYSTEM] === SYSTEM STARTUP COMPLETE ===
+[14][INFO][SYSTEM] Device: DOG_WALKER_001
+[14][INFO][SYSTEM] Display: OK | SD: OK | Accel: OK
+[14][INFO][SYSTEM] GPS: OK | Modem: OK | WiFi: OK
+[14][INFO][WIFI] Connected to CTNF-Universal, IP: 192.168.29.106
+[14][INFO][GEOFENCE] Home: 28.536500, 77.254600 | Start: 100m | End: 30m
+[14][INFO][GEOFENCE] Home WiFi: CTNF-Universal | Standby: DISABLED
