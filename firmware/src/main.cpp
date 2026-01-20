@@ -324,6 +324,9 @@ void setup() {
         displayStatus.lastEvent = "System Ready";
         updateDisplay();
     }
+
+    // Initialize display off timer (prevent immediate turn-off in standby)
+    displayOffTime = millis() + STANDBY_DISPLAY_OFF_MS;
 }
 
 // ============================================================================
