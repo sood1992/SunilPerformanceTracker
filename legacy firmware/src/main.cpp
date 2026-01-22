@@ -1,5 +1,6 @@
 #include "config.h"
 #include "gps_handler.h"
+#include "modem_handler.h" // Added Modem Handler
 #include "sd_logger.h"
 #include "wifi_uploader.h"
 #include <Adafruit_ADXL345_U.h>
@@ -34,6 +35,7 @@ void setup() {
 
   setupGPS();
   setupSD();
+  setupModem(); // Initialize LTE Modem
 
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
   if (!accel.begin()) {
@@ -63,6 +65,7 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 
 void loop() {
   processGPS();
+  modemLoop(); // Keep modem alive
 
   sensors_event_t event;
   accel.getEvent(&event);
@@ -87,16 +90,19 @@ void loop() {
       walkStartTime = millis();
       lastActivityTime = millis();
 
-      // USE GPS TIME FOR FILENAME to fix "Wrong Date"
       unsigned long gpsTime = getGPSEpochTime();
       if (gpsTime == 0)
-        gpsTime = millis(); // Fallback
+        gpsTime = millis();
 
       currentWalkId = startNewLogSession(gpsTime);
     } else {
       static unsigned long lastSync = 0;
       if (millis() - lastSync > 60000) {
         lastSync = millis();
+        // Prefer LTE Sync if connected?
+        // Actually for large files WiFi is better.
+        // But user wants Realtime LTE.
+        // We'll keep WiFi Sync for bulk upload of old files.
         syncData();
       }
     }
@@ -109,6 +115,12 @@ void loop() {
     if (millis() - lastLog > 1000) {
       lastLog = millis();
       logData(currentWalkId, lat, lon, speed, deviation, hasFix);
+
+      // REALTIME PUSH via LTE
+      // Only push if we have a fix
+      if (hasFix) {
+        postDataRealtime(lat, lon, speed, deviation);
+      }
 
       Serial.printf("Walk Active: %.2f km/h | Act: %.2f\n", speed, deviation);
     }
