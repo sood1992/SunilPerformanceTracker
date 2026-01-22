@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -949,6 +950,53 @@ void readGPS() {
     }
 }
 
+// Get Unix epoch time from GPS (fallback when NTP not available)
+// Adopted from legacy firmware - works without WiFi!
+time_t getGPSEpochTime() {
+    if (gps.date.isValid() && gps.time.isValid()) {
+        // Validate year to filter obviously invalid dates
+        if (gps.date.year() < 2024 || gps.date.year() > 2030) {
+            return 0;
+        }
+
+        struct tm t = {0};
+        t.tm_year = gps.date.year() - 1900;
+        t.tm_mon = gps.date.month() - 1;
+        t.tm_mday = gps.date.day();
+        t.tm_hour = gps.time.hour();
+        t.tm_min = gps.time.minute();
+        t.tm_sec = gps.time.second();
+
+        // mktime assumes local time, but GPS gives UTC
+        // Add timezone offset (IST = UTC+5:30 = 19800 seconds)
+        time_t epochTime = mktime(&t) + 19800;
+
+        return epochTime;
+    }
+    return 0;
+}
+
+// Get best available timestamp (NTP preferred, GPS fallback)
+time_t getBestTimestamp() {
+    time_t ntpTime = time(nullptr);
+
+    // If NTP time is valid (after year 2020), use it
+    if (ntpTime > 1600000000) {
+        return ntpTime;
+    }
+
+    // Fallback to GPS time if available
+    time_t gpsTime = getGPSEpochTime();
+    if (gpsTime > 1600000000) {
+        Serial.println("[TIME] Using GPS time (NTP not synced)");
+        return gpsTime;
+    }
+
+    // Last resort - return 0 to indicate no valid time
+    Serial.println("[TIME] WARNING: No valid time source!");
+    return 0;
+}
+
 void readAccelerometer() {
     if (!accelReady || accel == nullptr) return;
 
@@ -977,7 +1025,7 @@ void startWalk() {
 
     currentWalk.isActive = true;
     currentWalk.startTime = millis();
-    currentWalk.startTimeUnix = time(nullptr);  // Get actual Unix timestamp
+    currentWalk.startTimeUnix = getBestTimestamp();  // NTP preferred, GPS fallback
     currentWalk.totalDistance = 0;
     currentWalk.maxSpeed = 0;
     currentWalk.avgSpeed = 0;
@@ -987,10 +1035,10 @@ void startWalk() {
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== WALK STARTED ==========");
 
-    // Warn if NTP hasn't synced yet (timestamp will be invalid)
+    // Warn if no valid time source available
     if (currentWalk.startTimeUnix < 1600000000) {
-        writeLog(LOG_WARN, "WALK", "WARNING: NTP not synced, timestamp may be invalid!");
-        Serial.println("  [WARN] NTP not synced - timestamp will be incorrect!");
+        writeLog(LOG_WARN, "WALK", "WARNING: No valid time (NTP/GPS), timestamp will be invalid!");
+        Serial.println("  [WARN] No valid time source - timestamp will be incorrect!");
     }
     writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
     writeLogf(LOG_INFO, "WALK", "GPS satellites: %d, Speed: %.1f km/h", currentGPS.satellites, currentGPS.speed);
@@ -1065,7 +1113,7 @@ void startWalkManual() {
 
     currentWalk.isActive = true;
     currentWalk.startTime = millis();
-    currentWalk.startTimeUnix = time(nullptr);  // Get actual Unix timestamp
+    currentWalk.startTimeUnix = getBestTimestamp();  // NTP preferred, GPS fallback
     currentWalk.totalDistance = 0;
     currentWalk.maxSpeed = 0;
     currentWalk.avgSpeed = 0;
@@ -1076,10 +1124,10 @@ void startWalkManual() {
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== MANUAL WALK STARTED ==========");
 
-    // Warn if NTP hasn't synced yet (timestamp will be invalid)
+    // Warn if no valid time source available
     if (currentWalk.startTimeUnix < 1600000000) {
-        writeLog(LOG_WARN, "WALK", "WARNING: NTP not synced, timestamp may be invalid!");
-        Serial.println("  [WARN] NTP not synced - timestamp will be incorrect!");
+        writeLog(LOG_WARN, "WALK", "WARNING: No valid time (NTP/GPS), timestamp will be invalid!");
+        Serial.println("  [WARN] No valid time source - timestamp will be incorrect!");
     }
     if (currentGPS.valid) {
         writeLogf(LOG_INFO, "WALK", "Start location: %.6f, %.6f", currentGPS.latitude, currentGPS.longitude);
@@ -1407,12 +1455,19 @@ void uploadPendingWalks() {
             // Log free heap before HTTP request
             writeLogf(LOG_DEBUG, "UPLOAD", "Free heap: %lu bytes", ESP.getFreeHeap());
 
-            // Send to server
+            // Send to server using WiFiClientSecure for stable HTTPS
+            WiFiClientSecure client;
+            client.setInsecure();  // Skip certificate validation for stability on ESP32
+
             HTTPClient http;
             String url = String(API_BASE_URL) + String(API_ENDPOINT);
             writeLogf(LOG_UPLOAD, "UPLOAD", "URL: %s", url.c_str());
 
-            http.begin(url);
+            if (!http.begin(client, url)) {
+                writeLogf(LOG_ERROR, "UPLOAD", "Failed to begin HTTPS connection to %s", url.c_str());
+                file = dir.openNextFile();
+                continue;
+            }
             http.addHeader("Content-Type", "application/json");
             http.addHeader("X-Device-ID", DEVICE_ID);
             http.setTimeout(60000);  // 60 second timeout for large payloads
