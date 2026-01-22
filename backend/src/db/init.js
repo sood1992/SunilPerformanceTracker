@@ -62,9 +62,15 @@ export async function initDatabase() {
       end_lat DOUBLE PRECISION,
       end_lon DOUBLE PRECISION,
       point_count INTEGER DEFAULT 0,
+      is_live BOOLEAN DEFAULT false,
       uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       metadata JSONB DEFAULT '{}'
     )
+  `);
+
+  // Add is_live column if it doesn't exist (for existing databases)
+  await query(`
+    ALTER TABLE walks ADD COLUMN IF NOT EXISTS is_live BOOLEAN DEFAULT false
   `);
 
   // Create walk_points table for GPS data
@@ -87,6 +93,7 @@ export async function initDatabase() {
   // Create indexes for better query performance
   await query(`CREATE INDEX IF NOT EXISTS idx_walks_device_id ON walks(device_id)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_walks_start_time ON walks(start_time)`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_walks_is_live ON walks(is_live) WHERE is_live = true`);
   await query(`CREATE INDEX IF NOT EXISTS idx_walk_points_walk_id ON walk_points(walk_id)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_devices_device_id ON devices(device_id)`);
 

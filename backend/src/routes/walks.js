@@ -326,6 +326,241 @@ walkRoutes.post('/upload', async (req, res, next) => {
 });
 
 /**
+ * POST /api/walks/realtime
+ * Real-time GPS point streaming during walks (from LTE)
+ * Creates or updates a "live" walk and appends points in real-time
+ */
+walkRoutes.post('/realtime', async (req, res, next) => {
+  try {
+    const { deviceId, walkId, points = [] } = req.body;
+
+    // Validate required fields
+    if (!deviceId || !walkId) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['deviceId', 'walkId']
+      });
+    }
+
+    // Validate points array
+    if (!Array.isArray(points) || points.length === 0) {
+      return res.status(400).json({ error: 'points must be a non-empty array' });
+    }
+
+    // Validate and filter points
+    const validPoints = points.filter(p => {
+      if (!p || typeof p !== 'object') return false;
+      if (typeof p.lat !== 'number' || isNaN(p.lat)) return false;
+      if (typeof p.lon !== 'number' || isNaN(p.lon)) return false;
+      if (p.lat < -90 || p.lat > 90) return false;
+      if (p.lon < -180 || p.lon > 180) return false;
+      return true;
+    });
+
+    if (validPoints.length === 0) {
+      return res.status(400).json({ error: 'No valid points in request' });
+    }
+
+    // Update device last_seen
+    await query(`
+      INSERT INTO devices (device_id, last_seen)
+      VALUES ($1, CURRENT_TIMESTAMP)
+      ON CONFLICT (device_id)
+      DO UPDATE SET last_seen = CURRENT_TIMESTAMP
+    `, [deviceId]);
+
+    // Check if walk already exists (by start_time matching walkId)
+    const existingWalk = await query(
+      `SELECT id, point_count, total_distance_meters, max_speed_kmh
+       FROM walks
+       WHERE device_id = $1 AND EXTRACT(EPOCH FROM start_time)::bigint = $2`,
+      [deviceId, walkId]
+    );
+
+    let dbWalkId;
+    let isNewWalk = false;
+
+    if (existingWalk.rows.length > 0) {
+      // Walk exists - we'll append points
+      dbWalkId = existingWalk.rows[0].id;
+    } else {
+      // Create new "live" walk record
+      isNewWalk = true;
+      const firstPoint = validPoints[0];
+
+      const walkResult = await query(`
+        INSERT INTO walks (
+          device_id, start_time,
+          duration_seconds, total_distance_meters,
+          avg_speed_kmh, max_speed_kmh,
+          start_lat, start_lon,
+          point_count, is_live
+        ) VALUES ($1, to_timestamp($2), 0, 0, 0, 0, $3, $4, 0, true)
+        RETURNING id
+      `, [deviceId, walkId, firstPoint.lat, firstPoint.lon]);
+
+      dbWalkId = walkResult.rows[0].id;
+      console.log(`[REALTIME] New live walk created: ID=${dbWalkId}, Device=${deviceId}`);
+    }
+
+    // Insert the new points
+    const batchValues = validPoints.map((_, idx) => {
+      const base = idx * 8;
+      return `($1, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
+    }).join(', ');
+
+    const batchParams = [dbWalkId];
+    validPoints.forEach(p => {
+      batchParams.push(
+        p.t || 0,
+        p.lat,
+        p.lon,
+        p.alt || null,
+        p.spd || null,
+        p.ax || null,
+        p.ay || null,
+        p.az || null
+      );
+    });
+
+    await query(`
+      INSERT INTO walk_points (
+        walk_id, time_offset_seconds, latitude, longitude,
+        altitude, speed_kmh, accel_x, accel_y, accel_z
+      ) VALUES ${batchValues}
+    `, batchParams);
+
+    // Update walk statistics
+    const lastPoint = validPoints[validPoints.length - 1];
+    const maxSpeed = Math.max(...validPoints.map(p => p.spd || 0));
+
+    // Calculate distance for these new points
+    let addedDistance = 0;
+    for (let i = 1; i < validPoints.length; i++) {
+      addedDistance += haversineDistance(
+        validPoints[i-1].lat, validPoints[i-1].lon,
+        validPoints[i].lat, validPoints[i].lon
+      );
+    }
+
+    // Update walk record with new stats
+    await query(`
+      UPDATE walks SET
+        point_count = point_count + $2,
+        duration_seconds = GREATEST(duration_seconds, $3),
+        end_time = to_timestamp($4 + $3),
+        total_distance_meters = total_distance_meters + $5,
+        max_speed_kmh = GREATEST(max_speed_kmh, $6),
+        end_lat = $7,
+        end_lon = $8
+      WHERE id = $1
+    `, [
+      dbWalkId,
+      validPoints.length,
+      Math.round(lastPoint.t || 0),
+      walkId,
+      addedDistance,
+      maxSpeed,
+      lastPoint.lat,
+      lastPoint.lon
+    ]);
+
+    console.log(`[REALTIME] Points added: Walk=${dbWalkId}, +${validPoints.length} points, distance +${addedDistance.toFixed(1)}m`);
+
+    res.status(200).json({
+      success: true,
+      walkId: dbWalkId,
+      pointsAdded: validPoints.length,
+      isNewWalk: isNewWalk
+    });
+  } catch (error) {
+    console.error('[REALTIME] Error:', error);
+    next(error);
+  }
+});
+
+/**
+ * POST /api/walks/:id/end
+ * Mark a live walk as complete
+ */
+walkRoutes.post('/:id/end', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Calculate final statistics
+    const statsResult = await query(`
+      SELECT
+        COUNT(*) as point_count,
+        MAX(time_offset_seconds) as duration,
+        AVG(speed_kmh) as avg_speed
+      FROM walk_points
+      WHERE walk_id = $1
+    `, [id]);
+
+    const stats = statsResult.rows[0];
+
+    // Update walk to mark as complete
+    await query(`
+      UPDATE walks SET
+        is_live = false,
+        duration_seconds = $2,
+        avg_speed_kmh = $3
+      WHERE id = $1
+    `, [id, stats.duration || 0, stats.avg_speed || 0]);
+
+    console.log(`[REALTIME] Walk ${id} marked as complete`);
+
+    res.json({ success: true, message: 'Walk marked as complete' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/walks/live
+ * Get currently active (live) walks
+ */
+walkRoutes.get('/live', async (req, res, next) => {
+  try {
+    const { device_id } = req.query;
+
+    let sql = `
+      SELECT
+        w.*,
+        (SELECT json_agg(json_build_object(
+          't', wp.time_offset_seconds,
+          'lat', wp.latitude,
+          'lon', wp.longitude,
+          'spd', wp.speed_kmh
+        ) ORDER BY wp.time_offset_seconds DESC LIMIT 50)
+        FROM walk_points wp WHERE wp.walk_id = w.id) as recent_points
+      FROM walks w
+      WHERE is_live = true
+    `;
+    const params = [];
+
+    if (device_id) {
+      sql += ` AND device_id = $1`;
+      params.push(device_id);
+    }
+
+    sql += ` ORDER BY start_time DESC`;
+
+    const result = await query(sql, params);
+
+    res.json({
+      liveWalks: result.rows.map(row => ({
+        ...formatWalk(row),
+        isLive: true,
+        recentPoints: row.recent_points || []
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * DELETE /api/walks/:id
  * Delete a walk and its points
  */
