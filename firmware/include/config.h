@@ -129,6 +129,14 @@
 #define UPLOAD_RETRY_DELAY   5000   // ms between retries
 
 // ============================================================================
+// Real-Time LTE Streaming (Live Tracking)
+// ============================================================================
+#define REALTIME_STREAMING_ENABLED  true   // Enable live GPS streaming over LTE
+#define REALTIME_STREAM_INTERVAL    5000   // ms between stream uploads (5 sec)
+#define REALTIME_ENDPOINT           "/api/walks/realtime"  // Real-time endpoint
+#define REALTIME_BATCH_SIZE         5      // Send this many points per request (reduces overhead)
+
+// ============================================================================
 // Debug Settings
 // ============================================================================
 #define DEBUG_SERIAL        Serial

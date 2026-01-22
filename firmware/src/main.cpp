@@ -170,6 +170,21 @@ unsigned long buttonPressStart = 0;
 bool buttonHandled = false;
 bool manualWalkMode = false;  // True when walk started manually via button
 
+// Real-Time LTE Streaming State
+unsigned long lastStreamTime = 0;         // Last time we streamed data
+int streamPointsBuffered = 0;             // Points buffered for next stream
+int streamPointsSent = 0;                 // Total points streamed this walk
+int streamFailures = 0;                   // Consecutive stream failures
+
+// Streaming buffer (stores points between streams)
+struct StreamPoint {
+    double t;       // Time offset from walk start
+    double lat;
+    double lon;
+    double spd;
+};
+StreamPoint streamBuffer[REALTIME_BATCH_SIZE];
+
 // Log levels for filtering
 enum LogLevel {
     LOG_DEBUG = 0,
@@ -212,6 +227,8 @@ void logWalkData();
 void uploadPendingWalks();
 void uploadPendingWalksLTE();
 bool uploadViaLTE(const String& filename, const String& payload);
+bool streamPointsLTE();
+void bufferPointForStreaming(double t, double lat, double lon, double spd);
 int countPendingFiles();
 void updateDisplay();
 void readBattery();
@@ -1121,8 +1138,17 @@ void startWalk() {
     currentWalk.dataPoints = 0;
     stepCount = 0;  // Reset walk step count
 
+    // Reset real-time streaming state
+    streamPointsBuffered = 0;
+    streamPointsSent = 0;
+    streamFailures = 0;
+    lastStreamTime = millis();
+
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== WALK STARTED ==========");
+    #if REALTIME_STREAMING_ENABLED
+        writeLog(LOG_INFO, "STREAM", "Real-time LTE streaming enabled");
+    #endif
 
     // Warn if no valid time source available
     if (currentWalk.startTimeUnix < 1600000000) {
@@ -1175,6 +1201,14 @@ void endWalk() {
     writeLogf(LOG_INFO, "WALK", "Steps: %lu", stepCount);
     writeLogf(LOG_INFO, "WALK", "Max speed: %.1f km/h, Avg speed: %.1f km/h", currentWalk.maxSpeed, currentWalk.avgSpeed);
 
+    // Log streaming stats
+    #if REALTIME_STREAMING_ENABLED
+        Serial.printf("  Streamed: %d points live\n", streamPointsSent);
+        writeLogf(LOG_INFO, "STREAM", "Live streamed: %d/%d points (%.0f%%)",
+            streamPointsSent, currentWalk.dataPoints,
+            currentWalk.dataPoints > 0 ? (streamPointsSent * 100.0 / currentWalk.dataPoints) : 0);
+    #endif
+
     if (duration < MIN_WALK_DURATION) {
         Serial.println("  Walk too short - discarding");
         writeLogf(LOG_WARN, "WALK", "Walk too short (<%lu ms) - discarding", MIN_WALK_DURATION);
@@ -1210,8 +1244,17 @@ void startWalkManual() {
     stepCount = 0;
     manualWalkMode = true;  // Mark as manual start
 
+    // Reset real-time streaming state
+    streamPointsBuffered = 0;
+    streamPointsSent = 0;
+    streamFailures = 0;
+    lastStreamTime = millis();
+
     // Log walk start
     writeLog(LOG_INFO, "WALK", "========== MANUAL WALK STARTED ==========");
+    #if REALTIME_STREAMING_ENABLED
+        writeLog(LOG_INFO, "STREAM", "Real-time LTE streaming enabled");
+    #endif
 
     // Warn if no valid time source available
     if (currentWalk.startTimeUnix < 1600000000) {
@@ -1273,6 +1316,14 @@ void endWalkManual() {
     writeLogf(LOG_INFO, "WALK", "Data points: %d", currentWalk.dataPoints);
     writeLogf(LOG_INFO, "WALK", "Steps: %lu", stepCount);
 
+    // Log streaming stats
+    #if REALTIME_STREAMING_ENABLED
+        Serial.printf("  Streamed: %d points live\n", streamPointsSent);
+        writeLogf(LOG_INFO, "STREAM", "Live streamed: %d/%d points (%.0f%%)",
+            streamPointsSent, currentWalk.dataPoints,
+            currentWalk.dataPoints > 0 ? (streamPointsSent * 100.0 / currentWalk.dataPoints) : 0);
+    #endif
+
     // For manual walks, always save (no minimum duration check)
     if (sdCardReady && currentWalk.filename.length() > 0) {
         String pendingPath = "/pending/walk_" + String(currentWalk.startTimeUnix) + ".json";
@@ -1310,10 +1361,14 @@ void logWalkData() {
     currentWalk.dataPoints++;
     currentWalk.avgSpeed = ((currentWalk.avgSpeed * (currentWalk.dataPoints - 1)) + currentGPS.speed) / currentWalk.dataPoints;
 
+    // Calculate time offset for this point
+    double timeOffset = (millis() - currentWalk.startTime) / 1000.0;
+
+    // Save to SD card (always - this is the backup)
     File file = SD.open(currentWalk.filename, FILE_APPEND);
     if (file) {
         JsonDocument point;
-        point["t"] = (millis() - currentWalk.startTime) / 1000.0;
+        point["t"] = timeOffset;
         point["lat"] = currentGPS.latitude;
         point["lon"] = currentGPS.longitude;
         point["spd"] = currentGPS.speed;
@@ -1325,6 +1380,11 @@ void logWalkData() {
         serializeJson(point, file);
         file.close();
     }
+
+    // Buffer point for real-time LTE streaming (if enabled)
+    #if REALTIME_STREAMING_ENABLED
+        bufferPointForStreaming(timeOffset, currentGPS.latitude, currentGPS.longitude, currentGPS.speed);
+    #endif
 
     lastValidGPS = currentGPS;
 }
@@ -1963,6 +2023,173 @@ void uploadPendingWalksLTE() {
     }
 
     dir.close();
+}
+
+// ============================================================================
+// Real-Time LTE Streaming (Live Tracking)
+// ============================================================================
+
+bool streamPointsLTE() {
+    #if !REALTIME_STREAMING_ENABLED
+        return false;
+    #endif
+
+    if (!modemReady || streamPointsBuffered == 0) {
+        return false;
+    }
+
+    // Check if we have enough consecutive failures to pause streaming
+    if (streamFailures >= 5) {
+        // Only retry every 30 seconds after multiple failures
+        static unsigned long lastRetryAttempt = 0;
+        if (millis() - lastRetryAttempt < 30000) {
+            return false;
+        }
+        lastRetryAttempt = millis();
+        writeLog(LOG_WARN, "STREAM", "Retrying after multiple failures...");
+    }
+
+    Serial.printf("[STREAM] Sending %d points via LTE...\n", streamPointsBuffered);
+    writeLogf(LOG_INFO, "STREAM", "Streaming %d points", streamPointsBuffered);
+
+    // Check network connection
+    if (!modem.isNetworkConnected()) {
+        writeLog(LOG_WARN, "STREAM", "Network not connected");
+        streamFailures++;
+        return false;
+    }
+
+    // Check GPRS connection, try to reconnect if needed
+    if (!modem.isGprsConnected()) {
+        if (!modem.gprsConnect("airtelgprs.com") &&
+            !modem.gprsConnect("internet")) {
+            writeLog(LOG_WARN, "STREAM", "GPRS not connected");
+            streamFailures++;
+            return false;
+        }
+    }
+
+    // Build JSON payload for real-time points
+    String payload;
+    payload.reserve(1024);
+
+    char buf[256];
+    snprintf(buf, sizeof(buf),
+        "{\"deviceId\":\"%s\",\"walkId\":%ld,\"points\":[",
+        DEVICE_ID, (long)currentWalk.startTimeUnix);
+    payload = buf;
+
+    for (int i = 0; i < streamPointsBuffered; i++) {
+        char pointBuf[150];
+        snprintf(pointBuf, sizeof(pointBuf),
+            "%s{\"t\":%.3f,\"lat\":%.8f,\"lon\":%.8f,\"spd\":%.2f}",
+            (i > 0) ? "," : "",
+            streamBuffer[i].t,
+            streamBuffer[i].lat,
+            streamBuffer[i].lon,
+            streamBuffer[i].spd);
+        payload += pointBuf;
+    }
+    payload += "]}";
+
+    // Parse URL
+    String url = String(API_BASE_URL) + String(REALTIME_ENDPOINT);
+    int protocolEnd = url.indexOf("://");
+    int pathStart = url.indexOf("/", protocolEnd + 3);
+    String host = url.substring(protocolEnd + 3, pathStart);
+    String path = url.substring(pathStart);
+
+    // Connect and send
+    unsigned long startTime = millis();
+
+    if (!lteClient.connect(host.c_str(), 443)) {
+        writeLog(LOG_WARN, "STREAM", "SSL connect failed");
+        streamFailures++;
+        return false;
+    }
+
+    // Send HTTP POST
+    lteClient.print(String("POST ") + path + " HTTP/1.1\r\n");
+    lteClient.print(String("Host: ") + host + "\r\n");
+    lteClient.print("Content-Type: application/json\r\n");
+    lteClient.print("X-Device-ID: " + String(DEVICE_ID) + "\r\n");
+    lteClient.print("Connection: close\r\n");
+    lteClient.print("Content-Length: " + String(payload.length()) + "\r\n");
+    lteClient.print("\r\n");
+    lteClient.print(payload);
+
+    // Wait for response (short timeout for real-time)
+    int httpStatus = -1;
+    unsigned long responseStart = millis();
+    while (lteClient.connected() && millis() - responseStart < 10000) {
+        if (lteClient.available()) {
+            String line = lteClient.readStringUntil('\n');
+            if (line.startsWith("HTTP/")) {
+                int spaceIdx = line.indexOf(' ');
+                if (spaceIdx > 0) {
+                    httpStatus = line.substring(spaceIdx + 1, spaceIdx + 4).toInt();
+                }
+                break;
+            }
+        }
+        delay(10);
+    }
+
+    lteClient.stop();
+
+    unsigned long duration = millis() - startTime;
+
+    if (httpStatus == 200 || httpStatus == 201) {
+        Serial.printf("[STREAM] OK! %d points in %lu ms\n", streamPointsBuffered, duration);
+        writeLogf(LOG_INFO, "STREAM", "Success: %d points in %lums", streamPointsBuffered, duration);
+
+        streamPointsSent += streamPointsBuffered;
+        streamPointsBuffered = 0;
+        streamFailures = 0;  // Reset failure counter on success
+
+        displayStatus.lastEvent = "Live: " + String(streamPointsSent) + " pts";
+        return true;
+    } else {
+        Serial.printf("[STREAM] FAIL HTTP %d after %lu ms\n", httpStatus, duration);
+        writeLogf(LOG_WARN, "STREAM", "Failed HTTP %d after %lums", httpStatus, duration);
+        streamFailures++;
+        // Don't clear buffer - points will be saved to SD and uploaded later
+        return false;
+    }
+}
+
+// Add a point to the stream buffer (called from logWalkData)
+void bufferPointForStreaming(double t, double lat, double lon, double spd) {
+    #if !REALTIME_STREAMING_ENABLED
+        return;
+    #endif
+
+    if (streamPointsBuffered < REALTIME_BATCH_SIZE) {
+        streamBuffer[streamPointsBuffered].t = t;
+        streamBuffer[streamPointsBuffered].lat = lat;
+        streamBuffer[streamPointsBuffered].lon = lon;
+        streamBuffer[streamPointsBuffered].spd = spd;
+        streamPointsBuffered++;
+    }
+
+    // Stream when buffer is full or enough time has passed
+    unsigned long now = millis();
+    bool bufferFull = (streamPointsBuffered >= REALTIME_BATCH_SIZE);
+    bool timeToStream = (now - lastStreamTime >= REALTIME_STREAM_INTERVAL);
+
+    if (bufferFull || (timeToStream && streamPointsBuffered > 0)) {
+        if (streamPointsLTE()) {
+            lastStreamTime = now;
+        } else {
+            // Streaming failed - data is still on SD card as backup
+            // Clear buffer to avoid memory issues, SD has the data
+            if (streamFailures >= 3) {
+                writeLog(LOG_WARN, "STREAM", "Multiple failures, relying on SD backup");
+                streamPointsBuffered = 0;
+                lastStreamTime = now;
+            }
+        }
+    }
 }
 
 // ============================================================================
