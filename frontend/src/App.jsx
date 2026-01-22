@@ -5,6 +5,7 @@ import StatsCards from './components/StatsCards'
 import SpeedChart from './components/SpeedChart'
 import GoalDashboard from './components/GoalDashboard'
 import HistoricalStats from './components/HistoricalStats'
+import LiveTracker from './components/LiveTracker'
 
 // API base URL - update for production
 // Auto-add https:// if protocol is missing
@@ -160,6 +161,11 @@ function App() {
             <button onClick={() => setError(null)}>Dismiss</button>
           </div>
         )}
+
+        {/* Live Tracking Section - Shows when walk is active */}
+        <section className="live-section">
+          <LiveTracker />
+        </section>
 
         {/* Stats Overview */}
         <section className="stats-section">

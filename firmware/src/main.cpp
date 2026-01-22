@@ -2418,27 +2418,51 @@ void updateDisplay() {
     }
     display->drawStr(0, 38, buf);
 
-    // ===== ROW 4: GPS + WiFi + Upload Status =====
+    // ===== ROW 4: GPS + Network + Upload Status =====
     // GPS status
     if (currentGPS.valid) {
-        snprintf(buf, sizeof(buf), "GPS:%d", currentGPS.satellites);
+        snprintf(buf, sizeof(buf), "G:%d", currentGPS.satellites);
     } else if (currentGPS.satellites > 0) {
-        snprintf(buf, sizeof(buf), "GPS:%d*", currentGPS.satellites);
+        snprintf(buf, sizeof(buf), "G:%d*", currentGPS.satellites);
     } else {
-        snprintf(buf, sizeof(buf), "GPS:--");
+        snprintf(buf, sizeof(buf), "G:--");
     }
     display->drawStr(0, 50, buf);
 
-    // WiFi status
-    display->drawStr(48, 50, (WiFi.status() == WL_CONNECTED) ? "WiFi" : "----");
-
-    // Upload status
-    if (pendingUploads > 0) {
-        snprintf(buf, sizeof(buf), "P:%d", pendingUploads);
+    // Network status (WiFi or LTE)
+    if (WiFi.status() == WL_CONNECTED) {
+        display->drawStr(30, 50, "WiFi");
+    } else if (lteConnected) {
+        display->drawStr(30, 50, "LTE");
+    } else if (modemReady) {
+        display->drawStr(30, 50, "4G?");
     } else {
-        snprintf(buf, sizeof(buf), "OK");
+        display->drawStr(30, 50, "---");
     }
-    display->drawStr(90, 50, buf);
+
+    // Streaming status during walk
+    #if REALTIME_STREAMING_ENABLED
+    if (currentWalk.isActive && streamPointsSent > 0) {
+        snprintf(buf, sizeof(buf), "L:%d", streamPointsSent);  // L for Live
+        display->drawStr(60, 50, buf);
+    } else
+    #endif
+    {
+        // Upload status when not streaming
+        if (pendingUploads > 0) {
+            snprintf(buf, sizeof(buf), "P:%d", pendingUploads);
+        } else {
+            snprintf(buf, sizeof(buf), "OK");
+        }
+        display->drawStr(60, 50, buf);
+    }
+
+    // Additional status indicator (far right)
+    if (currentWalk.isActive && streamFailures > 0) {
+        display->drawStr(100, 50, "!");  // Warning if stream failing
+    } else if (currentWalk.isActive) {
+        display->drawStr(100, 50, "*");  // Active indicator
+    }
 
     // ===== ROW 5: Location Status =====
     if (isAtHome) {

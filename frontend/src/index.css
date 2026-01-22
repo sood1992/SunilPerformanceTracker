@@ -1263,3 +1263,197 @@ body {
     align-items: flex-start;
   }
 }
+
+/* ============================================
+   Live Tracker Styles
+   ============================================ */
+
+.live-section {
+  margin-bottom: 1.5rem;
+}
+
+.live-tracker {
+  background: var(--card-background);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.live-tracker--active {
+  border: 2px solid #ef4444;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: #ef4444; }
+  50% { border-color: #fca5a5; }
+}
+
+.live-tracker__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.live-tracker__header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.live-tracker--active .live-tracker__header h2 {
+  color: #ef4444;
+}
+
+.live-tracker__status {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.live-tracker__update {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+/* Pulsing dot indicator */
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.pulse-dot--red {
+  background: #ef4444;
+  animation: pulse-dot 1.5s infinite;
+}
+
+.pulse-dot--gray {
+  background: #9ca3af;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+/* Empty state */
+.live-tracker__empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.live-tracker__empty p {
+  margin-bottom: 0.5rem;
+}
+
+.live-tracker__empty .text-muted {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.live-tracker__empty .text-small {
+  font-size: 0.75rem;
+  margin-top: 1rem;
+  opacity: 0.5;
+}
+
+/* Loading state */
+.live-tracker__loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Error state */
+.live-tracker__error {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Live stats grid */
+.live-tracker__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.live-stat {
+  text-align: center;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.live-stat__value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.live-stat__label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Live map */
+.live-tracker__map {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+#live-map {
+  background: #e5e7eb;
+}
+
+/* Current location */
+.live-tracker__location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.location-label {
+  font-weight: 500;
+}
+
+.location-coords {
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .live-tracker__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .live-tracker__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
