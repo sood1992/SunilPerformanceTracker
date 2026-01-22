@@ -22,6 +22,11 @@
 #include <U8g2lib.h>
 #include "config.h"
 
+// TinyGSM configuration (must be before TinyGSM include)
+#define TINY_GSM_MODEM_SIM7600
+#define TINY_GSM_RX_BUFFER 1024
+#include <TinyGsmClient.h>
+
 // ============================================================================
 // Global Objects
 // ============================================================================
@@ -29,6 +34,10 @@
 HardwareSerial SerialAT(1);   // Modem on UART1
 HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
+
+// TinyGSM modem and secure client for LTE uploads
+TinyGsm modem(SerialAT);
+TinyGsmClientSecure lteClient(modem);
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
 // U8g2 display for SH1106 1.3" OLED (128x64) on hardware I2C
@@ -40,6 +49,7 @@ U8G2_SH1106_128X64_NONAME_F_HW_I2C* display = nullptr;
 
 bool sdCardReady = false;
 bool modemReady = false;
+bool lteConnected = false;
 bool gpsEnabled = false;
 bool accelReady = false;
 bool displayReady = false;
@@ -200,6 +210,8 @@ void endWalk();
 void endWalkManual();
 void logWalkData();
 void uploadPendingWalks();
+void uploadPendingWalksLTE();
+bool uploadViaLTE(const String& filename, const String& payload);
 int countPendingFiles();
 void updateDisplay();
 void readBattery();
@@ -291,11 +303,15 @@ void setup() {
     Serial.printf("  SD Card:       %s\n", sdCardReady ? "OK" : "FAIL");
     Serial.printf("  Accelerometer: %s\n", accelReady ? "OK" : "FAIL");
     Serial.printf("  Modem (4G):    %s\n", modemReady ? "OK" : "FAIL");
-    Serial.printf("  GPS (modem):   %s\n", gpsEnabled ? "OK" : "FAIL");
+    Serial.printf("  LTE Data:      %s\n", lteConnected ? "OK" : "FAIL");
+    Serial.printf("  GPS (L76K):    %s\n", gpsEnabled ? "OK" : "FAIL");
     Serial.printf("  WiFi:          %s\n", WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
     Serial.println("============================================");
     Serial.println();
     Serial.println("System ready. Monitoring for walks...");
+    if (lteConnected && WiFi.status() != WL_CONNECTED) {
+        Serial.println("  Note: LTE fallback available for uploads");
+    }
     Serial.println();
 
     // Log system startup
@@ -303,11 +319,15 @@ void setup() {
     writeLogf(LOG_INFO, "SYSTEM", "Device: %s", DEVICE_ID);
     writeLogf(LOG_INFO, "SYSTEM", "Display: %s | SD: %s | Accel: %s",
         displayReady ? "OK" : "FAIL", sdCardReady ? "OK" : "FAIL", accelReady ? "OK" : "FAIL");
-    writeLogf(LOG_INFO, "SYSTEM", "GPS: %s | Modem: %s | WiFi: %s",
+    writeLogf(LOG_INFO, "SYSTEM", "GPS: %s | Modem: %s | LTE: %s | WiFi: %s",
         gpsEnabled ? "OK" : "FAIL", modemReady ? "OK" : "FAIL",
+        lteConnected ? "OK" : "FAIL",
         WiFi.status() == WL_CONNECTED ? "OK" : "FAIL");
     if (WiFi.status() == WL_CONNECTED) {
         writeLogf(LOG_INFO, "WIFI", "Connected to %s, IP: %s", WIFI_SSID, WiFi.localIP().toString().c_str());
+    }
+    if (lteConnected) {
+        writeLogf(LOG_INFO, "LTE", "Data connected, IP: %s", modem.localIP().toString().c_str());
     }
 
     // Log geofence configuration
@@ -338,6 +358,11 @@ void loop() {
 
     // Read GPS continuously (no standby reduction)
     readGPS();
+
+    // Maintain modem connection (TinyGSM requirement)
+    if (modemReady) {
+        modem.maintain();
+    }
 
     // Read accelerometer and detect steps
     readAccelerometer();
@@ -501,8 +526,18 @@ void loop() {
                 writeLog(LOG_WARN, "WIFI", "Reconnection failed");
             }
         }
-        if (WiFi.status() == WL_CONNECTED && sdCardReady) {
-            uploadPendingWalks();
+
+        // Upload pending walks - try WiFi first, then LTE fallback
+        if (sdCardReady && countPendingFiles() > 0) {
+            if (WiFi.status() == WL_CONNECTED) {
+                // WiFi available - use standard upload
+                uploadPendingWalks();
+            } else if (modemReady) {
+                // WiFi unavailable - try LTE upload
+                Serial.println("[UPLOAD] WiFi unavailable, trying LTE...");
+                writeLog(LOG_INFO, "UPLOAD", "WiFi down, attempting LTE upload");
+                uploadPendingWalksLTE();
+            }
         }
         lastWiFiCheck = now;
     }
@@ -672,33 +707,87 @@ void initModem() {
     digitalWrite(MODEM_POWER_ON_PIN, HIGH);
     delay(100);
 
+    // PWRKEY pulse to turn on modem
     digitalWrite(MODEM_PWRKEY_PIN, LOW);
     delay(100);
     digitalWrite(MODEM_PWRKEY_PIN, HIGH);
     delay(1000);
     digitalWrite(MODEM_PWRKEY_PIN, LOW);
 
-    SerialAT.begin(MODEM_BAUDRATE, SERIAL_8N1, MODEM_RX_PIN, MODEM_TX_PIN);
+    Serial.println("  Waiting for modem to boot...");
     delay(3000);
 
-    Serial.println("  Checking modem response...");
-    int retries = 10;
-    while (retries > 0) {
-        if (sendATCommand("AT", "OK", 1000)) {
-            modemReady = true;
-            break;
+    SerialAT.begin(MODEM_BAUDRATE, SERIAL_8N1, MODEM_RX_PIN, MODEM_TX_PIN);
+
+    // Initialize modem using TinyGSM
+    Serial.println("  Initializing modem...");
+    if (!modem.restart()) {
+        Serial.println("  [WARN] Modem restart failed, trying init...");
+        if (!modem.init()) {
+            Serial.println("  [FAIL] Modem init failed");
+            Serial.println("  Check: Battery connected?");
+            return;
         }
-        retries--;
-        Serial.printf("  Retry %d/10...\n", 10 - retries);
-        delay(500);
     }
 
-    if (modemReady) {
-        sendATCommand("ATE0", "OK", 1000);
-        Serial.println("  [OK] Modem ready");
+    modemReady = true;
+    String modemInfo = modem.getModemInfo();
+    Serial.printf("  [OK] Modem: %s\n", modemInfo.c_str());
+
+    // Configure SSL for HTTPS (fixes Let's Encrypt certificate issue)
+    // The A7670G/SIM7600 modem has outdated CA certificates
+    // These AT commands configure SSL to work with modern servers like Railway
+    Serial.println("  Configuring SSL/TLS for HTTPS...");
+
+    // Force TLS 1.2 (Railway and modern servers require it)
+    modem.sendAT("+CSSLCFG=\"sslversion\",0,3");
+    modem.waitResponse();
+
+    // Disable certificate verification (modem's CA store is outdated)
+    // Data is still encrypted, just not verifying server certificate chain
+    modem.sendAT("+CSSLCFG=\"authmode\",0,0");
+    modem.waitResponse();
+
+    // Alternative command for some firmware versions
+    modem.sendAT("+CSSLCFG=\"verify\",0,0");
+    modem.waitResponse();
+
+    // Ignore certificate time validation (in case RTC not synced)
+    modem.sendAT("+CSSLCFG=\"ignorelocaltime\",0,1");
+    modem.waitResponse();
+
+    Serial.println("  [OK] SSL configured (TLS 1.2, no verify)");
+
+    // Set secure client to insecure mode
+    lteClient.setInsecure();
+
+    // Wait for network registration
+    Serial.println("  Waiting for network...");
+    int networkRetries = 30;  // 30 seconds timeout
+    while (!modem.isNetworkConnected() && networkRetries > 0) {
+        delay(1000);
+        Serial.print(".");
+        networkRetries--;
+    }
+    Serial.println();
+
+    if (modem.isNetworkConnected()) {
+        Serial.println("  [OK] Registered on network");
+
+        // Connect to GPRS/LTE data
+        Serial.println("  Connecting to data network...");
+        // Try common APNs - adjust for your carrier
+        if (modem.gprsConnect("airtelgprs.com") ||
+            modem.gprsConnect("internet") ||
+            modem.gprsConnect("jionet")) {
+            lteConnected = true;
+            Serial.println("  [OK] LTE data connected");
+            Serial.printf("  [OK] IP: %s\n", modem.localIP().toString().c_str());
+        } else {
+            Serial.println("  [WARN] GPRS connect failed - will retry later");
+        }
     } else {
-        Serial.println("  [FAIL] Modem not responding");
-        Serial.println("  Check: Battery connected?");
+        Serial.println("  [WARN] Network not available - will retry later");
     }
 }
 
@@ -1558,6 +1647,321 @@ void uploadPendingWalks() {
         }
         file = dir.openNextFile();
     }
+    dir.close();
+}
+
+// ============================================================================
+// LTE Upload Function (4G modem fallback using TinyGSM)
+// ============================================================================
+
+bool uploadViaLTE(const String& fullPath, const String& payload) {
+    if (!modemReady) {
+        writeLog(LOG_ERROR, "LTE", "Modem not ready");
+        return false;
+    }
+
+    Serial.println("[LTE] Starting upload via 4G modem...");
+    writeLog(LOG_UPLOAD, "LTE", "=== Starting LTE upload ===");
+
+    // Check network connection
+    if (!modem.isNetworkConnected()) {
+        writeLog(LOG_WARN, "LTE", "Network disconnected, reconnecting...");
+        Serial.println("[LTE] Waiting for network...");
+
+        int retries = 10;
+        while (!modem.isNetworkConnected() && retries > 0) {
+            delay(1000);
+            retries--;
+        }
+
+        if (!modem.isNetworkConnected()) {
+            writeLog(LOG_ERROR, "LTE", "Network connection failed");
+            return false;
+        }
+    }
+    writeLog(LOG_INFO, "LTE", "Network connected");
+
+    // Check GPRS/LTE data connection
+    if (!modem.isGprsConnected()) {
+        writeLog(LOG_WARN, "LTE", "GPRS disconnected, reconnecting...");
+        if (!modem.gprsConnect("airtelgprs.com") &&
+            !modem.gprsConnect("internet") &&
+            !modem.gprsConnect("jionet")) {
+            writeLog(LOG_ERROR, "LTE", "GPRS connection failed");
+            return false;
+        }
+        lteConnected = true;
+    }
+
+    // Parse URL to extract host and path
+    String url = String(API_BASE_URL) + String(API_ENDPOINT);
+    writeLogf(LOG_UPLOAD, "LTE", "URL: %s", url.c_str());
+
+    int protocolEnd = url.indexOf("://");
+    int pathStart = url.indexOf("/", protocolEnd + 3);
+    String host = url.substring(protocolEnd + 3, pathStart);
+    String path = url.substring(pathStart);
+
+    writeLogf(LOG_UPLOAD, "LTE", "Host: %s, Path: %s", host.c_str(), path.c_str());
+    Serial.printf("[LTE] Connecting to %s:443...\n", host.c_str());
+
+    // Connect using TinyGsmClientSecure (SSL already configured in initModem)
+    unsigned long connectStart = millis();
+    if (!lteClient.connect(host.c_str(), 443)) {
+        unsigned long connectDuration = millis() - connectStart;
+        writeLogf(LOG_ERROR, "LTE", "SSL connect failed after %lums", connectDuration);
+        Serial.printf("[LTE] SSL connection failed after %lu ms\n", connectDuration);
+        return false;
+    }
+
+    unsigned long connectDuration = millis() - connectStart;
+    writeLogf(LOG_INFO, "LTE", "Connected in %lums", connectDuration);
+    Serial.printf("[LTE] Connected in %lu ms\n", connectDuration);
+
+    // Build and send HTTP POST request
+    int payloadLen = payload.length();
+    writeLogf(LOG_UPLOAD, "LTE", "Sending %d bytes...", payloadLen);
+
+    unsigned long sendStart = millis();
+
+    // Send HTTP headers
+    lteClient.print(String("POST ") + path + " HTTP/1.1\r\n");
+    lteClient.print(String("Host: ") + host + "\r\n");
+    lteClient.print("Content-Type: application/json\r\n");
+    lteClient.print("X-Device-ID: " + String(DEVICE_ID) + "\r\n");
+    lteClient.print("Connection: close\r\n");
+    lteClient.print("Content-Length: " + String(payloadLen) + "\r\n");
+    lteClient.print("\r\n");
+
+    // Send payload in chunks to avoid buffer issues
+    const int CHUNK_SIZE = 512;
+    for (int i = 0; i < payloadLen; i += CHUNK_SIZE) {
+        int chunkLen = min(CHUNK_SIZE, payloadLen - i);
+        lteClient.write((const uint8_t*)payload.c_str() + i, chunkLen);
+
+        // Progress indicator
+        if (i % 5000 == 0 && i > 0) {
+            Serial.printf("[LTE] Sent %d/%d bytes...\n", i, payloadLen);
+        }
+        yield();
+    }
+
+    // Wait for response
+    Serial.println("[LTE] Waiting for response...");
+    unsigned long responseStart = millis();
+    String statusLine = "";
+    int httpStatus = -1;
+
+    // Read status line
+    while (lteClient.connected() && millis() - responseStart < 60000) {
+        if (lteClient.available()) {
+            String line = lteClient.readStringUntil('\n');
+            line.trim();
+
+            if (statusLine.length() == 0) {
+                statusLine = line;
+                // Parse HTTP status: "HTTP/1.1 200 OK"
+                int spaceIdx = statusLine.indexOf(' ');
+                if (spaceIdx > 0) {
+                    httpStatus = statusLine.substring(spaceIdx + 1, spaceIdx + 4).toInt();
+                }
+            }
+
+            // Empty line = end of headers
+            if (line.length() == 0) break;
+        }
+        delay(10);
+    }
+
+    // Read response body (limited)
+    String responseBody = "";
+    while (lteClient.connected() && lteClient.available() && responseBody.length() < 500) {
+        responseBody += (char)lteClient.read();
+    }
+
+    lteClient.stop();
+
+    unsigned long totalDuration = millis() - sendStart;
+
+    if (httpStatus == 200 || httpStatus == 201) {
+        Serial.printf("[LTE] SUCCESS! HTTP %d in %lu ms\n", httpStatus, totalDuration);
+        writeLogf(LOG_UPLOAD, "LTE", "SUCCESS! HTTP %d in %lums", httpStatus, totalDuration);
+
+        if (responseBody.length() > 0) {
+            writeLogf(LOG_DEBUG, "LTE", "Response: %s", responseBody.substring(0, 200).c_str());
+        }
+
+        displayStatus.uploadsToday++;
+        displayStatus.lastEvent = "LTE Upload OK";
+        return true;
+    } else {
+        Serial.printf("[LTE] FAILED! HTTP %d\n", httpStatus);
+        writeLogf(LOG_ERROR, "LTE", "FAILED! HTTP %d after %lums", httpStatus, totalDuration);
+        writeLogf(LOG_ERROR, "LTE", "Status: %s", statusLine.c_str());
+
+        if (responseBody.length() > 0) {
+            writeLogf(LOG_ERROR, "LTE", "Error: %s", responseBody.substring(0, 200).c_str());
+        }
+
+        displayStatus.uploadsFailed++;
+        displayStatus.lastEvent = "LTE FAIL: " + String(httpStatus);
+        return false;
+    }
+}
+
+// ============================================================================
+// LTE Upload for Pending Walks (fallback when WiFi unavailable)
+// ============================================================================
+
+void uploadPendingWalksLTE() {
+    if (!sdCardReady || !modemReady) return;
+
+    Serial.println("[LTE UPLOAD] Checking pending walks...");
+    writeLog(LOG_UPLOAD, "LTE", "--- Starting LTE upload check ---");
+
+    File dir = SD.open("/pending");
+    if (!dir || !dir.isDirectory()) {
+        writeLog(LOG_WARN, "LTE", "No pending directory or empty");
+        return;
+    }
+
+    // Only process one file at a time via LTE to conserve data
+    File file = dir.openNextFile();
+    if (file && !file.isDirectory()) {
+        String filename = String(file.name());
+        String fullPath = "/pending/" + filename;
+        Serial.printf("  [LTE] Uploading: %s\n", filename.c_str());
+        writeLogf(LOG_UPLOAD, "LTE", "Processing: %s", filename.c_str());
+
+        file.close();
+        File walkFile = SD.open(fullPath, FILE_READ);
+        if (!walkFile) {
+            writeLogf(LOG_ERROR, "LTE", "Failed to open: %s", fullPath.c_str());
+            dir.close();
+            return;
+        }
+
+        // Read metadata
+        String metaLine = walkFile.readStringUntil('\n');
+        metaLine.trim();
+
+        if (metaLine.length() == 0) {
+            writeLogf(LOG_ERROR, "LTE", "Empty file: %s", filename.c_str());
+            walkFile.close();
+            dir.close();
+            return;
+        }
+
+        // Parse metadata
+        JsonDocument metaDoc;
+        DeserializationError metaErr = deserializeJson(metaDoc, metaLine);
+        if (metaErr) {
+            writeLogf(LOG_ERROR, "LTE", "Invalid metadata: %s", metaErr.c_str());
+            walkFile.close();
+            dir.close();
+            return;
+        }
+
+        // Build payload (similar to uploadPendingWalks but simpler)
+        // Limit size for LTE (40KB max to conserve data)
+        const size_t MAX_LTE_PAYLOAD = 40000;
+        const int MAX_LTE_POINTS = 400;
+
+        String payload;
+        if (!payload.reserve(MAX_LTE_PAYLOAD)) {
+            writeLog(LOG_ERROR, "LTE", "Memory allocation failed");
+            walkFile.close();
+            dir.close();
+            return;
+        }
+
+        // Build header
+        char headerBuf[512];
+        const char* deviceId = metaDoc["deviceId"] | DEVICE_ID;
+        long startTime = metaDoc["startTime"] | 0;
+
+        if (metaDoc.containsKey("startLat") && metaDoc.containsKey("startLon")) {
+            double startLat = metaDoc["startLat"];
+            double startLon = metaDoc["startLon"];
+            snprintf(headerBuf, sizeof(headerBuf),
+                "{\"deviceId\":\"%s\",\"startTime\":%ld,\"startLat\":%.6f,\"startLon\":%.6f,\"points\":[",
+                deviceId, startTime, startLat, startLon);
+        } else {
+            snprintf(headerBuf, sizeof(headerBuf),
+                "{\"deviceId\":\"%s\",\"startTime\":%ld,\"points\":[",
+                deviceId, startTime);
+        }
+        payload = headerBuf;
+
+        // Read points
+        int pointCount = 0;
+        char lineBuffer[256];
+        char pointBuf[200];
+
+        while (walkFile.available() && pointCount < MAX_LTE_POINTS) {
+            int idx = 0;
+            while (walkFile.available() && idx < sizeof(lineBuffer) - 1) {
+                char c = walkFile.read();
+                if (c == '\n') break;
+                lineBuffer[idx++] = c;
+            }
+            lineBuffer[idx] = '\0';
+
+            if (idx == 0) continue;
+
+            JsonDocument pointDoc;
+            if (deserializeJson(pointDoc, lineBuffer)) continue;
+            if (!pointDoc.containsKey("lat") || !pointDoc.containsKey("lon")) continue;
+
+            double t = pointDoc["t"] | 0.0;
+            double lat = pointDoc["lat"] | 0.0;
+            double lon = pointDoc["lon"] | 0.0;
+            double spd = pointDoc["spd"] | 0.0;
+
+            snprintf(pointBuf, sizeof(pointBuf),
+                "%s{\"t\":%.3f,\"lat\":%.8f,\"lon\":%.8f,\"spd\":%.2f}",
+                (pointCount > 0) ? "," : "", t, lat, lon, spd);
+
+            if (payload.length() + strlen(pointBuf) + 10 > MAX_LTE_PAYLOAD) break;
+
+            payload += pointBuf;
+            pointCount++;
+
+            if (pointCount % 100 == 0) yield();
+        }
+
+        walkFile.close();
+        payload += "]}";
+
+        if (pointCount == 0) {
+            writeLogf(LOG_ERROR, "LTE", "No valid points in %s", filename.c_str());
+            dir.close();
+            return;
+        }
+
+        writeLogf(LOG_UPLOAD, "LTE", "Built payload: %d points, %d bytes", pointCount, payload.length());
+
+        // Upload via LTE
+        if (uploadViaLTE(fullPath, payload)) {
+            // Archive on success
+            time_t now = time(nullptr);
+            struct tm* timeinfo = localtime(&now);
+            char yearStr[5], monthStr[3];
+            strftime(yearStr, sizeof(yearStr), "%Y", timeinfo);
+            strftime(monthStr, sizeof(monthStr), "%m", timeinfo);
+
+            String archiveDir = "/archived/" + String(yearStr) + "/" + String(monthStr);
+            SD.mkdir("/archived");
+            SD.mkdir("/archived/" + String(yearStr));
+            SD.mkdir(archiveDir);
+
+            String archivePath = archiveDir + "/" + filename;
+            SD.rename(fullPath.c_str(), archivePath.c_str());
+            writeLogf(LOG_UPLOAD, "LTE", "Archived to: %s", archivePath.c_str());
+            displayStatus.archivesToday++;
+        }
+    }
+
     dir.close();
 }
 
