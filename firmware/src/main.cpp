@@ -22,8 +22,8 @@
 #include <U8g2lib.h>
 #include "config.h"
 
-// TinyGSM configuration (must be before TinyGSM include)
-#define TINY_GSM_MODEM_SIM7600
+// TinyGSM configuration
+// Note: TINY_GSM_MODEM_SIM7600 is defined in platformio.ini build_flags
 #define TINY_GSM_RX_BUFFER 1024
 #include <TinyGSM.h>
 
@@ -35,9 +35,10 @@ HardwareSerial SerialAT(1);   // Modem on UART1
 HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
 
-// TinyGSM modem and secure client for LTE HTTPS uploads
+// TinyGSM modem and client for LTE uploads
+// Note: SSL/TLS is configured via AT commands (+CSSLCFG), not through client class
 TinyGsm modem(SerialAT);
-TinyGsmClientSecure lteClient(modem);
+TinyGsmClient lteClient(modem);
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
 // U8g2 display for SH1106 1.3" OLED (128x64) on hardware I2C
@@ -782,8 +783,7 @@ void initModem() {
 
     Serial.println("  [OK] SSL configured (TLS 1.2, no verify)");
 
-    // Set secure client to use SSL context 0 (insecure mode)
-    lteClient.setInsecure();
+    // Note: SSL is handled at modem level via AT commands, not client level
 
     // Wait for network registration
     Serial.println("  Waiting for network...");
