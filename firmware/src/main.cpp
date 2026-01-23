@@ -703,6 +703,13 @@ void initGPS() {
 
     Serial.printf("  GPS on UART2: RX=GPIO%d, TX=GPIO%d\n", GPS_RX_PIN, GPS_TX_PIN);
 
+    // Enable GPS module - WAKEUP pin must be HIGH for L76K to operate
+    // This enables the antenna LNA and wakes the module from standby
+    pinMode(GPS_WAKEUP_PIN, OUTPUT);
+    digitalWrite(GPS_WAKEUP_PIN, HIGH);
+    Serial.printf("  GPS WAKEUP pin (GPIO%d) set HIGH\n", GPS_WAKEUP_PIN);
+    delay(100);  // Give module time to wake up
+
     // Initialize SerialGPS on UART2
     SerialGPS.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 
