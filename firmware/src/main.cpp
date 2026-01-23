@@ -25,7 +25,7 @@
 // TinyGSM configuration (must be before TinyGSM include)
 #define TINY_GSM_MODEM_SIM7600
 #define TINY_GSM_RX_BUFFER 1024
-#include <TinyGsmClient.h>
+#include <TinyGSM.h>
 
 // ============================================================================
 // Global Objects
@@ -35,10 +35,9 @@ HardwareSerial SerialAT(1);   // Modem on UART1
 HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
 
-// TinyGSM modem and client for LTE uploads
-// Note: SSL is configured via AT commands, not TinyGsmClientSecure (which doesn't exist for SIM7600)
+// TinyGSM modem and secure client for LTE HTTPS uploads
 TinyGsm modem(SerialAT);
-TinyGsmClient lteClient(modem);
+TinyGsmClientSecure lteClient(modem);
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
 // U8g2 display for SH1106 1.3" OLED (128x64) on hardware I2C
@@ -783,7 +782,8 @@ void initModem() {
 
     Serial.println("  [OK] SSL configured (TLS 1.2, no verify)");
 
-    // Note: SSL is handled via AT commands above, no client-side config needed
+    // Set secure client to use SSL context 0 (insecure mode)
+    lteClient.setInsecure();
 
     // Wait for network registration
     Serial.println("  Waiting for network...");
