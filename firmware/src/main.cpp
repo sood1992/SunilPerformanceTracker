@@ -982,7 +982,8 @@ void readGPS() {
 
     // Debug: Print raw GPS data every 10 seconds
     static unsigned long lastRawDump = 0;
-    static char rawBuffer[256];
+    static unsigned long lastDetailedDump = 0;
+    static char rawBuffer[512];  // Increased buffer
     static int rawIndex = 0;
     bool dumpNow = (millis() - lastRawDump > 10000);
 
@@ -993,7 +994,7 @@ void readGPS() {
         gps.encode(c);
 
         // Capture raw data for debug dump
-        if (dumpNow && rawIndex < 255) {
+        if (dumpNow && rawIndex < 511) {
             rawBuffer[rawIndex++] = c;
         }
     }
@@ -1004,10 +1005,67 @@ void readGPS() {
         Serial.println("[GPS RAW] -------- Raw NMEA Data --------");
         Serial.println(rawBuffer);
         Serial.println("[GPS RAW] --------------------------------");
+
+        // Parse GPGSV to show satellite signal strength
+        char* line = strtok(rawBuffer, "\n");
+        while (line != NULL) {
+            if (strstr(line, "GSV") != NULL) {
+                // GPGSV format: $GPGSV,total,num,sats,prn,elev,azim,snr,...*cs
+                // Look for SNR values (every 4th field after satellite info starts)
+                char* ptr = line;
+                int fieldCount = 0;
+                int snrCount = 0;
+                int totalSnr = 0;
+
+                while (*ptr) {
+                    if (*ptr == ',') {
+                        fieldCount++;
+                        // Fields 7,11,15,19 are SNR values
+                        if (fieldCount == 7 || fieldCount == 11 || fieldCount == 15 || fieldCount == 19) {
+                            int snr = atoi(ptr + 1);
+                            if (snr > 0) {
+                                snrCount++;
+                                totalSnr += snr;
+                            }
+                        }
+                    }
+                    ptr++;
+                }
+                if (snrCount > 0) {
+                    Serial.printf("[GPS] Satellites with signal: %d, avg SNR: %d dB\n", snrCount, totalSnr / snrCount);
+                }
+            }
+            line = strtok(NULL, "\n");
+        }
+
         rawIndex = 0;
         lastRawDump = millis();
     } else if (dumpNow) {
         lastRawDump = millis();  // Reset timer even if no data
+    }
+
+    // Detailed GPS status every 30 seconds
+    if (millis() - lastDetailedDump > 30000) {
+        lastDetailedDump = millis();
+        Serial.println("[GPS DIAG] ======== Detailed GPS Status ========");
+        Serial.printf("[GPS DIAG] Chars processed: %lu\n", gps.charsProcessed());
+        Serial.printf("[GPS DIAG] Sentences passed: %lu\n", gps.sentencesWithFix());
+        Serial.printf("[GPS DIAG] Checksum failures: %lu\n", gps.failedChecksum());
+        Serial.printf("[GPS DIAG] Satellites value: %d (valid: %s)\n",
+            gps.satellites.value(), gps.satellites.isValid() ? "YES" : "NO");
+        Serial.printf("[GPS DIAG] Location valid: %s, updated: %s\n",
+            gps.location.isValid() ? "YES" : "NO",
+            gps.location.isUpdated() ? "YES" : "NO");
+        Serial.printf("[GPS DIAG] HDOP: %.1f (valid: %s)\n",
+            gps.hdop.hdop(), gps.hdop.isValid() ? "YES" : "NO");
+        Serial.printf("[GPS DIAG] Time valid: %s, Date valid: %s\n",
+            gps.time.isValid() ? "YES" : "NO",
+            gps.date.isValid() ? "YES" : "NO");
+        if (gps.time.isValid()) {
+            Serial.printf("[GPS DIAG] GPS Time: %02d:%02d:%02d\n",
+                gps.time.hour(), gps.time.minute(), gps.time.second());
+        }
+        Serial.println("[GPS DIAG] ==========================================");
     }
 
     // Update satellite count (available even without fix)

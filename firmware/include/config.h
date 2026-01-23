@@ -35,10 +35,21 @@
 #define MODEM_RESET_LEVEL   HIGH
 
 // GPS (L76K) - Dedicated UART, NOT through modem!
-#define GPS_TX_PIN          21
-#define GPS_RX_PIN          22
+// NOTE: Different LilyGo T-A7670G R2 variants use different pins!
+// If GPS doesn't work, try the alternative pin configuration below.
+//
+// Configuration A (default - some T-A7670G R2 boards):
+#define GPS_TX_PIN          21    // ESP32 RX from GPS TX
+#define GPS_RX_PIN          22    // ESP32 TX to GPS RX
+#define GPS_WAKEUP_PIN      19    // L76K FORCE_ON/WAKEUP pin
+//
+// Configuration B (alternative - other T-A7670G R2 variants):
+// If GPS shows data but no satellites/fix, try these pins:
+// #define GPS_TX_PIN       12    // Some boards use GPIO 12 for GPS TX
+// #define GPS_RX_PIN       34    // GPIO 34 is input-only (may not need TX to GPS)
+// #define GPS_WAKEUP_PIN   4     // Some boards use GPIO 4 for FORCE_ON
+//
 #define GPS_PPS_PIN         23
-#define GPS_WAKEUP_PIN      19
 #define GPS_BAUDRATE        9600
 
 // SD Card SPI Pins
