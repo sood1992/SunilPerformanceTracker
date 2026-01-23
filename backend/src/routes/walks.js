@@ -86,6 +86,51 @@ walkRoutes.get('/', async (req, res, next) => {
 });
 
 /**
+ * GET /api/walks/live
+ * Get currently active (live) walks
+ * NOTE: This route MUST be defined before /:id to avoid matching "live" as an ID
+ */
+walkRoutes.get('/live', async (req, res, next) => {
+  try {
+    const { device_id } = req.query;
+
+    let sql = `
+      SELECT
+        w.*,
+        (SELECT json_agg(json_build_object(
+          't', wp.time_offset_seconds,
+          'lat', wp.latitude,
+          'lon', wp.longitude,
+          'spd', wp.speed_kmh
+        ) ORDER BY wp.time_offset_seconds DESC)
+        FROM (SELECT * FROM walk_points WHERE walk_id = w.id ORDER BY time_offset_seconds DESC LIMIT 50) wp) as recent_points
+      FROM walks w
+      WHERE is_live = true
+    `;
+    const params = [];
+
+    if (device_id) {
+      sql += ` AND device_id = $1`;
+      params.push(device_id);
+    }
+
+    sql += ` ORDER BY start_time DESC`;
+
+    const result = await query(sql, params);
+
+    res.json({
+      liveWalks: result.rows.map(row => ({
+        ...formatWalk(row),
+        isLive: true,
+        recentPoints: row.recent_points || []
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/walks/:id
  * Get a specific walk by ID
  */
@@ -511,50 +556,6 @@ walkRoutes.post('/:id/end', async (req, res, next) => {
     console.log(`[REALTIME] Walk ${id} marked as complete`);
 
     res.json({ success: true, message: 'Walk marked as complete' });
-  } catch (error) {
-    next(error);
-  }
-});
-
-/**
- * GET /api/walks/live
- * Get currently active (live) walks
- */
-walkRoutes.get('/live', async (req, res, next) => {
-  try {
-    const { device_id } = req.query;
-
-    let sql = `
-      SELECT
-        w.*,
-        (SELECT json_agg(json_build_object(
-          't', wp.time_offset_seconds,
-          'lat', wp.latitude,
-          'lon', wp.longitude,
-          'spd', wp.speed_kmh
-        ) ORDER BY wp.time_offset_seconds DESC LIMIT 50)
-        FROM walk_points wp WHERE wp.walk_id = w.id) as recent_points
-      FROM walks w
-      WHERE is_live = true
-    `;
-    const params = [];
-
-    if (device_id) {
-      sql += ` AND device_id = $1`;
-      params.push(device_id);
-    }
-
-    sql += ` ORDER BY start_time DESC`;
-
-    const result = await query(sql, params);
-
-    res.json({
-      liveWalks: result.rows.map(row => ({
-        ...formatWalk(row),
-        isLive: true,
-        recentPoints: row.recent_points || []
-      }))
-    });
   } catch (error) {
     next(error);
   }
