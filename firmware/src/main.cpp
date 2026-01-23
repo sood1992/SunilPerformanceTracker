@@ -973,11 +973,34 @@ static unsigned long lastGPSDebugPrint = 0;
 void readGPS() {
     if (!gpsEnabled) return;
 
+    // Debug: Print raw GPS data every 10 seconds
+    static unsigned long lastRawDump = 0;
+    static char rawBuffer[256];
+    static int rawIndex = 0;
+    bool dumpNow = (millis() - lastRawDump > 10000);
+
     // Read all available bytes from GPS UART and feed to TinyGPSPlus
     // This should be called every loop iteration to prevent buffer overflow
     while (SerialGPS.available() > 0) {
         char c = SerialGPS.read();
         gps.encode(c);
+
+        // Capture raw data for debug dump
+        if (dumpNow && rawIndex < 255) {
+            rawBuffer[rawIndex++] = c;
+        }
+    }
+
+    // Dump raw GPS data for debugging
+    if (dumpNow && rawIndex > 0) {
+        rawBuffer[rawIndex] = '\0';
+        Serial.println("[GPS RAW] -------- Raw NMEA Data --------");
+        Serial.println(rawBuffer);
+        Serial.println("[GPS RAW] --------------------------------");
+        rawIndex = 0;
+        lastRawDump = millis();
+    } else if (dumpNow) {
+        lastRawDump = millis();  // Reset timer even if no data
     }
 
     // Update satellite count (available even without fix)
