@@ -35,9 +35,10 @@ HardwareSerial SerialAT(1);   // Modem on UART1
 HardwareSerial SerialGPS(2);  // GPS L76K on UART2
 TinyGPSPlus gps;
 
-// TinyGSM modem and secure client for LTE uploads
+// TinyGSM modem and client for LTE uploads
+// Note: SSL is configured via AT commands, not TinyGsmClientSecure (which doesn't exist for SIM7600)
 TinyGsm modem(SerialAT);
-TinyGsmClientSecure lteClient(modem);
+TinyGsmClient lteClient(modem);
 Adafruit_ADXL345_Unified* accel = nullptr;
 SPIClass* sdSPI = nullptr;
 // U8g2 display for SH1106 1.3" OLED (128x64) on hardware I2C
@@ -775,8 +776,7 @@ void initModem() {
 
     Serial.println("  [OK] SSL configured (TLS 1.2, no verify)");
 
-    // Set secure client to insecure mode
-    lteClient.setInsecure();
+    // Note: SSL is handled via AT commands above, no client-side config needed
 
     // Wait for network registration
     Serial.println("  Waiting for network...");
