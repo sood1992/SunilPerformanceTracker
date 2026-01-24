@@ -2148,7 +2148,24 @@ void uploadPendingWalksLTE() {
 
 // ============================================================================
 // Real-Time LTE Streaming (Live Tracking)
+// Uses A7670G modem's built-in HTTP client for proper HTTPS support
 // ============================================================================
+
+// Helper to send AT command and wait for response
+bool sendATWithResponse(const char* cmd, const char* expected, unsigned long timeout = 5000) {
+    SerialAT.println(cmd);
+    unsigned long start = millis();
+    String response = "";
+    while (millis() - start < timeout) {
+        if (SerialAT.available()) {
+            char c = SerialAT.read();
+            response += c;
+            if (response.indexOf(expected) >= 0) return true;
+            if (response.indexOf("ERROR") >= 0) return false;
+        }
+    }
+    return false;
+}
 
 bool streamPointsLTE() {
     #if !REALTIME_STREAMING_ENABLED
@@ -2170,24 +2187,14 @@ bool streamPointsLTE() {
         writeLog(LOG_WARN, "STREAM", "Retrying after multiple failures...");
     }
 
-    Serial.printf("[STREAM] Sending %d points via LTE...\n", streamPointsBuffered);
-    writeLogf(LOG_INFO, "STREAM", "Streaming %d points", streamPointsBuffered);
+    Serial.printf("[STREAM] Sending %d points via LTE (AT HTTP)...\n", streamPointsBuffered);
+    writeLogf(LOG_INFO, "STREAM", "Streaming %d points via AT HTTP", streamPointsBuffered);
 
     // Check network connection
     if (!modem.isNetworkConnected()) {
         writeLog(LOG_WARN, "STREAM", "Network not connected");
         streamFailures++;
         return false;
-    }
-
-    // Check GPRS connection, try to reconnect if needed
-    if (!modem.isGprsConnected()) {
-        if (!modem.gprsConnect("airtelgprs.com") &&
-            !modem.gprsConnect("internet")) {
-            writeLog(LOG_WARN, "STREAM", "GPRS not connected");
-            streamFailures++;
-            return false;
-        }
     }
 
     // Build JSON payload for real-time points
@@ -2213,55 +2220,106 @@ bool streamPointsLTE() {
     }
     payload += "]}";
 
-    // Parse URL
-    String url = String(API_BASE_URL) + String(REALTIME_ENDPOINT);
-    int protocolEnd = url.indexOf("://");
-    int pathStart = url.indexOf("/", protocolEnd + 3);
-    String host = url.substring(protocolEnd + 3, pathStart);
-    String path = url.substring(pathStart);
-
-    // Connect and send
     unsigned long startTime = millis();
+    int httpStatus = -1;
 
-    if (!lteClient.connect(host.c_str(), 443)) {
-        writeLog(LOG_WARN, "STREAM", "SSL connect failed");
+    // Use modem's built-in HTTP client for proper HTTPS support
+    // Terminate any previous HTTP session
+    sendATWithResponse("AT+HTTPTERM", "OK", 1000);
+    delay(100);
+
+    // Initialize HTTP service
+    if (!sendATWithResponse("AT+HTTPINIT", "OK", 3000)) {
+        writeLog(LOG_WARN, "STREAM", "HTTPINIT failed");
         streamFailures++;
         return false;
     }
 
-    // Send HTTP POST
-    lteClient.print(String("POST ") + path + " HTTP/1.1\r\n");
-    lteClient.print(String("Host: ") + host + "\r\n");
-    lteClient.print("Content-Type: application/json\r\n");
-    lteClient.print("X-Device-ID: " + String(DEVICE_ID) + "\r\n");
-    lteClient.print("Connection: close\r\n");
-    lteClient.print("Content-Length: " + String(payload.length()) + "\r\n");
-    lteClient.print("\r\n");
-    lteClient.print(payload);
+    // Set URL
+    String url = String(API_BASE_URL) + String(REALTIME_ENDPOINT);
+    String urlCmd = "AT+HTTPPARA=\"URL\",\"" + url + "\"";
+    if (!sendATWithResponse(urlCmd.c_str(), "OK", 3000)) {
+        writeLog(LOG_WARN, "STREAM", "Set URL failed");
+        sendATWithResponse("AT+HTTPTERM", "OK", 1000);
+        streamFailures++;
+        return false;
+    }
 
-    // Wait for response (short timeout for real-time)
-    int httpStatus = -1;
-    unsigned long responseStart = millis();
-    while (lteClient.connected() && millis() - responseStart < 10000) {
-        if (lteClient.available()) {
-            String line = lteClient.readStringUntil('\n');
-            if (line.startsWith("HTTP/")) {
-                int spaceIdx = line.indexOf(' ');
-                if (spaceIdx > 0) {
-                    httpStatus = line.substring(spaceIdx + 1, spaceIdx + 4).toInt();
+    // Set content type to JSON
+    if (!sendATWithResponse("AT+HTTPPARA=\"CONTENT\",\"application/json\"", "OK", 2000)) {
+        writeLog(LOG_WARN, "STREAM", "Set content type failed");
+        sendATWithResponse("AT+HTTPTERM", "OK", 1000);
+        streamFailures++;
+        return false;
+    }
+
+    // Enable HTTPS (SSL)
+    sendATWithResponse("AT+HTTPSSL=1", "OK", 2000);
+
+    // Prepare to send POST data
+    char dataCmd[32];
+    snprintf(dataCmd, sizeof(dataCmd), "AT+HTTPDATA=%d,10000", payload.length());
+    SerialAT.println(dataCmd);
+
+    // Wait for DOWNLOAD prompt
+    unsigned long waitStart = millis();
+    bool gotDownload = false;
+    while (millis() - waitStart < 5000) {
+        if (SerialAT.available()) {
+            String line = SerialAT.readStringUntil('\n');
+            if (line.indexOf("DOWNLOAD") >= 0) {
+                gotDownload = true;
+                break;
+            }
+        }
+    }
+
+    if (!gotDownload) {
+        writeLog(LOG_WARN, "STREAM", "No DOWNLOAD prompt");
+        sendATWithResponse("AT+HTTPTERM", "OK", 1000);
+        streamFailures++;
+        return false;
+    }
+
+    // Send the payload
+    SerialAT.print(payload);
+    delay(500);
+
+    // Wait for OK after data sent
+    if (!sendATWithResponse("", "OK", 5000)) {
+        writeLog(LOG_WARN, "STREAM", "Data send failed");
+        sendATWithResponse("AT+HTTPTERM", "OK", 1000);
+        streamFailures++;
+        return false;
+    }
+
+    // Execute POST request (action=1 is POST)
+    SerialAT.println("AT+HTTPACTION=1");
+
+    // Wait for +HTTPACTION response with status code
+    waitStart = millis();
+    while (millis() - waitStart < 30000) {  // 30 second timeout for HTTP request
+        if (SerialAT.available()) {
+            String line = SerialAT.readStringUntil('\n');
+            // Response format: +HTTPACTION: <method>,<status>,<datalen>
+            if (line.indexOf("+HTTPACTION:") >= 0) {
+                int firstComma = line.indexOf(',');
+                int secondComma = line.indexOf(',', firstComma + 1);
+                if (firstComma > 0 && secondComma > firstComma) {
+                    httpStatus = line.substring(firstComma + 1, secondComma).toInt();
                 }
                 break;
             }
         }
-        delay(10);
     }
 
-    lteClient.stop();
+    // Terminate HTTP session
+    sendATWithResponse("AT+HTTPTERM", "OK", 1000);
 
     unsigned long duration = millis() - startTime;
 
     if (httpStatus == 200 || httpStatus == 201) {
-        Serial.printf("[STREAM] OK! %d points in %lu ms\n", streamPointsBuffered, duration);
+        Serial.printf("[STREAM] OK! %d points in %lu ms (HTTP %d)\n", streamPointsBuffered, duration, httpStatus);
         writeLogf(LOG_INFO, "STREAM", "Success: %d points in %lums", streamPointsBuffered, duration);
 
         streamPointsSent += streamPointsBuffered;
