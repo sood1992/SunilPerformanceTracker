@@ -28,6 +28,18 @@
 #include <TinyGSM.h>
 
 // ============================================================================
+// Early Power Latch (runs BEFORE setup())
+// ============================================================================
+// CRITICAL: On LilyGo T-A7670G R2, GPIO 12 (BOARD_POWERON_PIN) must be set HIGH
+// immediately on power-up to keep the board powered when running from battery.
+// Without this, the board will shut down shortly after boot on battery power.
+// Using __attribute__((constructor)) ensures this runs before setup().
+__attribute__((constructor)) void earlyPowerLatch() {
+    pinMode(12, OUTPUT);      // BOARD_POWERON_PIN / MODEM_POWER_ON_PIN
+    digitalWrite(12, HIGH);   // Latch power ON
+}
+
+// ============================================================================
 // Global Objects
 // ============================================================================
 

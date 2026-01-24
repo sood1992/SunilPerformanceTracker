@@ -37,8 +37,8 @@
 // GPS (L76K) - Dedicated UART, NOT through modem!
 // Official LilyGo T-A7670G R2 + L76K pinout from utilities.h
 // WARNING: Do NOT use GPIO 12/4 - they conflict with modem power pins!
-#define GPS_TX_PIN          21    // L76K TX -> ESP32 RX (UART2)
-#define GPS_RX_PIN          22    // L76K RX <- ESP32 TX (UART2)
+#define GPS_RX_PIN          22    // ESP32 RX <- L76K TX (receive GPS data)
+#define GPS_TX_PIN          21    // ESP32 TX -> L76K RX (send commands to GPS)
 #define GPS_WAKEUP_PIN      19    // L76K FORCE_ON pin
 #define GPS_PPS_PIN         23
 #define GPS_BAUDRATE        9600
