@@ -703,23 +703,44 @@ void initGPS() {
 
     Serial.printf("  GPS on UART2: RX=GPIO%d, TX=GPIO%d\n", GPS_RX_PIN, GPS_TX_PIN);
 
-    // Enable GPS module - WAKEUP pin must be HIGH for L76K to operate
+    // Enable GPS module - WAKEUP/FORCE_ON pin must be HIGH for L76K to operate
     // This enables the antenna LNA and wakes the module from standby
     pinMode(GPS_WAKEUP_PIN, OUTPUT);
     digitalWrite(GPS_WAKEUP_PIN, HIGH);
-    Serial.printf("  GPS WAKEUP pin (GPIO%d) set HIGH\n", GPS_WAKEUP_PIN);
-    delay(100);  // Give module time to wake up
+    Serial.printf("  GPS WAKEUP/FORCE_ON pin (GPIO%d) set HIGH\n", GPS_WAKEUP_PIN);
+    delay(500);  // Give module more time to fully wake up
 
     // Initialize SerialGPS on UART2
     SerialGPS.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
+    delay(100);
 
     // Clear any stale data in the buffer
     while (SerialGPS.available()) {
         SerialGPS.read();
     }
 
+    // Send L76K initialization commands to ensure full power mode
+    // PMTK command to set full power mode (no power saving)
+    Serial.println("  Sending L76K full power mode command...");
+    SerialGPS.println("$PMTK225,0*2B");  // Disable periodic power saving
+    delay(100);
+
+    // Hot restart to re-acquire satellites
+    Serial.println("  Sending L76K hot restart command...");
+    SerialGPS.println("$PMTK101*32");  // Hot restart
+    delay(500);
+
+    // Request all NMEA sentences
+    SerialGPS.println("$PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*28");
+    delay(100);
+
+    // Clear response data
+    while (SerialGPS.available()) {
+        SerialGPS.read();
+    }
+
     gpsEnabled = true;
-    Serial.println("  [OK] GPS UART initialized");
+    Serial.println("  [OK] GPS UART initialized with L76K commands");
     Serial.println("  Note: First fix may take 30-60 seconds outdoors with clear sky");
 }
 
